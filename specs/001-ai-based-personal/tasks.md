@@ -65,7 +65,7 @@ Integration tests from `quickstart.md`:
 
 ## Phase 3.3: Data Models (from data-model.md)
 - [ ] T016 [P] Create Drizzle schema in `server/db/schema.ts` for:
-  - users, training_plans, session_plans, exercises, sessions,
+  - user_profile, training_plans, session_plans, exercises, sessions,
   - session_exercise_logs, session_set_logs, session_feedbacks
 - [ ] T017 Generate initial migrations via drizzle-kit → `migrations/`
 - [ ] T018 Add derived views/queries for analytics aggregations (read-time)
