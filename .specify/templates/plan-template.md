@@ -34,6 +34,7 @@
 [Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
+Note: Per Constitution (SDR), explicitly record user-approved stack decisions here and keep them up to date.
 **Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
 **Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
 **Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
@@ -100,6 +101,7 @@ ios/ or android/
 ```
 
 **Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
+Note: If your project root is nested (e.g., `app/`), reflect that in paths and scripts across docs and tasks.
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:

@@ -1,30 +1,26 @@
 <!--
 Sync Impact Report
-Version change: none → 1.0.0 (Initial version)
-Modified principles: Initial creation - all principles
+Version change: 1.0.0 → 1.1.0 (MINOR)
+Modified principles:
+- Workflow Standards: Added "Stack Decision Recording (SDR)"
 Added sections:
-- Core Principles
-- Workflow Standards
-- Code Quality Guarantees
-- Security & Performance Considerations
-- AI Communication Guidelines
-- Continuous Documentation
-- Feature-Based Development Workflow
-
+- None (minor addition within Workflow Standards)
+Removed sections:
+- None
 Templates requiring updates:
-⚠ .specify/templates/plan-template.md
-⚠ .specify/templates/spec-template.md
-⚠ .specify/templates/tasks-template.md
-⚠ .specify/templates/commands/*.md
-
-No deferred placeholders or TODOs.
+✅ .specify/templates/plan-template.md (Stack decisions must be explicitly recorded and user-approved)
+✅ .specify/templates/tasks-template.md (Path conventions note for nested project roots like app/)
+⚠ .specify/templates/spec-template.md (no changes required)
+⚠ .specify/templates/commands/*.md (no changes required)
+Follow-up TODOs:
+- None
 -->
 
 # Project Constitution
 
-Version: 1.0.0
+Version: 1.1.0
 Ratification Date: 2025-09-22
-Last Amended: 2025-09-22
+Last Amended: 2025-09-27
 
 These rules establish universal standards and preferences that apply across all projects developed with Windsurf AI assistance.
 
@@ -55,6 +51,7 @@ These rules establish universal standards and preferences that apply across all 
 - **Transparent Reasoning (TR):** When generating code, explicitly reference which global rules influenced decisions.
 - **Context Window Management (CWM):** Be mindful of AI context limitations. Suggest new sessions when necessary.
 - **Preserve Existing Code (PEC):** Windsurf must not overwrite or break functional code unless explicitly instructed otherwise. Propose changes conservatively to maintain codebase integrity.
+- **Stack Decision Recording (SDR):** All technology stack decisions (runtime, package manager, framework, UI kit, database, ORM, AI provider, major libs) MUST be explicitly confirmed by the user, recorded in `plan.md` Technical Context, and any changes REQUIRE explicit user approval before implementation.
 
 ## Code Quality Guarantees
 

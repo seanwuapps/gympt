@@ -30,8 +30,6 @@
    → All entities have models?
    → All endpoints implemented?
 9. Return: SUCCESS (tasks ready for execution)
-```
-
 ## Format: `[ID] [P?] Description`
 - **[P]**: Can run in parallel (different files, no dependencies)
 - Include exact file paths in descriptions
@@ -41,12 +39,12 @@
 - **Web app**: `backend/src/`, `frontend/src/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
 - Paths shown below assume single project - adjust based on plan.md structure
+ - Note: If your project root is nested (e.g., `app/`), prefix all paths accordingly (e.g., `app/server/api`, `app/tests/`).
 
 ## Phase 3.1: Setup
 - [ ] T001 Create project structure per implementation plan
 - [ ] T002 Initialize [language] project with [framework] dependencies
 - [ ] T003 [P] Configure linting and formatting tools
-
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
 - [ ] T004 [P] Contract test POST /api/users in tests/contract/test_users_post.py
