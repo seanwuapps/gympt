@@ -130,3 +130,24 @@ T030, T031, T032, T033, T034
 - [ ] Parallel tasks only across different files
 - [ ] Each task specifies exact file paths
 - [ ] Scope adheres to MVP: no offline, no export
+
+## Additional Tasks for FR-008 (Swap Exercise)
+
+- [ ] T043 [P] Contract test POST /sessions/{id}/swap → `tests/contract/sessions.swap.post.spec.ts`
+- [ ] T044 Implement `swapExercise(sessionId, fromExerciseId, toExerciseId)` in `server/services/sessionService.ts`
+- [ ] T045 POST `server/api/sessions/[sessionId]/swap.post.ts`
+- [ ] T046 [P] Integration test: swap exercise scenario → `tests/integration/swap_flow.spec.ts`
+
+Additional Dependencies
+- T043 (contract test) before T044–T045
+- T044 (service) blocks T045 (endpoint)
+- T046 (integration) before implementation if strict TDD is preferred, or after endpoint stub if incremental
+
+Additional Parallel Example
+```
+# Contracts [P]
+T007, T008, T009, T010, T011, T012, T043
+
+# Services/Endpoints [P]
+T019, T020, T021, T022, T044, T045
+```

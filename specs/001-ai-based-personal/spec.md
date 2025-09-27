@@ -60,6 +60,7 @@ As a gym-goer, I want an AI-powered training companion that creates personalized
 
 - **User**: Represents the gym-goer, including their profile, fitness goals (e.g. rehab, strength, fat loss, cardio), fitness level (e.g. max 1 rep for bench, deadlift and squats, cardio capabilities), preferred training days (e.g. Mon, Tues, Wed), preferred training methodology (e.g. progressive overload)
 - **GeneratedTrainingPlan**: AI-generated high-level training plans for users to review and commit to, this should also include why AI thinks the plan will help the user. high-level means at this level, the plan includes total length (weeks), scheduled training days and rest days in a week (e.g. Mon - Wed training, Thu - Sun rest), the purpose of each training day, start date and end date of the plan. Users should be able to re-commit to previously finished training plan.
+ - **GeneratedTrainingSessionPlan**: A specific day’s planned session derived from a training plan, including exercises with `name`, `description`, `videoUrl`, targets (sets/reps/load), and optional `restSeconds`. This is what powers “Today’s session” and can be updated by a swap action.
  - **Exercise**: Individual training exercise with associated performance metrics
  - **UserTrainingSession**: Records of completed training sessions including actual user performance data (sets, reps, duration etc)
  - **Feedback**: System-generated insights, recommendations, and session summaries

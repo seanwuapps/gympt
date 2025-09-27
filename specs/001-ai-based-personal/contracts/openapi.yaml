@@ -99,6 +99,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionSummary'
+  /sessions/{sessionId}/swap:
+    post:
+      summary: Swap an exercise in the current planned session
+      description: Replaces an existing exercise in the session plan with a new exercise from the catalog
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fromExerciseId, toExerciseId]
+              properties:
+                fromExerciseId:
+                  type: string
+                  description: Exercise ID to replace (existing in the session plan)
+                toExerciseId:
+                  type: string
+                  description: Exercise ID from the catalog to insert
+      responses:
+        '200':
+          description: Updated session plan after swap
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedTrainingSessionPlan'
   /analytics:
     get:
       summary: Get analytics for a user
