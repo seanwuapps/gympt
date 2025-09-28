@@ -52,6 +52,37 @@ When creating this spec from a user prompt:
 
 ---
 
+## Clarifications
+
+### Session
+- Use Supabase defaults (no custom session policy).
+
+### Authentication
+- Google OAuth only.
+- No MFA.
+- No email/password.
+- Email verification not required.
+
+### Rate Limiting
+- Use Supabase provider defaults.
+
+### Sessions
+- Concurrent sessions are allowed; no custom handling.
+
+### Audit Logging
+- Not in scope for this feature.
+
+### Account Deletion
+- Handled by existing organizational policy; out of scope for this feature.
+
+### Environment & Redirects
+- The authentication redirect MUST return to the same environment origin:
+  - Local development: redirect back to localhost origin.
+  - Development environment: redirect to the dev environment origin when available.
+  - Production: redirect to the production origin.
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
@@ -63,19 +94,18 @@ As a user of the training application, I want to create an account, sign in, and
 3. **Given** an authenticated user, **When** they select sign out, **Then** their session is terminated and protected pages become inaccessible until they sign in again.
 4. **Given** a user with an expired session, **When** they navigate within the app, **Then** they are prompted to re-authenticate without losing unsaved work.
 5. **Given** an authenticated user, **When** they visit the sign-in page, **Then** they are redirected away from auth pages to an appropriate destination (e.g., dashboard).
-
 ### Edge Cases
 - User cancels Google sign-in consent → remain on the current page with a clear message; allow retry.
 - Provider error or denial during sign-in → show a clear error and allow retry.
 - Google account email not verified by provider → allow sign-in; no additional email verification required.
 - Concurrent sessions per user → allowed; no special handling.
-- Account deletion request → confirm irreversible action and remove access immediately; data handling follows existing organizational policy (outside this feature).
+ - Account deletion request → confirm irreversible action and remove access immediately; data handling follows existing organizational policy (outside this feature).
+ - Environment mismatch on callback (e.g., started in localhost but redirected to dev) → treat as misconfiguration; fail safely with clear guidance to use the matching environment.
 
 ## Requirements *(mandatory)*
 ### Functional Requirements
 - **FR-001**: System MUST allow users to create accounts via a secure sign-up flow.
 - **FR-002**: System MUST rely on trusted identity from the Google provider; no separate email verification flow is required.
-- **FR-003**: System MUST allow users to sign in with their Google account only (no email/password).
 - **FR-004**: System MUST allow users to sign out and terminate their session.
  - **FR-007**: System MUST protect designated routes/features so that only authenticated users can access them.
  - **FR-008**: The application MUST clearly reflect authentication state and guard protected actions in the UI.
@@ -89,6 +119,7 @@ As a user of the training application, I want to create an account, sign in, and
  - **FR-018**: System MUST present authentication UX that is accessible and localizable.
  - **FR-019**: System MUST prevent already-authenticated users from accessing sign-in/up pages (redirect appropriately).
  - **FR-020**: System MUST protect against common auth threats (e.g., CSRF on state-changing actions, reuse of expired tokens, credential stuffing via rate limits).
+ - **FR-021**: Sign-in redirects MUST be environment-aware and return to the same environment origin (local/dev/prod) as where the flow was initiated; dev uses its dev origin when available.
 
  ### Key Entities *(include if feature involves data)*
  - **User**: Represents an end user of the app; key attributes include id, email, emailVerified, displayName, createdAt, status (active/blocked), consents.
