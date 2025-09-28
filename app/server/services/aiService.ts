@@ -8,6 +8,18 @@ export function getAIClient() {
     client = new OpenAI({
       apiKey: env.AI_API_KEY,
       baseURL: env.AI_BASE_URL,
+      // OpenRouter optional guidance headers
+      defaultHeaders:
+        env.OPENROUTER_SITE_URL || env.OPENROUTER_APP_NAME
+          ? {
+              ...(env.OPENROUTER_SITE_URL
+                ? { 'HTTP-Referer': env.OPENROUTER_SITE_URL }
+                : {}),
+              ...(env.OPENROUTER_APP_NAME
+                ? { 'X-Title': env.OPENROUTER_APP_NAME }
+                : {}),
+            }
+          : undefined,
     })
   }
   return client

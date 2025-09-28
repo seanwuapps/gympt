@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1758961353211,
+      "tag": "0000_outgoing_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1759011773383,
+      "tag": "0001_steep_roland_deschain",
+      "breakpoints": true
+    }
+  ]
+}

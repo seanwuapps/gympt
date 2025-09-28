@@ -56,6 +56,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneratedTrainingSessionPlan'
+  /sessions/generate:
+    post:
+      summary: Generate a detailed session plan at session start
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                planId:
+                  type: string
+                date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Generated detailed session plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedTrainingSessionPlan'
   /sessions/{sessionId}/logs:
     post:
       summary: Append a set log to a session
@@ -96,13 +120,10 @@ paths:
         '200':
           description: Session summary
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SessionSummary'
   /sessions/{sessionId}/swap:
     post:
       summary: Swap an exercise in the current planned session
-      description: Replaces an existing exercise in the session plan with a new exercise from the catalog
+      description: Replaces an existing exercise in the session plan with an AI-recommended alternative
       parameters:
         - in: path
           name: sessionId
@@ -115,17 +136,17 @@ paths:
           application/json:
             schema:
               type: object
-              required: [fromExerciseId, toExerciseId]
               properties:
                 fromExerciseId:
                   type: string
-                  description: Exercise ID to replace (existing in the session plan)
-                toExerciseId:
+                intent:
                   type: string
-                  description: Exercise ID from the catalog to insert
+                  description: Optional hint describing what the user wants instead (e.g. "more cardio")
+              required:
+                - fromExerciseId
       responses:
         '200':
-          description: Updated session plan after swap
+          description: Updated session plan
           content:
             application/json:
               schema:
@@ -187,13 +208,25 @@ components:
         weeks: { type: integer }
         schedule:
           type: array
-          items: { type: string }
-        dayPurposes:
-          type: object
-          additionalProperties: { type: string }
+          description: Structured 7-day weekly schedule
+          minItems: 7
+          maxItems: 7
+          items:
+            $ref: '#/components/schemas/DaySchedule'
         rationale: { type: string }
         status: { type: string, enum: [proposed, active, completed, archived] }
         recommitable: { type: boolean }
+    DaySchedule:
+      type: object
+      properties:
+        day:
+          type: string
+          enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+        planned: { type: boolean }
+        purpose: { type: string }
+        summary:
+          type: string
+          description: Brief description of the focus or expected exercises for the day
     GeneratedTrainingSessionPlan:
       type: object
       properties:

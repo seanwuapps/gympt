@@ -30,8 +30,7 @@ Relationships:
 - startDate (date)
 - endDate (date)
 - weeks (integer)
-- schedule (array<enum: Mon..Sun>)  # planned training days
-- dayPurposes (map<enum day → string>)  # e.g., "Mon: Squat strength"
+- schedule (array<DaySchedule>[7])  # structured Mon–Sun schedule
 - rationale (string)  # why this plan suits the user
 - status (enum: proposed | active | completed | archived)
 - recommitable (boolean)  # allow re-commit later
@@ -40,6 +39,12 @@ Relationships:
 - 1..* GeneratedTrainingSessionPlan (via planId)
 
 ---
+
+DaySchedule:
+- day (enum: Mon | Tue | Wed | Thu | Fri | Sat | Sun)
+- planned (boolean)
+- purpose (string)
+- summary (string)  # high-level description of work type
 
 ### GeneratedTrainingSessionPlan
 - id (UUID)

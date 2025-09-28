@@ -42,7 +42,7 @@ Key functional points (from spec):
 
 ## Technical Context
 **Language/Version**: TypeScript on Node.js (LTS)  
-**Primary Dependencies**: Nuxt 4, Nuxt UI, Drizzle ORM, OpenAI SDK (configured for Cloudflare Workers AI baseURL/auth), pnpm [DM]  
+**Primary Dependencies**: Nuxt 4, Nuxt UI, Drizzle ORM, OpenAI SDK (configured for OpenRouter baseURL/auth), pnpm [DM]  
 **Storage**: Supabase Postgres — single database for MVP  
 **Testing**: Vitest (+ jsdom, supertest/undici)  
 **Target Platform**: Web app (mobile-first; PWA later if needed)  

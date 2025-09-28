@@ -9,7 +9,7 @@ Plan: C:/dev/gympt/specs/001-ai-based-personal/plan.md
  - Language/Runtime: TypeScript on Node.js (LTS); package manager pnpm; Framework: Nuxt 4 + Nuxt UI [DM, SF]
  - Storage (MVP): Supabase Postgres — single database [SF]
  - ORM: Drizzle ORM [DM]
- - AI: OpenAI SDK configured for Cloudflare Workers AI baseURL/auth [DM]
+ - AI: OpenAI SDK configured for OpenRouter baseURL/auth [DM]
   - UI Target: Web app, mobile-first layout; consider PWA later (offline explicitly out of scope for MVP) [SF]
   - Analytics: Session cadence, weekly volume load, estimated 1RM trend [Spec Clarifications]
   - Feedback capture: 5-point effort rating after each session + optional free-text comment [Spec Clarifications]
@@ -24,6 +24,7 @@ Plan: C:/dev/gympt/specs/001-ai-based-personal/plan.md
   - Web app enables quick iteration and broad device support; mobile-first addresses gym usage context [SF].
  - Selected analytics serve the core value proposition (progress visibility) with minimal complexity [SF].
  - Deferring charting library avoids premature dependency lock-in; choose at analytics UI implementation [DM].
+ - OpenRouter keeps provider flexibility and broad model access while using a single OpenAI SDK client [DM].
 
 ## Alternatives Considered
 

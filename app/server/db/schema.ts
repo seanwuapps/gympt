@@ -40,8 +40,14 @@ export const trainingPlans = pgTable('training_plans', {
   startDate: date('start_date').notNull(),
   endDate: date('end_date').notNull(),
   weeks: integer('weeks').notNull(),
-  schedule: jsonb('schedule').$type<string[]>(), // Mon..Sun
-  dayPurposes: jsonb('day_purposes').$type<Record<string, string>>(),
+  schedule: jsonb('schedule').$type<
+    Array<{
+      day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
+      planned: boolean
+      purpose: string
+      summary: string
+    }>
+  >(),
   rationale: text('rationale'),
   status: varchar('status', { length: 16 }).notNull().default('proposed'), // proposed | active | completed | archived
   recommitable: boolean('recommitable').default(false),
