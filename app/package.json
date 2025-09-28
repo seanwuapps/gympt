@@ -17,6 +17,7 @@
     "@nuxt/eslint": "1.9.0",
     "@nuxt/test-utils": "3.19.2",
     "@nuxt/ui": "4.0.0",
+    "@scalar/nuxt": "^0.5.16",
     "drizzle-orm": "^0.44.5",
     "eslint": "^9.0.0",
     "nuxt": "^4.1.2",
