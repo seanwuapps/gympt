@@ -17,6 +17,9 @@ importers:
       '@nuxtjs/supabase':
         specifier: ^2.0.1
         version: 2.0.1
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
       element-plus:
         specifier: ^2.11.4
         version: 2.11.4(vue@3.5.22(typescript@5.9.3))

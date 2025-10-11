@@ -25,10 +25,19 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
-      include: ['dayjs'],
+      include: [
+        'dayjs',
+        'dayjs/plugin/customParseFormat',
+        'dayjs/plugin/advancedFormat',
+        'dayjs/plugin/weekOfYear',
+        'dayjs/plugin/weekYear',
+        'dayjs/plugin/dayOfYear',
+        'dayjs/plugin/isSameOrAfter',
+        'dayjs/plugin/isSameOrBefore',
+      ],
     },
     ssr: {
-      noExternal: ['element-plus'],
+      noExternal: ['element-plus', 'dayjs'],
     },
   },
 });
