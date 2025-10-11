@@ -318,7 +318,7 @@ CREATE POLICY "Users can update own profile"
   - [x] Create `app/pages/profile.vue` (view/edit mode, single-page form)
   - [x] Add profile link to navigation
   - [x] Implement localStorage progress saving
-  - [ ] Create `app/middleware/profile-check.global.ts` for automatic redirect
+  - [x] Create `app/middleware/profile-check.global.ts` for automatic redirect
   - [ ] Test wizard flow (next, back, skip, resume)
   - [ ] Test view/edit profile flows
   - [ ] Test automatic redirect when no profile exists
@@ -476,9 +476,12 @@ CREATE POLICY "Users can update own profile"
 - `db/schema/profiles.ts` - Profile table schema
 - `db/schema/index.ts` - Schema exports
 - `db/migrations/0000_aspiring_invisible_woman.sql` - Initial migration
-- `db/rls-policies.sql` - RLS policies (to be applied manually)
+- `db/migrations/0001_rls_policies.sql` - RLS policies migration
+- `db/rls-policies.sql` - RLS policies (reference)
+- `scripts/apply-rls.ts` - RLS migration script
 - `server/api/profile.get.ts` - GET profile endpoint
 - `server/api/profile.post.ts` - POST profile endpoint (upsert)
+- `app/middleware/profile-check.global.ts` - Automatic onboarding redirect middleware
 - `app/composables/useProfile.ts` - Profile composable with wizard helpers
 - `app/components/onboarding/OnboardingStep1.vue` - Step 1: Experience & Schedule
 - `app/components/onboarding/OnboardingStep2.vue` - Step 2: Goals & Progression
@@ -486,6 +489,7 @@ CREATE POLICY "Users can update own profile"
 - `app/pages/onboarding.vue` - Multi-step wizard page
 - `app/pages/profile.vue` - Profile view/edit page
 - `app/pages/index.vue` - Updated with profile link
+- `app/plugins/element-plus.client.ts` - dayjs plugin initialization
 
 ### Completion Notes
 - Database schema created and migrated successfully
@@ -495,6 +499,7 @@ CREATE POLICY "Users can update own profile"
 - All TypeScript types properly defined
 - Mobile-first responsive design implemented
 - **RLS policies applied automatically via migration script**
+- **Profile-check middleware implemented for automatic onboarding redirect**
 
 ### Change Log
 - 2025-10-11: Initial implementation of user profile management feature
@@ -505,9 +510,12 @@ CREATE POLICY "Users can update own profile"
   - Added navigation link to profile
   - Created automated RLS migration script (`pnpm db:apply-rls`)
   - Applied RLS policies successfully
+- 2025-10-12: Added automatic onboarding redirect
+  - Created profile-check global middleware
+  - Users without profile automatically redirected to `/onboarding`
+  - Fixed dayjs import issues with Element Plus
 
 ### Next Steps
-- **NEW REQUIREMENT:** Create profile-check middleware for automatic onboarding redirect
 - Test onboarding wizard flow
 - Test automatic redirect when no profile exists
 - Test profile view/edit functionality
@@ -516,7 +524,7 @@ CREATE POLICY "Users can update own profile"
 
 ---
 
-**Story Status:** In Progress (middleware implementation needed)
+**Story Status:** Ready for Testing
 **Estimated Effort:** 4-6 hours
 **Priority:** High (blocks session generation feature)
 **Dependencies:** Auth (complete), Drizzle setup (complete)
