@@ -39,16 +39,16 @@ body {
   margin-top: var(--spacing-md); 
 }
 
-/* Ensure good tap targets for mobile (minimum 44x44px) */
+/* Ensure good tap targets for mobile (minimum 44px / 2.75rem) */
 button, 
 .el-button {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
 }
 
 /* Improve readability on mobile */
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   body {
-    font-size: 16px; /* Prevents iOS zoom on input focus */
+    font-size: 1rem; /* Prevents iOS zoom on input focus (16px base) */
   }
 }
