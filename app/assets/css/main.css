@@ -2,18 +2,8 @@
 
 :root {
   /* Font family */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  /* Spacing for mobile-first design */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-}
-
-* {
-  box-sizing: border-box;
+  --font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
@@ -22,33 +12,4 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-}
-
-/* Optimize font rendering for numbers (important for reps/weights) */
-.numeric {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' on, 'lnum' on;
-}
-
-/* Mobile-first utilities */
-.p-6 { 
-  padding: var(--spacing-lg); 
-}
-
-.space-y-4 > * + * { 
-  margin-top: var(--spacing-md); 
-}
-
-/* Ensure good tap targets for mobile (minimum 44px / 2.75rem) */
-button, 
-.el-button {
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-}
-
-/* Improve readability on mobile */
-@media (max-width: 48rem) {
-  body {
-    font-size: 1rem; /* Prevents iOS zoom on input focus (16px base) */
-  }
 }
