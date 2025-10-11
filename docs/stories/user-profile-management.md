@@ -250,28 +250,28 @@ CREATE POLICY "Users can update own profile"
 
 ## Tasks
 
-- [ ] **Database Layer**
-  - [ ] Create `db/schema/profiles.ts` with Drizzle schema
-  - [ ] Generate migration: `pnpm db:generate`
-  - [ ] Push to Supabase: `pnpm db:push`
-  - [ ] Configure RLS policies in Supabase dashboard
+- [x] **Database Layer**
+  - [x] Create `db/schema/profiles.ts` with Drizzle schema
+  - [x] Generate migration: `pnpm db:generate`
+  - [x] Push to Supabase: `pnpm db:push`
+  - [ ] Configure RLS policies in Supabase dashboard (SQL file created: `db/rls-policies.sql`)
   - [ ] Test RLS with multiple users
 
-- [ ] **Server API**
-  - [ ] Create `server/api/profile.get.ts`
-  - [ ] Create `server/api/profile.post.ts`
-  - [ ] Add Zod validation schemas
+- [x] **Server API**
+  - [x] Create `server/api/profile.get.ts`
+  - [x] Create `server/api/profile.post.ts`
+  - [x] Add Zod validation schemas
   - [ ] Test endpoints with Postman/curl
 
-- [ ] **Frontend**
-  - [ ] Create `app/composables/useProfile.ts` with wizard helpers
-  - [ ] Create `app/pages/onboarding.vue` (multi-step wizard)
-  - [ ] Create `app/components/onboarding/OnboardingStep1.vue`
-  - [ ] Create `app/components/onboarding/OnboardingStep2.vue`
-  - [ ] Create `app/components/onboarding/OnboardingStep3.vue`
-  - [ ] Create `app/pages/profile.vue` (view/edit mode, single-page form)
-  - [ ] Add profile link to navigation
-  - [ ] Implement localStorage progress saving
+- [x] **Frontend**
+  - [x] Create `app/composables/useProfile.ts` with wizard helpers
+  - [x] Create `app/pages/onboarding.vue` (multi-step wizard)
+  - [x] Create `app/components/onboarding/OnboardingStep1.vue`
+  - [x] Create `app/components/onboarding/OnboardingStep2.vue`
+  - [x] Create `app/components/onboarding/OnboardingStep3.vue`
+  - [x] Create `app/pages/profile.vue` (view/edit mode, single-page form)
+  - [x] Add profile link to navigation
+  - [x] Implement localStorage progress saving
   - [ ] Test wizard flow (next, back, skip, resume)
   - [ ] Test view/edit profile flows
 
@@ -419,7 +419,49 @@ CREATE POLICY "Users can update own profile"
 
 ---
 
-**Story Status:** Ready
+## Dev Agent Record
+
+### File List
+- `db/schema/profiles.ts` - Profile table schema
+- `db/schema/index.ts` - Schema exports
+- `db/migrations/0000_aspiring_invisible_woman.sql` - Initial migration
+- `db/rls-policies.sql` - RLS policies (to be applied manually)
+- `server/api/profile.get.ts` - GET profile endpoint
+- `server/api/profile.post.ts` - POST profile endpoint (upsert)
+- `app/composables/useProfile.ts` - Profile composable with wizard helpers
+- `app/components/onboarding/OnboardingStep1.vue` - Step 1: Experience & Schedule
+- `app/components/onboarding/OnboardingStep2.vue` - Step 2: Goals & Progression
+- `app/components/onboarding/OnboardingStep3.vue` - Step 3: Safety
+- `app/pages/onboarding.vue` - Multi-step wizard page
+- `app/pages/profile.vue` - Profile view/edit page
+- `app/pages/index.vue` - Updated with profile link
+
+### Completion Notes
+- Database schema created and migrated successfully
+- Server API implemented with Zod validation
+- 3-step onboarding wizard with localStorage progress saving
+- Profile view/edit page with Element Plus components
+- All TypeScript types properly defined
+- Mobile-first responsive design implemented
+
+### Change Log
+- 2025-10-11: Initial implementation of user profile management feature
+  - Created profiles table with Drizzle ORM
+  - Implemented GET/POST API endpoints with RLS
+  - Built 3-step onboarding wizard
+  - Created profile view/edit page
+  - Added navigation link to profile
+
+### Next Steps
+- **MANUAL ACTION REQUIRED:** Apply RLS policies from `db/rls-policies.sql` in Supabase dashboard
+- Test onboarding wizard flow
+- Test profile view/edit functionality
+- Verify RLS with multiple user accounts
+- Test API endpoints
+
+---
+
+**Story Status:** In Progress (awaiting RLS configuration and testing)
 **Estimated Effort:** 4-6 hours
 **Priority:** High (blocks session generation feature)
 **Dependencies:** Auth (complete), Drizzle setup (complete)
