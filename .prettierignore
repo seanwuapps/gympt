@@ -1,0 +1,23 @@
+# Build outputs
+.nuxt
+.output
+dist
+.nitro
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Generated files
+*.log
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+
+# Misc
+coverage
+.DS_Store
