@@ -23,4 +23,9 @@ export default defineNuxtConfig({
       exclude: ["/login", "/confirm"],
     },
   },
+  vite: {
+    optimizeDeps: {
+      include: ['dayjs', 'dayjs/plugin/customParseFormat', 'dayjs/plugin/advancedFormat', 'dayjs/plugin/weekOfYear', 'dayjs/plugin/weekYear', 'dayjs/plugin/dayOfYear', 'dayjs/plugin/isSameOrAfter', 'dayjs/plugin/isSameOrBefore'],
+    },
+  },
 });
