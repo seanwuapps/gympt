@@ -28,12 +28,12 @@ So that **the AI can generate personalized training sessions based on my goals, 
    - User can input:
      - Goals (text field, optional)
      - Experience level (dropdown: beginner, intermediate, advanced)
-     - Training days per week (number input, 1-7)
-     - Available equipment (multi-select: barbell, dumbbells, kettlebells, resistance bands, bodyweight, cardio machines, etc.)
+     - Preferred training days (multi-select checkboxes: Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+     - Progression aggressiveness (dropdown: conservative, moderate, aggressive)
      - Injury flags (text area, optional)
    - Units default to metric (kg/cm)
    - Language defaults to English
-   - Aggressiveness defaults to 'beginner'
+   - Equipment assumption: Commercial gym (full equipment access)
    - Profile is saved to database with user_id from auth.uid()
 
 2. **Profile View**
@@ -92,12 +92,11 @@ export const profiles = pgTable('profiles', {
   userId: uuid('user_id').primaryKey().references(() => auth.users.id, { onDelete: 'cascade' }),
   goals: text('goals'),
   experienceLevel: text('experience_level').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
-  trainingDaysPerWeek: integer('training_days_per_week').notNull().default(3),
-  availableEquipment: jsonb('available_equipment').notNull().default('[]'), // string[]
+  preferredTrainingDays: jsonb('preferred_training_days').notNull().default('[1,3,5]'), // Array of day numbers: 0=Sun, 1=Mon, ..., 6=Sat
   injuryFlags: text('injury_flags'),
   units: text('units').notNull().default('metric'), // 'metric' | 'imperial'
   language: text('language').notNull().default('en'),
-  aggressiveness: text('aggressiveness').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
+  aggressiveness: text('aggressiveness').notNull().default('moderate'), // 'conservative' | 'moderate' | 'aggressive'
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -121,12 +120,11 @@ export const profiles = pgTable('profiles', {
 const profileSchema = z.object({
   goals: z.string().optional(),
   experienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
-  trainingDaysPerWeek: z.number().int().min(1).max(7),
-  availableEquipment: z.array(z.string()),
+  preferredTrainingDays: z.array(z.number().int().min(0).max(6)).min(1).max(7), // Array of 0-6 (Sun-Sat), at least 1 day
   injuryFlags: z.string().optional(),
   units: z.enum(['metric', 'imperial']).default('metric'),
   language: z.string().default('en'),
-  aggressiveness: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
+  aggressiveness: z.enum(['conservative', 'moderate', 'aggressive']).default('moderate'),
 })
 ```
 
@@ -261,6 +259,13 @@ CREATE POLICY "Users can update own profile"
 - Must use RLS for all data access
 - Profile must be created before user can generate sessions (future feature dependency)
 - Units and language are MVP-locked to metric/English (editable but not used yet)
+- Equipment assumption: Commercial gym with full equipment (no user selection needed for MVP)
+
+**UX Notes:**
+- **Preferred Training Days:** Use Element Plus checkbox group with day buttons (M T W T F S S) for easy mobile selection
+- **Aggressiveness:** Conservative = slower progression, Moderate = balanced, Aggressive = faster progression (affects AI session adaptation)
+- **Default preferred days:** Mon, Wed, Fri (stored as [1, 3, 5] where 0=Sunday)
+- Keep form simple and mobile-friendly with large tap targets
 
 ## QA Hooks
 
