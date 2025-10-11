@@ -9,12 +9,14 @@ So that **the AI can generate personalized training sessions based on my goals, 
 ## Story Context
 
 **Existing System Integration:**
+
 - Integrates with: Supabase Auth (Google OAuth already working)
 - Technology: Nuxt 4, Drizzle ORM, Supabase Postgres, Element Plus UI
 - Follows pattern: Server API routes with RLS, composables for data access
 - Touch points: Auth middleware, Supabase user session, database with RLS
 
 **Reference:**
+
 - PRD Section 4: Functional Requirements - Onboarding
 - Architecture Section 4: Data Model - `profiles` table
 - Architecture Section 5: Security & RLS
@@ -97,7 +99,9 @@ So that **the AI can generate personalized training sessions based on my goals, 
 import { pgTable, uuid, text, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
 
 export const profiles = pgTable('profiles', {
-  userId: uuid('user_id').primaryKey().references(() => auth.users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => auth.users.id, { onDelete: 'cascade' }),
   goals: text('goals'),
   experienceLevel: text('experience_level').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
   preferredTrainingDays: jsonb('preferred_training_days').notNull().default('["Mon","Wed","Fri"]'), // Array of day abbreviations: 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
@@ -113,22 +117,28 @@ export const profiles = pgTable('profiles', {
 ### Server API Routes
 
 **1. GET `/api/profile`**
+
 - Fetches current user's profile using auth.uid()
 - Returns 404 if profile doesn't exist
 - Returns profile object if found
 
 **2. POST `/api/profile`**
+
 - Creates or updates profile (upsert)
 - Validates input with Zod schema
 - Uses auth.uid() to ensure user only modifies own profile
 - Returns updated profile
 
 **Zod Schema:**
+
 ```typescript
 const profileSchema = z.object({
   goals: z.string().optional(),
   experienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
-  preferredTrainingDays: z.array(z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])).min(1).max(7), // Array of day abbreviations, at least 1 day
+  preferredTrainingDays: z
+    .array(z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']))
+    .min(1)
+    .max(7), // Array of day abbreviations, at least 1 day
   injuryFlags: z.string().optional(),
   units: z.enum(['metric', 'imperial']).default('metric'),
   language: z.string().default('en'),
@@ -139,6 +149,7 @@ const profileSchema = z.object({
 ### Frontend Components
 
 **1. Page: `app/pages/onboarding.vue`** (Multi-step wizard)
+
 - Protected by auth middleware
 - Three-step wizard using `el-steps` component
 - State management:
@@ -153,6 +164,7 @@ const profileSchema = z.object({
 - Redirects to home/dashboard after completion
 
 **2. Components: `app/components/onboarding/`**
+
 - `OnboardingStep1.vue` - Experience & Schedule
   - Radio button group for experience level
   - Checkbox button group for training days
@@ -167,6 +179,7 @@ const profileSchema = z.object({
   - Optional field
 
 **3. Page: `app/pages/profile.vue`** (View/Edit existing profile)
+
 - Protected by auth middleware
 - Fetches profile on mount
 - Toggle between view and edit modes
@@ -174,29 +187,40 @@ const profileSchema = z.object({
 - Uses Element Plus form components
 
 **4. Composable: `app/composables/useProfile.ts`**
+
 ```typescript
 export const useProfile = () => {
   const profile = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
-  const fetchProfile = async () => { /* ... */ }
-  const saveProfile = async (data) => { /* ... */ }
-  
-  // Wizard-specific
-  const saveProgressToLocalStorage = (step, data) => { /* ... */ }
-  const loadProgressFromLocalStorage = () => { /* ... */ }
-  const clearProgress = () => { /* ... */ }
+  const fetchProfile = async () => {
+    /* ... */
+  }
+  const saveProfile = async (data) => {
+    /* ... */
+  }
 
-  return { 
-    profile, 
-    loading, 
-    error, 
-    fetchProfile, 
+  // Wizard-specific
+  const saveProgressToLocalStorage = (step, data) => {
+    /* ... */
+  }
+  const loadProgressFromLocalStorage = () => {
+    /* ... */
+  }
+  const clearProgress = () => {
+    /* ... */
+  }
+
+  return {
+    profile,
+    loading,
+    error,
+    fetchProfile,
     saveProfile,
     saveProgressToLocalStorage,
     loadProgressFromLocalStorage,
-    clearProgress
+    clearProgress,
   }
 }
 ```
@@ -278,17 +302,20 @@ CREATE POLICY "Users can update own profile"
 **Primary Risk:** RLS misconfiguration could allow users to access other users' profiles
 
 **Mitigation:**
+
 - Test RLS policies with multiple accounts before deploying
 - Use `auth.uid()` consistently in all queries
 - Never expose service role key to client
 
 **Rollback:**
+
 - Drop `profiles` table if critical issues found
 - Remove profile routes from `server/api/`
 - Remove profile pages from `app/pages/`
 - Revert migration with Drizzle
 
 **Compatibility Verification:**
+
 - [x] No breaking changes to existing APIs (new endpoints only)
 - [x] Database changes are additive only (new table)
 - [x] UI changes follow existing design patterns (Element Plus)
@@ -297,16 +324,19 @@ CREATE POLICY "Users can update own profile"
 ## Dev Notes
 
 **Integration Approach:**
+
 - Follows existing pattern: Drizzle schema → migration → RLS → server API → composable → page
 - Reuses Supabase client from `@nuxtjs/supabase`
 - Uses `useSupabaseUser()` to get current user
 
 **Existing Pattern Reference:**
+
 - Server API: See `server/api/ai/session.generate.post.ts` for Zod validation pattern
 - Auth middleware: See `app/middleware/auth.ts`
 - Composables: Follow Vue 3 Composition API patterns
 
 **Key Constraints:**
+
 - Must use RLS for all data access
 - Profile must be created before user can generate sessions (future feature dependency)
 - Units and language are MVP-locked to metric/English (editable but not used yet)
@@ -315,6 +345,7 @@ CREATE POLICY "Users can update own profile"
 **UX Notes - Multi-Step Wizard:**
 
 **Step 1: Experience & Schedule** (Required)
+
 - Title: "Let's get started!"
 - Experience level: Radio buttons with icons and descriptions
   - Beginner: "New to training"
@@ -327,6 +358,7 @@ CREATE POLICY "Users can update own profile"
 - Primary action: "Next" button (bottom right)
 
 **Step 2: Goals & Progression** (Optional but recommended)
+
 - Title: "Personalize your training"
 - Goals: Textarea with placeholder "e.g., Build strength for hiking, lose 10kg..."
   - Max 500 characters with counter
@@ -339,6 +371,7 @@ CREATE POLICY "Users can update own profile"
 - Secondary action: "Back" button (top left)
 
 **Step 3: Safety & Finish** (Optional)
+
 - Title: "Any injuries or limitations?"
 - Injury flags: Textarea with warning icon
   - Placeholder: "e.g., Lower back pain, right knee issues..."
@@ -350,12 +383,14 @@ CREATE POLICY "Users can update own profile"
 - Tertiary action: "Skip" link (if field is empty)
 
 **Progress Indicator:**
+
 - Use `el-steps` component at top
 - Show: "1 of 3", "2 of 3", "3 of 3"
 - Visual progress bar
 - All steps accessible via clicking (if previous steps valid)
 
 **Mobile Optimizations:**
+
 - One question per screen (reduces cognitive load)
 - Large tap targets (2.75rem minimum)
 - Primary button fixed to bottom (thumb zone)
@@ -364,12 +399,14 @@ CREATE POLICY "Users can update own profile"
 - Swipe gestures: swipe left = next, swipe right = back
 
 **Validation:**
+
 - Step 1: Must select experience level + at least 1 training day
 - Step 2 & 3: All fields optional, can skip
 - Inline validation on blur
 - Prevent "Next" if required fields invalid
 
 **State Management:**
+
 - Save progress to localStorage (in case user closes browser)
 - Show "Resume setup" if incomplete profile found
 - Can edit any step by clicking progress indicator
@@ -382,7 +419,7 @@ CREATE POLICY "Users can update own profile"
 
 ---
 
-**Story Status:** Draft
+**Story Status:** Ready
 **Estimated Effort:** 4-6 hours
 **Priority:** High (blocks session generation feature)
 **Dependencies:** Auth (complete), Drizzle setup (complete)

@@ -25,7 +25,12 @@ const signOut = async () => {
           <el-alert title="Welcome!" type="success" :closable="false">
             <p>Signed in as: <strong>{{ user.email }}</strong></p>
           </el-alert>
-          <el-button @click="signOut">Sign out</el-button>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <el-button type="primary" @click="$router.push('/profile')">
+              My Profile
+            </el-button>
+            <el-button @click="signOut">Sign out</el-button>
+          </div>
         </div>
         <div v-else>
           <p>Loading...</p>
