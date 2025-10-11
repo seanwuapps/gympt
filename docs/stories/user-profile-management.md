@@ -254,7 +254,7 @@ CREATE POLICY "Users can update own profile"
   - [x] Create `db/schema/profiles.ts` with Drizzle schema
   - [x] Generate migration: `pnpm db:generate`
   - [x] Push to Supabase: `pnpm db:push`
-  - [ ] Configure RLS policies in Supabase dashboard (SQL file created: `db/rls-policies.sql`)
+  - [x] Configure RLS policies via migration script (`pnpm db:apply-rls`)
   - [ ] Test RLS with multiple users
 
 - [x] **Server API**
@@ -443,6 +443,7 @@ CREATE POLICY "Users can update own profile"
 - Profile view/edit page with Element Plus components
 - All TypeScript types properly defined
 - Mobile-first responsive design implemented
+- **RLS policies applied automatically via migration script**
 
 ### Change Log
 - 2025-10-11: Initial implementation of user profile management feature
@@ -451,9 +452,10 @@ CREATE POLICY "Users can update own profile"
   - Built 3-step onboarding wizard
   - Created profile view/edit page
   - Added navigation link to profile
+  - Created automated RLS migration script (`pnpm db:apply-rls`)
+  - Applied RLS policies successfully
 
 ### Next Steps
-- **MANUAL ACTION REQUIRED:** Apply RLS policies from `db/rls-policies.sql` in Supabase dashboard
 - Test onboarding wizard flow
 - Test profile view/edit functionality
 - Verify RLS with multiple user accounts
