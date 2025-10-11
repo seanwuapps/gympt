@@ -35,7 +35,3 @@ const signOut = async () => {
   </div>
 </template>
 
-<style scoped>
-.p-6 { padding: 1.5rem; }
-.space-y-4 > * + * { margin-top: 1rem; }
-</style>

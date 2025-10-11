@@ -1,13 +1,22 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ['@nuxtjs/supabase'],
+  modules: ["@nuxtjs/supabase", "@nuxt/fonts"],
+  css: [
+    "element-plus/dist/index.css",
+    "~/assets/css/main.css"
+  ],
+  fonts: {
+    families: [
+      { name: "Inter", provider: "google" }
+    ]
+  },
   supabase: {
     redirectOptions: {
-      login: '/login',
-      callback: '/confirm',
-      exclude: ['/login', '/confirm']
-    }
-  }
-})
+      login: "/login",
+      callback: "/confirm",
+      exclude: ["/login", "/confirm"],
+    },
+  },
+});
