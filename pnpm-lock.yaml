@@ -11,6 +11,9 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.2
         version: 2.3.2(vue@3.5.22)
+      '@element-plus/nuxt':
+        specifier: ^1.1.4
+        version: 1.1.4(@element-plus/icons-vue@2.3.2(vue@3.5.22))(element-plus@2.11.4(vue@3.5.22))(magicast@0.3.5)
       '@nuxtjs/supabase':
         specifier: ^2.0.1
         version: 2.0.1
@@ -48,6 +51,9 @@ importers:
       eslint:
         specifier: ^9.37.0
         version: 9.37.0(jiti@2.6.1)
+      nuxi:
+        specifier: ^3.29.3
+        version: 3.29.3
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
@@ -195,6 +201,12 @@ packages:
     resolution: {integrity: sha512-OzIuTaIfC8QXEPmJvB4Y4kw34rSXdCJzxcD1kFStBvr8bK6X1zQAYDo0CNMjojnfTqRQCJ0I7prlErcoRiET2A==}
     peerDependencies:
       vue: ^3.2.0
+
+  '@element-plus/nuxt@1.1.4':
+    resolution: {integrity: sha512-tDGpJgzbu/4of9nsjDqVD34FJYH8bFHB7xDh5ePfP3RsRQLsCw9SjNpMR4o+6wUfJACl0tydbC/1lsYY0HT8gw==}
+    peerDependencies:
+      '@element-plus/icons-vue': '>=0.2.6'
+      element-plus: '>=2'
 
   '@emnapi/core@1.5.0':
     resolution: {integrity: sha512-sbP8GzB1WDzacS8fgNPpHlp6C9VZe+SJP3F90W9rLemaQj2PzIuTEl1qDOYQf58YIpyjViI24y9aPWCjEzY2cg==}
@@ -2592,6 +2604,10 @@ packages:
     resolution: {integrity: sha512-CvkkH1i81zl7mmb94DsRiFeG9V2fR2JeuK8yDgS8oiZSFa++wWLEgZ5ufEOyLHbvSbD1gTRKv9NdX69Rnvr9JA==}
     engines: {node: '>=20.19.0'}
 
+  magic-string@0.27.0:
+    resolution: {integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA==}
+    engines: {node: '>=12'}
+
   magic-string@0.30.19:
     resolution: {integrity: sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw==}
 
@@ -2759,6 +2775,11 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
+
+  nuxi@3.29.3:
+    resolution: {integrity: sha512-+/IHFCXT2t1XO5dQdpVyV/eU12DrVOCkKKwrDv9YwHIL4pXMyTDxIGMfU995YWjLjRb7SUsfNLfGV4wWCFdg0A==}
+    engines: {node: ^16.10.0 || >=18.0.0}
+    hasBin: true
 
   nuxt@4.1.3:
     resolution: {integrity: sha512-FPl+4HNIOTRYWQXtsZe5KJAr/eddFesuXABvcSTnFLYckIfnxcistwmbtPlkJhkW6vr/Jdhef5QqqYYkBsowGg==}
@@ -3543,6 +3564,10 @@ packages:
       vue-router:
         optional: true
 
+  unplugin@1.16.1:
+    resolution: {integrity: sha512-4/u/j4FrCKdi17jaxuJA0jClGxB1AvU2hw/IuayPc4ay1XGaJs/rbb4v5WKwAjNifjmXK9PIFyuPiaK8azyR9w==}
+    engines: {node: '>=14.0.0'}
+
   unplugin@2.3.10:
     resolution: {integrity: sha512-6NCPkv1ClwH+/BGE9QeoTIl09nuiAt0gS28nn1PvYXsGKRwM2TCbFA2QiilmehPDTXIe684k4rZI1yl3A1PCUw==}
     engines: {node: '>=18.12.0'}
@@ -4058,6 +4083,16 @@ snapshots:
   '@element-plus/icons-vue@2.3.2(vue@3.5.22)':
     dependencies:
       vue: 3.5.22
+
+  '@element-plus/nuxt@1.1.4(@element-plus/icons-vue@2.3.2(vue@3.5.22))(element-plus@2.11.4(vue@3.5.22))(magicast@0.3.5)':
+    dependencies:
+      '@element-plus/icons-vue': 2.3.2(vue@3.5.22)
+      '@nuxt/kit': 3.19.3(magicast@0.3.5)
+      element-plus: 2.11.4(vue@3.5.22)
+      magic-string: 0.27.0
+      unplugin: 1.16.1
+    transitivePeerDependencies:
+      - magicast
 
   '@emnapi/core@1.5.0':
     dependencies:
@@ -6442,6 +6477,10 @@ snapshots:
     dependencies:
       magic-string: 0.30.19
 
+  magic-string@0.27.0:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.5.5
+
   magic-string@0.30.19:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -6662,6 +6701,8 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  nuxi@3.29.3: {}
 
   nuxt@4.1.3(@parcel/watcher@2.5.1)(@types/node@24.7.1)(@vue/compiler-sfc@3.5.22)(db0@0.3.4(drizzle-orm@0.44.6(postgres@3.4.7)))(drizzle-orm@0.44.6(postgres@3.4.7))(eslint@9.37.0(jiti@2.6.1))(ioredis@5.8.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.52.4)(terser@5.44.0)(vite@7.1.9(@types/node@24.7.1)(jiti@2.6.1)(terser@5.44.0)(yaml@2.8.1))(yaml@2.8.1):
     dependencies:
@@ -7619,6 +7660,11 @@ snapshots:
     transitivePeerDependencies:
       - typescript
       - vue
+
+  unplugin@1.16.1:
+    dependencies:
+      acorn: 8.15.0
+      webpack-virtual-modules: 0.6.2
 
   unplugin@2.3.10:
     dependencies:
