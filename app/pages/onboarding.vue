@@ -1,37 +1,25 @@
 <template>
   <div class="onboarding-container">
     <el-card class="onboarding-card">
-      <el-steps :active="currentStep" finish-status="success" align-center>
+      <el-steps :active="onboardingStore.currentStep" finish-status="success" align-center>
         <el-step title="Basics" />
         <el-step title="Goals" />
         <el-step title="Safety" />
       </el-steps>
 
       <div class="step-content">
-        <OnboardingStep1
-          v-if="currentStep === 0"
-          ref="step1Ref"
-          v-model="formData"
-        />
-        <OnboardingStep2
-          v-if="currentStep === 1"
-          ref="step2Ref"
-          v-model="formData"
-        />
-        <OnboardingStep3
-          v-if="currentStep === 2"
-          ref="step3Ref"
-          v-model="formData"
-        />
+        <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
+        <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
+        <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
       </div>
 
       <div class="step-actions">
-        <el-button v-if="currentStep > 0" @click="handleBack">
+        <el-button v-if="onboardingStore.currentStep > 0" @click="handleBack">
           Back
         </el-button>
         <div class="spacer" />
         <el-button
-          v-if="currentStep < 2"
+          v-if="onboardingStore.currentStep < 2"
           type="primary"
           :disabled="!canProceed"
           @click="handleNext"
@@ -39,7 +27,7 @@
           Next
         </el-button>
         <el-button
-          v-if="currentStep === 2"
+          v-if="onboardingStore.currentStep === 2"
           type="primary"
           :loading="saving"
           @click="handleComplete"
@@ -49,7 +37,7 @@
       </div>
 
       <div class="step-indicator">
-        Step {{ currentStep + 1 }} of 3
+        Step {{ onboardingStore.currentStep + 1 }} of 3
       </div>
     </el-card>
   </div>
@@ -64,67 +52,39 @@ definePageMeta({
 })
 
 const router = useRouter()
-const { saveProfile, saveProgressToLocalStorage, loadProgressFromLocalStorage, clearProgress } =
-  useProfile()
+const { saveProfile } = useProfile()
+const onboardingStore = useOnboardingStore()
 
-const currentStep = ref(0)
 const saving = ref(false)
-
-const formData = ref<Partial<ProfileFormData>>({
-  experienceLevel: 'beginner',
-  preferredTrainingDays: ['Mon', 'Wed', 'Fri'],
-  aggressiveness: 'moderate',
-  units: 'metric',
-  language: 'en',
-})
-
-const step1Ref = ref()
-const step2Ref = ref()
-const step3Ref = ref()
 
 // Load progress from localStorage on mount
 onMounted(() => {
-  const progress = loadProgressFromLocalStorage()
-  if (progress) {
-    currentStep.value = progress.step
-    formData.value = { ...formData.value, ...progress.data }
-  }
+  onboardingStore.loadProgress()
 })
 
-// Save progress whenever form data or step changes
-watch(
-  [currentStep, formData],
-  () => {
-    saveProgressToLocalStorage(currentStep.value, formData.value)
-  },
-  { deep: true }
-)
-
 const canProceed = computed(() => {
-  if (currentStep.value === 0) {
-    return step1Ref.value?.validate?.() ?? false
+  if (onboardingStore.currentStep === 0) {
+    return onboardingStore.canProceedStep1
   }
   return true // Steps 2 and 3 are optional
 })
 
 const handleNext = () => {
   if (canProceed.value) {
-    currentStep.value++
+    onboardingStore.nextStep()
   }
 }
 
 const handleBack = () => {
-  if (currentStep.value > 0) {
-    currentStep.value--
-  }
+  onboardingStore.previousStep()
 }
 
 const handleComplete = async () => {
   saving.value = true
 
   try {
-    await saveProfile(formData.value as ProfileFormData)
-    clearProgress()
+    await saveProfile(onboardingStore.formData as ProfileFormData)
+    onboardingStore.clearProgress()
 
     ElNotification({
       title: 'Profile Created!',

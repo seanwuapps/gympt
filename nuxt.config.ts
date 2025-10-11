@@ -5,7 +5,8 @@ export default defineNuxtConfig({
   modules: [
     "@nuxtjs/supabase",
     "@nuxt/fonts",
-    "@element-plus/nuxt"
+    "@element-plus/nuxt",
+    "@pinia/nuxt"
   ],
   css: ["~/assets/css/main.css"],
   fonts: {

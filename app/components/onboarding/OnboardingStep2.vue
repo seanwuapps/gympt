@@ -2,10 +2,10 @@
   <div class="onboarding-step">
     <h2 class="step-title">Personalize your training</h2>
 
-    <el-form :model="formData" label-position="top">
+    <el-form label-position="top">
       <el-form-item label="Training Goals (Optional)">
         <el-input
-          v-model="formData.goals"
+          v-model="goals"
           type="textarea"
           :rows="3"
           :maxlength="500"
@@ -15,7 +15,7 @@
       </el-form-item>
 
       <el-form-item label="Progression Pace">
-        <el-select v-model="formData.aggressiveness" placeholder="Select progression pace">
+        <el-select v-model="aggressiveness" placeholder="Select progression pace">
           <el-option value="conservative">
             <div class="option-content">
               <span class="option-label">Conservative</span>
@@ -41,36 +41,16 @@
 </template>
 
 <script setup lang="ts">
-import type { ProfileFormData } from '~/composables/useProfile'
+const onboardingStore = useOnboardingStore()
 
-const props = defineProps<{
-  modelValue: Partial<ProfileFormData>
-}>()
-
-const emit = defineEmits<{
-  'update:modelValue': [value: Partial<ProfileFormData>]
-}>()
-
-const formData = computed({
-  get: () => ({
-    goals: props.modelValue.goals || '',
-    aggressiveness: props.modelValue.aggressiveness || 'moderate',
-  }),
-  set: (value) => {
-    emit('update:modelValue', { ...props.modelValue, ...value })
-  },
+const goals = computed({
+  get: () => onboardingStore.formData.goals || '',
+  set: (value) => onboardingStore.updateFormData({ goals: value }),
 })
 
-watch(
-  formData,
-  (newValue) => {
-    emit('update:modelValue', { ...props.modelValue, ...newValue })
-  },
-  { deep: true }
-)
-
-defineExpose({
-  validate: () => true, // All fields optional
+const aggressiveness = computed({
+  get: () => onboardingStore.formData.aggressiveness || 'moderate',
+  set: (value) => onboardingStore.updateFormData({ aggressiveness: value }),
 })
 </script>
 

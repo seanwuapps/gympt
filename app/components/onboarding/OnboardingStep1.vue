@@ -2,9 +2,9 @@
   <div class="onboarding-step">
     <h2 class="step-title">Let's get started!</h2>
 
-    <el-form :model="formData" label-position="top">
+    <el-form label-position="top">
       <el-form-item label="Experience Level" required>
-        <el-radio-group v-model="formData.experienceLevel" class="experience-selector">
+        <el-radio-group v-model="experienceLevel" class="experience-selector">
           <el-radio value="beginner" border>
             <div class="radio-content">
               <span class="label">Beginner</span>
@@ -27,7 +27,7 @@
       </el-form-item>
 
       <el-form-item label="Preferred Training Days" required>
-        <el-checkbox-group v-model="formData.preferredTrainingDays" class="day-selector">
+        <el-checkbox-group v-model="preferredTrainingDays" class="day-selector">
           <el-checkbox-button
             v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
             :key="day"
@@ -37,7 +37,7 @@
             {{ day.charAt(0) }}
           </el-checkbox-button>
         </el-checkbox-group>
-        <div v-if="formData.preferredTrainingDays.length === 0" class="error-text">
+        <div v-if="preferredTrainingDays.length === 0" class="error-text">
           Please select at least one training day
         </div>
       </el-form-item>
@@ -46,41 +46,16 @@
 </template>
 
 <script setup lang="ts">
-import type { ProfileFormData } from '~/composables/useProfile'
+const onboardingStore = useOnboardingStore()
 
-const props = defineProps<{
-  modelValue: Partial<ProfileFormData>
-}>()
-
-const emit = defineEmits<{
-  'update:modelValue': [value: Partial<ProfileFormData>]
-}>()
-
-const formData = computed({
-  get: () => ({
-    experienceLevel: props.modelValue.experienceLevel || 'beginner',
-    preferredTrainingDays: props.modelValue.preferredTrainingDays || ['Mon', 'Wed', 'Fri'],
-  }),
-  set: (value) => {
-    emit('update:modelValue', { ...props.modelValue, ...value })
-  },
+const experienceLevel = computed({
+  get: () => onboardingStore.formData.experienceLevel || 'beginner',
+  set: (value) => onboardingStore.updateFormData({ experienceLevel: value }),
 })
 
-watch(
-  formData,
-  (newValue) => {
-    emit('update:modelValue', { ...props.modelValue, ...newValue })
-  },
-  { deep: true }
-)
-
-defineExpose({
-  validate: () => {
-    return (
-      formData.value.experienceLevel !== undefined &&
-      formData.value.preferredTrainingDays.length > 0
-    )
-  },
+const preferredTrainingDays = computed({
+  get: () => onboardingStore.formData.preferredTrainingDays || [],
+  set: (value) => onboardingStore.updateFormData({ preferredTrainingDays: value }),
 })
 </script>
 

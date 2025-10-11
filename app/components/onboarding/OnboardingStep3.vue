@@ -2,10 +2,10 @@
   <div class="onboarding-step">
     <h2 class="step-title">Any injuries or limitations?</h2>
 
-    <el-form :model="formData" label-position="top">
+    <el-form label-position="top">
       <el-form-item label="Injury Flags (Optional)">
         <el-input
-          v-model="formData.injuryFlags"
+          v-model="injuryFlags"
           type="textarea"
           :rows="3"
           :maxlength="300"
@@ -28,35 +28,12 @@
 
 <script setup lang="ts">
 import { WarningFilled } from '@element-plus/icons-vue'
-import type { ProfileFormData } from '~/composables/useProfile'
 
-const props = defineProps<{
-  modelValue: Partial<ProfileFormData>
-}>()
+const onboardingStore = useOnboardingStore()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: Partial<ProfileFormData>]
-}>()
-
-const formData = computed({
-  get: () => ({
-    injuryFlags: props.modelValue.injuryFlags || '',
-  }),
-  set: (value) => {
-    emit('update:modelValue', { ...props.modelValue, ...value })
-  },
-})
-
-watch(
-  formData,
-  (newValue) => {
-    emit('update:modelValue', { ...props.modelValue, ...newValue })
-  },
-  { deep: true }
-)
-
-defineExpose({
-  validate: () => true, // Optional field
+const injuryFlags = computed({
+  get: () => onboardingStore.formData.injuryFlags || '',
+  set: (value) => onboardingStore.updateFormData({ injuryFlags: value }),
 })
 </script>
 
