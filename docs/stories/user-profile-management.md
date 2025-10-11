@@ -1,0 +1,276 @@
+# Story: User Profile Management - Create, View, and Edit Profile
+
+## User Story
+
+As a **signed-in user**,
+I want to **create and manage my training profile with preferences**,
+So that **the AI can generate personalized training sessions based on my goals, experience, and equipment**.
+
+## Story Context
+
+**Existing System Integration:**
+- Integrates with: Supabase Auth (Google OAuth already working)
+- Technology: Nuxt 4, Drizzle ORM, Supabase Postgres, Element Plus UI
+- Follows pattern: Server API routes with RLS, composables for data access
+- Touch points: Auth middleware, Supabase user session, database with RLS
+
+**Reference:**
+- PRD Section 4: Functional Requirements - Onboarding
+- Architecture Section 4: Data Model - `profiles` table
+- Architecture Section 5: Security & RLS
+
+## Acceptance Criteria
+
+### Functional Requirements
+
+1. **Profile Creation (First-Time User)**
+   - After Google sign-in, new users are redirected to profile creation flow
+   - User can input:
+     - Goals (text field, optional)
+     - Experience level (dropdown: beginner, intermediate, advanced)
+     - Training days per week (number input, 1-7)
+     - Available equipment (multi-select: barbell, dumbbells, kettlebells, resistance bands, bodyweight, cardio machines, etc.)
+     - Injury flags (text area, optional)
+   - Units default to metric (kg/cm)
+   - Language defaults to English
+   - Aggressiveness defaults to 'beginner'
+   - Profile is saved to database with user_id from auth.uid()
+
+2. **Profile View**
+   - Authenticated users can view their profile at `/profile`
+   - Displays all profile fields in read-only format
+   - Shows "Edit Profile" button
+
+3. **Profile Edit**
+   - Users can click "Edit Profile" to enter edit mode
+   - All fields are editable except user_id
+   - "Save" button persists changes
+   - "Cancel" button discards changes and returns to view mode
+   - Success message shown after save
+
+### Integration Requirements
+
+4. **Existing auth flow continues to work unchanged**
+   - Google OAuth sign-in/sign-out unaffected
+   - Session state via Supabase composables works as before
+   - Auth middleware protects profile routes
+
+5. **New functionality follows existing server API pattern**
+   - Server routes in `server/api/profile/`
+   - Zod validation for inputs/outputs
+   - RLS enforces user can only access own profile
+
+6. **Integration with Supabase maintains current behavior**
+   - Uses existing Supabase client
+   - Respects RLS policies
+   - Leverages auth.uid() for user identification
+
+### Quality Requirements
+
+7. **Change is covered by appropriate tests**
+   - Manual testing: Create, view, edit profile flows
+   - Verify RLS: User A cannot access User B's profile
+
+8. **Documentation is updated**
+   - Update `docs/SETUP.md` if new setup steps required
+   - Add profile feature to README if applicable
+
+9. **No regression in existing functionality verified**
+   - Auth flow still works
+   - Existing pages (index, login, confirm) unaffected
+
+## Technical Implementation
+
+### Database Schema
+
+**File:** `db/schema/profiles.ts`
+
+```typescript
+import { pgTable, uuid, text, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
+
+export const profiles = pgTable('profiles', {
+  userId: uuid('user_id').primaryKey().references(() => auth.users.id, { onDelete: 'cascade' }),
+  goals: text('goals'),
+  experienceLevel: text('experience_level').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
+  trainingDaysPerWeek: integer('training_days_per_week').notNull().default(3),
+  availableEquipment: jsonb('available_equipment').notNull().default('[]'), // string[]
+  injuryFlags: text('injury_flags'),
+  units: text('units').notNull().default('metric'), // 'metric' | 'imperial'
+  language: text('language').notNull().default('en'),
+  aggressiveness: text('aggressiveness').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+```
+
+### Server API Routes
+
+**1. GET `/api/profile`**
+- Fetches current user's profile using auth.uid()
+- Returns 404 if profile doesn't exist
+- Returns profile object if found
+
+**2. POST `/api/profile`**
+- Creates or updates profile (upsert)
+- Validates input with Zod schema
+- Uses auth.uid() to ensure user only modifies own profile
+- Returns updated profile
+
+**Zod Schema:**
+```typescript
+const profileSchema = z.object({
+  goals: z.string().optional(),
+  experienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
+  trainingDaysPerWeek: z.number().int().min(1).max(7),
+  availableEquipment: z.array(z.string()),
+  injuryFlags: z.string().optional(),
+  units: z.enum(['metric', 'imperial']).default('metric'),
+  language: z.string().default('en'),
+  aggressiveness: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
+})
+```
+
+### Frontend Components
+
+**1. Page: `app/pages/profile.vue`**
+- Protected by auth middleware
+- Fetches profile on mount
+- Toggle between view and edit modes
+- Uses Element Plus form components
+
+**2. Page: `app/pages/onboarding.vue`** (optional, or use profile page)
+- First-time user flow
+- Simplified form for initial profile creation
+- Redirects to home after completion
+
+**3. Composable: `app/composables/useProfile.ts`**
+```typescript
+export const useProfile = () => {
+  const profile = ref(null)
+  const loading = ref(false)
+  const error = ref(null)
+
+  const fetchProfile = async () => { /* ... */ }
+  const saveProfile = async (data) => { /* ... */ }
+
+  return { profile, loading, error, fetchProfile, saveProfile }
+}
+```
+
+### RLS Policies (Supabase Dashboard)
+
+```sql
+-- Enable RLS
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own profile
+CREATE POLICY "Users can view own profile"
+  ON profiles FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Users can insert their own profile
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+```
+
+## Tasks
+
+- [ ] **Database Layer**
+  - [ ] Create `db/schema/profiles.ts` with Drizzle schema
+  - [ ] Generate migration: `pnpm db:generate`
+  - [ ] Push to Supabase: `pnpm db:push`
+  - [ ] Configure RLS policies in Supabase dashboard
+  - [ ] Test RLS with multiple users
+
+- [ ] **Server API**
+  - [ ] Create `server/api/profile.get.ts`
+  - [ ] Create `server/api/profile.post.ts`
+  - [ ] Add Zod validation schemas
+  - [ ] Test endpoints with Postman/curl
+
+- [ ] **Frontend**
+  - [ ] Create `app/composables/useProfile.ts`
+  - [ ] Create `app/pages/profile.vue` (view/edit mode)
+  - [ ] Create `app/pages/onboarding.vue` (optional first-time flow)
+  - [ ] Add profile link to navigation
+  - [ ] Test create, view, edit flows
+
+- [ ] **Integration & Testing**
+  - [ ] Verify auth middleware protects routes
+  - [ ] Test with multiple Google accounts
+  - [ ] Verify RLS prevents cross-user access
+  - [ ] Verify existing auth flow unaffected
+
+- [ ] **Documentation**
+  - [ ] Update `docs/SETUP.md` if needed
+  - [ ] Update README with profile feature
+
+## Definition of Done
+
+- [ ] New users can create profile after Google sign-in
+- [ ] Users can view their profile at `/profile`
+- [ ] Users can edit and save profile changes
+- [ ] RLS enforces data isolation (tested with 2+ users)
+- [ ] Server API validates inputs with Zod
+- [ ] Existing auth flow works unchanged
+- [ ] Code follows existing patterns (server routes, composables, RLS)
+- [ ] No console errors or warnings
+- [ ] Profile data persists across sessions
+
+## Risk and Compatibility Check
+
+**Primary Risk:** RLS misconfiguration could allow users to access other users' profiles
+
+**Mitigation:**
+- Test RLS policies with multiple accounts before deploying
+- Use `auth.uid()` consistently in all queries
+- Never expose service role key to client
+
+**Rollback:**
+- Drop `profiles` table if critical issues found
+- Remove profile routes from `server/api/`
+- Remove profile pages from `app/pages/`
+- Revert migration with Drizzle
+
+**Compatibility Verification:**
+- [x] No breaking changes to existing APIs (new endpoints only)
+- [x] Database changes are additive only (new table)
+- [x] UI changes follow existing design patterns (Element Plus)
+- [x] Performance impact is negligible (single table, indexed by PK)
+
+## Dev Notes
+
+**Integration Approach:**
+- Follows existing pattern: Drizzle schema → migration → RLS → server API → composable → page
+- Reuses Supabase client from `@nuxtjs/supabase`
+- Uses `useSupabaseUser()` to get current user
+
+**Existing Pattern Reference:**
+- Server API: See `server/api/ai/session.generate.post.ts` for Zod validation pattern
+- Auth middleware: See `app/middleware/auth.ts`
+- Composables: Follow Vue 3 Composition API patterns
+
+**Key Constraints:**
+- Must use RLS for all data access
+- Profile must be created before user can generate sessions (future feature dependency)
+- Units and language are MVP-locked to metric/English (editable but not used yet)
+
+## QA Hooks
+
+- Run `@qa *risk {this-story}` to identify additional risks
+- Run `@qa *design {this-story}` to outline test strategy
+- After implementation, run `@qa *review {this-story}` and then `@qa *gate {this-story}`
+
+---
+
+**Story Status:** Draft
+**Estimated Effort:** 4-6 hours
+**Priority:** High (blocks session generation feature)
+**Dependencies:** Auth (complete), Drizzle setup (complete)
