@@ -15,7 +15,8 @@
     "type-check": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:apply-rls": "tsx scripts/apply-rls.ts"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
@@ -33,6 +34,7 @@
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
     "@types/node": "^24.7.1",
     "@typescript-eslint/parser": "^8.46.0",
+    "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.6",
     "eslint": "^9.37.0",
@@ -42,6 +44,7 @@
     "nuxi": "^3.29.3",
     "postgres": "^3.4.7",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
     "vue-eslint-parser": "^10.2.0"
   }
 }
