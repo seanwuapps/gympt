@@ -1,3 +1,17 @@
+<script setup lang="ts">
+definePageMeta({
+  middleware: 'auth'
+})
+
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
+const signOut = async () => {
+  await supabase.auth.signOut()
+  await navigateTo('/login')
+}
+</script>
+
 <template>
   <div class="p-6">
     <el-card>
@@ -7,29 +21,19 @@
         </div>
       </template>
       <div class="space-y-4">
-        <div v-if="!user">
-          <el-button type="primary" @click="signIn">Sign in with Google</el-button>
+        <div v-if="user">
+          <el-alert title="Welcome!" type="success" :closable="false">
+            <p>Signed in as: <strong>{{ user.email }}</strong></p>
+          </el-alert>
+          <el-button @click="signOut">Sign out</el-button>
         </div>
         <div v-else>
-          <p>Signed in as: {{ user.email }}</p>
-          <el-button @click="signOut">Sign out</el-button>
+          <p>Loading...</p>
         </div>
       </div>
     </el-card>
   </div>
 </template>
-
-<script setup lang="ts">
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
-
-const signIn = async () => {
-  await supabase.auth.signInWithOAuth({ provider: 'google' })
-}
-const signOut = async () => {
-  await supabase.auth.signOut()
-}
-</script>
 
 <style scoped>
 .p-6 { padding: 1.5rem; }
