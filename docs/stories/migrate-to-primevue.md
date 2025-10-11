@@ -9,6 +9,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 ## Story Context
 
 **Current State:**
+
 - Using Element Plus (`@element-plus/nuxt`, `element-plus`, `@element-plus/icons-vue`)
 - 147 Element Plus component instances across 7 files
 - Experiencing reactivity issues with complex form patterns
@@ -16,6 +17,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 - dayjs dependency only needed by Element Plus
 
 **Target State:**
+
 - PrimeVue as the UI component library
 - Smaller bundle size (~200KB)
 - Better mobile support and touch interactions
@@ -24,6 +26,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 - Better documentation and global community support
 
 **Motivation:**
+
 - Element Plus had reactivity issues with v-model on complex forms
 - PrimeVue has better Nuxt 4 integration
 - PrimeVue offers better mobile-first design
@@ -31,6 +34,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 - Better long-term maintenance and updates
 
 **Reference:**
+
 - Current implementation uses Element Plus throughout
 - Pinia store already implemented for state management
 - All forms use Pinia store pattern (no prop drilling)
@@ -135,6 +139,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 ### Package Changes
 
 **Remove:**
+
 ```json
 "@element-plus/icons-vue": "^2.3.2",
 "@element-plus/nuxt": "^1.1.4",
@@ -143,6 +148,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 ```
 
 **Add:**
+
 ```json
 "primevue": "^4.2.0",
 "@primevue/nuxt-module": "^0.2.0",
@@ -155,12 +161,7 @@ So that **we have a more modern, lighter, and better-maintained UI component lib
 
 ```typescript
 export default defineNuxtConfig({
-  modules: [
-    "@nuxtjs/supabase",
-    "@nuxt/fonts",
-    "@primevue/nuxt-module",
-    "@pinia/nuxt"
-  ],
+  modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
   primevue: {
     options: {
       theme: {
@@ -175,10 +176,7 @@ export default defineNuxtConfig({
       include: ['Tooltip', 'Ripple'],
     },
   },
-  css: [
-    'primeicons/primeicons.css',
-    '~/assets/css/main.css'
-  ],
+  css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
 })
 ```
 
@@ -187,6 +185,7 @@ export default defineNuxtConfig({
 #### Onboarding Page (`app/pages/onboarding.vue`)
 
 **Before (Element Plus):**
+
 ```vue
 <el-card>
   <el-steps :active="currentStep">
@@ -202,6 +201,7 @@ ElNotification({ title: 'Success', type: 'success' })
 ```
 
 **After (PrimeVue):**
+
 ```vue
 <Card>
   <template #header>
@@ -217,10 +217,10 @@ ElNotification({ title: 'Success', type: 'success' })
 
 <script setup>
 const toast = useToast()
-toast.add({ 
-  severity: 'success', 
-  summary: 'Success', 
-  life: 3000 
+toast.add({
+  severity: 'success',
+  summary: 'Success',
+  life: 3000,
 })
 </script>
 ```
@@ -228,6 +228,7 @@ toast.add({
 #### Step 1 Component (`app/components/onboarding/OnboardingStep1.vue`)
 
 **Before (Element Plus):**
+
 ```vue
 <el-form>
   <el-form-item label="Experience Level">
@@ -245,6 +246,7 @@ toast.add({
 ```
 
 **After (PrimeVue):**
+
 ```vue
 <form>
   <div class="field">
@@ -278,14 +280,9 @@ toast.add({
 #### Step 2 Component (`app/components/onboarding/OnboardingStep2.vue`)
 
 **Before (Element Plus):**
+
 ```vue
-<el-input 
-  v-model="goals" 
-  type="textarea" 
-  :rows="3" 
-  :maxlength="500"
-  show-word-limit
-/>
+<el-input v-model="goals" type="textarea" :rows="3" :maxlength="500" show-word-limit />
 
 <el-select v-model="aggressiveness">
   <el-option value="moderate" label="Moderate" />
@@ -293,17 +290,13 @@ toast.add({
 ```
 
 **After (PrimeVue):**
+
 ```vue
-<Textarea 
-  v-model="goals" 
-  :rows="3" 
-  :maxlength="500"
-  placeholder="Enter your goals..."
-/>
+<Textarea v-model="goals" :rows="3" :maxlength="500" placeholder="Enter your goals..." />
 <small>{{ goals.length }}/500</small>
 
-<Dropdown 
-  v-model="aggressiveness" 
+<Dropdown
+  v-model="aggressiveness"
   :options="aggressivenessOptions"
   optionLabel="label"
   optionValue="value"
@@ -314,11 +307,9 @@ toast.add({
 #### Step 3 Component (`app/components/onboarding/OnboardingStep3.vue`)
 
 **Before (Element Plus):**
+
 ```vue
-<el-input 
-  v-model="injuryFlags" 
-  type="textarea"
->
+<el-input v-model="injuryFlags" type="textarea">
   <template #prepend>
     <el-icon><WarningFilled /></el-icon>
   </template>
@@ -326,6 +317,7 @@ toast.add({
 ```
 
 **After (PrimeVue):**
+
 ```vue
 <div class="p-inputgroup">
   <span class="p-inputgroup-addon">
@@ -342,6 +334,7 @@ toast.add({
 #### Profile Page (`app/pages/profile.vue`)
 
 **Before (Element Plus):**
+
 ```vue
 <el-form :model="editForm">
   <el-form-item label="Goals">
@@ -352,6 +345,7 @@ toast.add({
 ```
 
 **After (PrimeVue):**
+
 ```vue
 <form>
   <div class="field">
@@ -376,6 +370,7 @@ toast.add({
 ```
 
 **Usage in components:**
+
 ```typescript
 const toast = useToast()
 
@@ -384,7 +379,7 @@ toast.add({
   severity: 'success',
   summary: 'Profile Created!',
   detail: 'Your training profile has been saved successfully.',
-  life: 3000
+  life: 3000,
 })
 
 // Error
@@ -392,7 +387,7 @@ toast.add({
   severity: 'error',
   summary: 'Error',
   detail: error.message || 'Failed to save profile.',
-  life: 5000
+  life: 5000,
 })
 ```
 
@@ -526,6 +521,7 @@ toast.add({
 **Primary Risk:** Breaking existing functionality during migration
 
 **Mitigation:**
+
 - Migrate one page/component at a time
 - Test thoroughly after each migration
 - Keep Element Plus installed until all components migrated
@@ -535,12 +531,14 @@ toast.add({
 **Secondary Risk:** PrimeVue API differences causing unexpected behavior
 
 **Mitigation:**
+
 - Review PrimeVue documentation for each component
 - Test edge cases (validation, empty states, error states)
 - Pay special attention to v-model bindings
 - Test form submissions thoroughly
 
 **Compatibility:**
+
 - PrimeVue fully compatible with Nuxt 4
 - PrimeVue fully compatible with Vue 3 Composition API
 - PrimeVue fully compatible with TypeScript
@@ -550,6 +548,7 @@ toast.add({
 ## Notes
 
 **Why PrimeVue?**
+
 - Better Nuxt 4 integration than Element Plus
 - Smaller bundle size (~100KB reduction)
 - Better mobile support and touch interactions
@@ -560,6 +559,7 @@ toast.add({
 - Global community support
 
 **Migration Strategy:**
+
 1. Install PrimeVue alongside Element Plus
 2. Migrate onboarding flow first (current pain point)
 3. Test thoroughly
@@ -575,7 +575,7 @@ toast.add({
 
 ---
 
-**Story Status:** Draft
+**Story Status:** Ready
 **Estimated Effort:** 6-8 hours
 **Priority:** Medium
 **Dependencies:** Pinia store implementation (complete)

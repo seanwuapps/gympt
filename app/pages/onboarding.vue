@@ -1,50 +1,50 @@
 <template>
   <div class="onboarding-container">
-    <el-card class="onboarding-card">
-      <el-steps :active="onboardingStore.currentStep" finish-status="success" align-center>
-        <el-step title="Basics" />
-        <el-step title="Goals" />
-        <el-step title="Safety" />
-      </el-steps>
-
-      <div class="step-content">
-        <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
-        <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
-        <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
-      </div>
-
-      <div class="step-actions">
-        <el-button v-if="onboardingStore.currentStep > 0" @click="handleBack">
-          Back
-        </el-button>
-        <div class="spacer" />
-        <el-button
-          v-if="onboardingStore.currentStep < 2"
-          type="primary"
-          :disabled="!canProceed"
-          @click="handleNext"
-        >
-          Next
-        </el-button>
-        <el-button
-          v-if="onboardingStore.currentStep === 2"
-          type="primary"
-          :loading="saving"
-          @click="handleComplete"
-        >
-          Complete Setup
-        </el-button>
-      </div>
-
-      <div class="step-indicator">
-        Step {{ onboardingStore.currentStep + 1 }} of 3
-      </div>
-    </el-card>
+    <Card class="onboarding-card">
+      <template #header>
+        <Steps :model="stepItems" :activeStep="onboardingStore.currentStep" />
+      </template>
+      
+      <template #content>
+        <div class="step-content">
+          <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
+          <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
+          <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
+        </div>
+      </template>
+      
+      <template #footer>
+        <div class="step-actions">
+          <Button 
+            v-if="onboardingStore.currentStep > 0" 
+            label="Back"
+            severity="secondary"
+            @click="handleBack"
+          />
+          <div class="spacer" />
+          <Button
+            v-if="onboardingStore.currentStep < 2"
+            label="Next"
+            :disabled="!canProceed"
+            @click="handleNext"
+          />
+          <Button
+            v-if="onboardingStore.currentStep === 2"
+            label="Complete Setup"
+            :loading="saving"
+            @click="handleComplete"
+          />
+        </div>
+        
+        <div class="step-indicator">
+          Step {{ onboardingStore.currentStep + 1 }} of 3
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElNotification } from 'element-plus'
 import type { ProfileFormData } from '~/composables/useProfile'
 
 definePageMeta({
@@ -52,10 +52,17 @@ definePageMeta({
 })
 
 const router = useRouter()
+const toast = useToast()
 const { saveProfile } = useProfile()
 const onboardingStore = useOnboardingStore()
 
 const saving = ref(false)
+
+const stepItems = ref([
+  { label: 'Basics' },
+  { label: 'Goals' },
+  { label: 'Safety' },
+])
 
 // Load progress from localStorage on mount
 onMounted(() => {
@@ -86,21 +93,21 @@ const handleComplete = async () => {
     await saveProfile(onboardingStore.formData as ProfileFormData)
     onboardingStore.clearProgress()
 
-    ElNotification({
-      title: 'Profile Created!',
-      message: 'Your training profile has been saved successfully.',
-      type: 'success',
-      duration: 3000,
+    toast.add({
+      severity: 'success',
+      summary: 'Profile Created!',
+      detail: 'Your training profile has been saved successfully.',
+      life: 3000,
     })
 
     // Redirect to home
     await router.push('/')
   } catch (error: any) {
-    ElNotification({
-      title: 'Error',
-      message: error.message || 'Failed to save profile. Please try again.',
-      type: 'error',
-      duration: 5000,
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to save profile. Please try again.',
+      life: 5000,
     })
   } finally {
     saving.value = false

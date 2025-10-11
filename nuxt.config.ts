@@ -6,9 +6,13 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "@nuxt/fonts",
     "@element-plus/nuxt",
+    "@primevue/nuxt-module",
     "@pinia/nuxt"
   ],
-  css: ["~/assets/css/main.css"],
+  css: [
+    "primeicons/primeicons.css",
+    "~/assets/css/main.css"
+  ],
   fonts: {
     families: [
       { name: "Inter", provider: "google" }
@@ -16,6 +20,14 @@ export default defineNuxtConfig({
   },
   elementPlus: {
     /** Options */
+  },
+  primevue: {
+    options: {
+      theme: {
+        preset: 'Aura',
+      },
+      ripple: true,
+    },
   },
   supabase: {
     redirectOptions: {
