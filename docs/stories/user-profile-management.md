@@ -25,7 +25,13 @@ So that **the AI can generate personalized training sessions based on my goals, 
 
 ### Functional Requirements
 
-1. **Profile Creation (First-Time User) - Multi-Step Wizard**
+1. **Automatic Onboarding Redirect**
+   - When a signed-in user does not have a profile, they are automatically redirected to `/onboarding`
+   - This redirect happens on any protected route (index, profile, etc.)
+   - User cannot access other pages until profile is created
+   - After profile creation, user is redirected to home page
+
+2. **Profile Creation (First-Time User) - Multi-Step Wizard**
    - After Google sign-in, new users are redirected to onboarding wizard
    - **Step 1 (Required):** Experience level + Preferred training days
      - Experience level: Radio buttons (beginner, intermediate, advanced)
@@ -46,12 +52,12 @@ So that **the AI can generate personalized training sessions based on my goals, 
    - Profile is saved to database on "Complete Setup" with user_id from auth.uid()
    - Progress saved to localStorage (can resume if interrupted)
 
-2. **Profile View**
-   - Authenticated users can view their profile at `/profile`
+3. **Profile View**
+   - Authenticated users with existing profile can view their profile at `/profile`
    - Displays all profile fields in read-only format
    - Shows "Edit Profile" button
 
-3. **Profile Edit**
+4. **Profile Edit**
    - Users can click "Edit Profile" to enter edit mode
    - All fields are editable except user_id
    - "Save" button persists changes
@@ -60,34 +66,43 @@ So that **the AI can generate personalized training sessions based on my goals, 
 
 ### Integration Requirements
 
-4. **Existing auth flow continues to work unchanged**
+5. **Existing auth flow continues to work unchanged**
    - Google OAuth sign-in/sign-out unaffected
    - Session state via Supabase composables works as before
    - Auth middleware protects profile routes
 
-5. **New functionality follows existing server API pattern**
+6. **New functionality follows existing server API pattern**
    - Server routes in `server/api/profile/`
    - Zod validation for inputs/outputs
    - RLS enforces user can only access own profile
 
-6. **Integration with Supabase maintains current behavior**
+7. **Integration with Supabase maintains current behavior**
    - Uses existing Supabase client
    - Respects RLS policies
    - Leverages auth.uid() for user identification
 
+8. **Profile check middleware**
+   - Create middleware to check if user has profile
+   - Redirect to `/onboarding` if profile doesn't exist
+   - Allow access to `/onboarding` and auth routes without profile
+   - Run after auth middleware
+
 ### Quality Requirements
 
-7. **Change is covered by appropriate tests**
+9. **Change is covered by appropriate tests**
    - Manual testing: Create, view, edit profile flows
    - Verify RLS: User A cannot access User B's profile
+   - Test automatic redirect when profile doesn't exist
+   - Test that user can access app after profile creation
 
-8. **Documentation is updated**
-   - Update `docs/SETUP.md` if new setup steps required
-   - Add profile feature to README if applicable
+10. **Documentation is updated**
+    - Update `docs/SETUP.md` if new setup steps required
+    - Add profile feature to README if applicable
 
-9. **No regression in existing functionality verified**
-   - Auth flow still works
-   - Existing pages (index, login, confirm) unaffected
+11. **No regression in existing functionality verified**
+    - Auth flow still works
+    - Existing pages (index, login, confirm) unaffected
+    - Users with existing profiles can access all pages normally
 
 ## Technical Implementation
 
@@ -146,11 +161,42 @@ const profileSchema = z.object({
 })
 ```
 
+### Middleware
+
+**File:** `app/middleware/profile-check.global.ts`
+
+```typescript
+// Global middleware to check if user has profile
+// Runs after auth middleware
+export default defineNuxtRouteMiddleware(async (to) => {
+  const user = useSupabaseUser()
+  
+  // Skip check for auth routes and onboarding
+  const publicRoutes = ['/login', '/confirm', '/onboarding']
+  if (publicRoutes.includes(to.path)) {
+    return
+  }
+  
+  // Only check if user is authenticated
+  if (user.value) {
+    try {
+      const profile = await $fetch('/api/profile')
+      // Profile exists, allow access
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        // No profile, redirect to onboarding
+        return navigateTo('/onboarding')
+      }
+    }
+  }
+})
+```
+
 ### Frontend Components
 
 **1. Page: `app/pages/onboarding.vue`** (Multi-step wizard)
 
-- Protected by auth middleware
+- Protected by auth middleware only (not profile-check)
 - Three-step wizard using `el-steps` component
 - State management:
   - Current step index (0, 1, 2)
@@ -272,8 +318,10 @@ CREATE POLICY "Users can update own profile"
   - [x] Create `app/pages/profile.vue` (view/edit mode, single-page form)
   - [x] Add profile link to navigation
   - [x] Implement localStorage progress saving
+  - [ ] Create `app/middleware/profile-check.global.ts` for automatic redirect
   - [ ] Test wizard flow (next, back, skip, resume)
   - [ ] Test view/edit profile flows
+  - [ ] Test automatic redirect when no profile exists
 
 - [ ] **Integration & Testing**
   - [ ] Verify auth middleware protects routes
@@ -287,13 +335,16 @@ CREATE POLICY "Users can update own profile"
 
 ## Definition of Done
 
-- [ ] New users can create profile after Google sign-in
-- [ ] Users can view their profile at `/profile`
+- [ ] Signed-in users without profile are automatically redirected to `/onboarding`
+- [ ] Users cannot access other pages until profile is created
+- [ ] New users can create profile via 3-step wizard
+- [ ] After profile creation, users are redirected to home page
+- [ ] Users with existing profile can view their profile at `/profile`
 - [ ] Users can edit and save profile changes
 - [ ] RLS enforces data isolation (tested with 2+ users)
 - [ ] Server API validates inputs with Zod
 - [ ] Existing auth flow works unchanged
-- [ ] Code follows existing patterns (server routes, composables, RLS)
+- [ ] Code follows existing patterns (server routes, composables, RLS, middleware)
 - [ ] No console errors or warnings
 - [ ] Profile data persists across sessions
 
@@ -456,14 +507,16 @@ CREATE POLICY "Users can update own profile"
   - Applied RLS policies successfully
 
 ### Next Steps
+- **NEW REQUIREMENT:** Create profile-check middleware for automatic onboarding redirect
 - Test onboarding wizard flow
+- Test automatic redirect when no profile exists
 - Test profile view/edit functionality
 - Verify RLS with multiple user accounts
 - Test API endpoints
 
 ---
 
-**Story Status:** In Progress (awaiting RLS configuration and testing)
+**Story Status:** In Progress (middleware implementation needed)
 **Estimated Effort:** 4-6 hours
 **Priority:** High (blocks session generation feature)
 **Dependencies:** Auth (complete), Drizzle setup (complete)
