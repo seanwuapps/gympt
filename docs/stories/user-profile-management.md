@@ -23,18 +23,26 @@ So that **the AI can generate personalized training sessions based on my goals, 
 
 ### Functional Requirements
 
-1. **Profile Creation (First-Time User)**
-   - After Google sign-in, new users are redirected to profile creation flow
-   - User can input:
-     - Goals (text field, optional)
-     - Experience level (dropdown: beginner, intermediate, advanced)
-     - Preferred training days (multi-select checkboxes: Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-     - Progression aggressiveness (dropdown: conservative, moderate, aggressive)
-     - Injury flags (text area, optional)
+1. **Profile Creation (First-Time User) - Multi-Step Wizard**
+   - After Google sign-in, new users are redirected to onboarding wizard
+   - **Step 1 (Required):** Experience level + Preferred training days
+     - Experience level: Radio buttons (beginner, intermediate, advanced)
+     - Preferred training days: Checkbox buttons (Mon-Sun, minimum 1 required)
+     - Cannot proceed without completing both fields
+   - **Step 2 (Optional):** Goals + Progression aggressiveness
+     - Goals: Textarea (max 500 chars, optional)
+     - Aggressiveness: Dropdown (conservative, moderate, aggressive) with default "moderate"
+     - Can skip this step
+   - **Step 3 (Optional):** Injury flags
+     - Injury flags: Textarea (max 300 chars, optional)
+     - Can skip this step
+   - Progress indicator shows current step (1 of 3, 2 of 3, 3 of 3)
+   - Can navigate back to previous steps
    - Units default to metric (kg/cm)
    - Language defaults to English
    - Equipment assumption: Commercial gym (full equipment access)
-   - Profile is saved to database with user_id from auth.uid()
+   - Profile is saved to database on "Complete Setup" with user_id from auth.uid()
+   - Progress saved to localStorage (can resume if interrupted)
 
 2. **Profile View**
    - Authenticated users can view their profile at `/profile`
@@ -130,18 +138,42 @@ const profileSchema = z.object({
 
 ### Frontend Components
 
-**1. Page: `app/pages/profile.vue`**
+**1. Page: `app/pages/onboarding.vue`** (Multi-step wizard)
+- Protected by auth middleware
+- Three-step wizard using `el-steps` component
+- State management:
+  - Current step index (0, 1, 2)
+  - Form data object with all fields
+  - Validation state per step
+  - Progress saved to localStorage
+- Step navigation:
+  - Next/Back buttons
+  - Click on progress indicator to jump to completed steps
+  - Swipe gestures on mobile (optional enhancement)
+- Redirects to home/dashboard after completion
+
+**2. Components: `app/components/onboarding/`**
+- `OnboardingStep1.vue` - Experience & Schedule
+  - Radio button group for experience level
+  - Checkbox button group for training days
+  - Validation: both fields required
+- `OnboardingStep2.vue` - Goals & Progression
+  - Textarea for goals (500 char limit)
+  - Select dropdown for aggressiveness
+  - All fields optional
+- `OnboardingStep3.vue` - Safety
+  - Textarea for injury flags (300 char limit)
+  - Warning icon and help text
+  - Optional field
+
+**3. Page: `app/pages/profile.vue`** (View/Edit existing profile)
 - Protected by auth middleware
 - Fetches profile on mount
 - Toggle between view and edit modes
+- Edit mode: Single-page form (not wizard) with all fields
 - Uses Element Plus form components
 
-**2. Page: `app/pages/onboarding.vue`** (optional, or use profile page)
-- First-time user flow
-- Simplified form for initial profile creation
-- Redirects to home after completion
-
-**3. Composable: `app/composables/useProfile.ts`**
+**4. Composable: `app/composables/useProfile.ts`**
 ```typescript
 export const useProfile = () => {
   const profile = ref(null)
@@ -150,8 +182,22 @@ export const useProfile = () => {
 
   const fetchProfile = async () => { /* ... */ }
   const saveProfile = async (data) => { /* ... */ }
+  
+  // Wizard-specific
+  const saveProgressToLocalStorage = (step, data) => { /* ... */ }
+  const loadProgressFromLocalStorage = () => { /* ... */ }
+  const clearProgress = () => { /* ... */ }
 
-  return { profile, loading, error, fetchProfile, saveProfile }
+  return { 
+    profile, 
+    loading, 
+    error, 
+    fetchProfile, 
+    saveProfile,
+    saveProgressToLocalStorage,
+    loadProgressFromLocalStorage,
+    clearProgress
+  }
 }
 ```
 
@@ -194,11 +240,16 @@ CREATE POLICY "Users can update own profile"
   - [ ] Test endpoints with Postman/curl
 
 - [ ] **Frontend**
-  - [ ] Create `app/composables/useProfile.ts`
-  - [ ] Create `app/pages/profile.vue` (view/edit mode)
-  - [ ] Create `app/pages/onboarding.vue` (optional first-time flow)
+  - [ ] Create `app/composables/useProfile.ts` with wizard helpers
+  - [ ] Create `app/pages/onboarding.vue` (multi-step wizard)
+  - [ ] Create `app/components/onboarding/OnboardingStep1.vue`
+  - [ ] Create `app/components/onboarding/OnboardingStep2.vue`
+  - [ ] Create `app/components/onboarding/OnboardingStep3.vue`
+  - [ ] Create `app/pages/profile.vue` (view/edit mode, single-page form)
   - [ ] Add profile link to navigation
-  - [ ] Test create, view, edit flows
+  - [ ] Implement localStorage progress saving
+  - [ ] Test wizard flow (next, back, skip, resume)
+  - [ ] Test view/edit profile flows
 
 - [ ] **Integration & Testing**
   - [ ] Verify auth middleware protects routes
@@ -261,11 +312,67 @@ CREATE POLICY "Users can update own profile"
 - Units and language are MVP-locked to metric/English (editable but not used yet)
 - Equipment assumption: Commercial gym with full equipment (no user selection needed for MVP)
 
-**UX Notes:**
-- **Preferred Training Days:** Use Element Plus checkbox group with day buttons (M T W T F S S) for easy mobile selection
-- **Aggressiveness:** Conservative = slower progression, Moderate = balanced, Aggressive = faster progression (affects AI session adaptation)
-- **Default preferred days:** Mon, Wed, Fri (stored as `["Mon", "Wed", "Fri"]`)
-- Keep form simple and mobile-friendly with large tap targets
+**UX Notes - Multi-Step Wizard:**
+
+**Step 1: Experience & Schedule** (Required)
+- Title: "Let's get started!"
+- Experience level: Radio buttons with icons and descriptions
+  - Beginner: "New to training"
+  - Intermediate: "6+ months experience"
+  - Advanced: "2+ years experience"
+- Preferred training days: Checkbox buttons in circular layout (M T W T F S S)
+  - Single letter display on mobile
+  - Minimum 1 day required
+  - Default: Mon, Wed, Fri pre-selected
+- Primary action: "Next" button (bottom right)
+
+**Step 2: Goals & Progression** (Optional but recommended)
+- Title: "Personalize your training"
+- Goals: Textarea with placeholder "e.g., Build strength for hiking, lose 10kg..."
+  - Max 500 characters with counter
+  - Optional field
+- Progression aggressiveness: Select dropdown with descriptions
+  - Conservative: "Slower, safer progression"
+  - Moderate: "Balanced approach (recommended)" ← default
+  - Aggressive: "Faster progression, more challenge"
+- Primary action: "Next" button
+- Secondary action: "Back" button (top left)
+
+**Step 3: Safety & Finish** (Optional)
+- Title: "Any injuries or limitations?"
+- Injury flags: Textarea with warning icon
+  - Placeholder: "e.g., Lower back pain, right knee issues..."
+  - Max 300 characters with counter
+  - Help text: "This helps the AI avoid exercises that may aggravate your condition"
+  - Optional field
+- Primary action: "Complete Setup" button (prominent, bottom)
+- Secondary action: "Back" button (top left)
+- Tertiary action: "Skip" link (if field is empty)
+
+**Progress Indicator:**
+- Use `el-steps` component at top
+- Show: "1 of 3", "2 of 3", "3 of 3"
+- Visual progress bar
+- All steps accessible via clicking (if previous steps valid)
+
+**Mobile Optimizations:**
+- One question per screen (reduces cognitive load)
+- Large tap targets (2.75rem minimum)
+- Primary button fixed to bottom (thumb zone)
+- Smooth transitions between steps
+- Auto-focus first field on each step
+- Swipe gestures: swipe left = next, swipe right = back
+
+**Validation:**
+- Step 1: Must select experience level + at least 1 training day
+- Step 2 & 3: All fields optional, can skip
+- Inline validation on blur
+- Prevent "Next" if required fields invalid
+
+**State Management:**
+- Save progress to localStorage (in case user closes browser)
+- Show "Resume setup" if incomplete profile found
+- Can edit any step by clicking progress indicator
 
 ## QA Hooks
 
