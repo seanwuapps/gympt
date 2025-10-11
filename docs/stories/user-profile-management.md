@@ -92,7 +92,7 @@ export const profiles = pgTable('profiles', {
   userId: uuid('user_id').primaryKey().references(() => auth.users.id, { onDelete: 'cascade' }),
   goals: text('goals'),
   experienceLevel: text('experience_level').notNull().default('beginner'), // 'beginner' | 'intermediate' | 'advanced'
-  preferredTrainingDays: jsonb('preferred_training_days').notNull().default('[1,3,5]'), // Array of day numbers: 0=Sun, 1=Mon, ..., 6=Sat
+  preferredTrainingDays: jsonb('preferred_training_days').notNull().default('["Mon","Wed","Fri"]'), // Array of day abbreviations: 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
   injuryFlags: text('injury_flags'),
   units: text('units').notNull().default('metric'), // 'metric' | 'imperial'
   language: text('language').notNull().default('en'),
@@ -120,7 +120,7 @@ export const profiles = pgTable('profiles', {
 const profileSchema = z.object({
   goals: z.string().optional(),
   experienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
-  preferredTrainingDays: z.array(z.number().int().min(0).max(6)).min(1).max(7), // Array of 0-6 (Sun-Sat), at least 1 day
+  preferredTrainingDays: z.array(z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])).min(1).max(7), // Array of day abbreviations, at least 1 day
   injuryFlags: z.string().optional(),
   units: z.enum(['metric', 'imperial']).default('metric'),
   language: z.string().default('en'),
@@ -264,7 +264,7 @@ CREATE POLICY "Users can update own profile"
 **UX Notes:**
 - **Preferred Training Days:** Use Element Plus checkbox group with day buttons (M T W T F S S) for easy mobile selection
 - **Aggressiveness:** Conservative = slower progression, Moderate = balanced, Aggressive = faster progression (affects AI session adaptation)
-- **Default preferred days:** Mon, Wed, Fri (stored as [1, 3, 5] where 0=Sunday)
+- **Default preferred days:** Mon, Wed, Fri (stored as `["Mon", "Wed", "Fri"]`)
 - Keep form simple and mobile-friendly with large tap targets
 
 ## QA Hooks
