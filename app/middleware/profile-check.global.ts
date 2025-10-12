@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser()
 
   // Only check if user is authenticated
@@ -12,17 +12,29 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  try {
-    // Check if profile exists
-    await $fetch('/api/profile', {
-      method: 'GET',
-    })
-  } catch (err: any) {
-    // If we get a 404, redirect to onboarding
-    if (err.statusCode === 404 || err.status === 404) {
-      return navigateTo('/onboarding')
+  // Use cached profile check to prevent flash
+  const hasProfile = useState<boolean | null>('user-has-profile', () => null)
+
+  // If we already checked and know the answer, use it immediately
+  if (hasProfile.value === false) {
+    return navigateTo('/onboarding')
+  }
+
+  // If we haven't checked yet, check now
+  if (hasProfile.value === null) {
+    try {
+      await $fetch('/api/profile', {
+        method: 'GET',
+      })
+      hasProfile.value = true
+    } catch (err: any) {
+      // If we get a 404, user has no profile
+      if (err.statusCode === 404 || err.status === 404) {
+        hasProfile.value = false
+        return navigateTo('/onboarding')
+      }
+      // For other errors (500, network, etc.), let the page handle it
+      // This prevents redirect loops if there's a server error
     }
-    // For other errors (500, network, etc.), let the page handle it
-    // This prevents redirect loops if there's a server error
   }
 })

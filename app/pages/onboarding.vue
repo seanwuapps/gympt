@@ -93,6 +93,10 @@ const handleComplete = async () => {
     await saveProfile(onboardingStore.formData as ProfileFormData)
     onboardingStore.clearProgress()
 
+    // Clear the profile check cache so middleware knows profile exists
+    const hasProfile = useState<boolean | null>('user-has-profile')
+    hasProfile.value = true
+
     toast.add({
       severity: 'success',
       summary: 'Profile Created!',
