@@ -7,7 +7,6 @@ export default defineNuxtConfig({
   modules: [
     "@nuxtjs/supabase",
     "@nuxt/fonts",
-    "@element-plus/nuxt",
     "@primevue/nuxt-module",
     "@pinia/nuxt"
   ],
@@ -19,9 +18,6 @@ export default defineNuxtConfig({
     families: [
       { name: "Inter", provider: "google" }
     ]
-  },
-  elementPlus: {
-    /** Options */
   },
   primevue: {
     options: {
@@ -39,20 +35,8 @@ export default defineNuxtConfig({
     },
   },
   vite: {
-    optimizeDeps: {
-      include: [
-        'dayjs',
-        'dayjs/plugin/customParseFormat',
-        'dayjs/plugin/advancedFormat',
-        'dayjs/plugin/weekOfYear',
-        'dayjs/plugin/weekYear',
-        'dayjs/plugin/dayOfYear',
-        'dayjs/plugin/isSameOrAfter',
-        'dayjs/plugin/isSameOrBefore',
-      ],
-    },
     ssr: {
-      noExternal: ['element-plus', 'dayjs'],
+      noExternal: ['primevue'],
     },
   },
 });

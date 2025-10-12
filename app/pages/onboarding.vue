@@ -122,7 +122,7 @@ const handleComplete = async () => {
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: var(--el-bg-color-page);
+  background: var(--p-surface-ground);
 }
 
 .onboarding-card {
@@ -140,7 +140,7 @@ const handleComplete = async () => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 0;
-  border-top: 1px solid var(--el-border-color);
+  border-top: 1px solid var(--p-surface-border);
 }
 
 .spacer {
@@ -149,7 +149,7 @@ const handleComplete = async () => {
 
 .step-indicator {
   text-align: center;
-  color: var(--el-text-color-secondary);
+  color: var(--p-text-muted-color);
   font-size: 0.875rem;
   margin-top: 1rem;
 }
