@@ -1,4 +1,9 @@
 export default defineNuxtRouteMiddleware((to) => {
+  // Only run on client side to prevent hydration mismatches
+  if (import.meta.server) {
+    return
+  }
+
   const user = useSupabaseUser()
 
   // Redirect to login if not authenticated and trying to access protected route
