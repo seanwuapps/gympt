@@ -124,6 +124,11 @@ const preferredTrainingDays = computed({
   flex-shrink: 0;
 }
 
+.radio-option :deep(.p-radiobutton .p-radiobutton-box) {
+  background: var(--p-surface-0);
+  border-color: var(--p-surface-border);
+}
+
 .radio-option:hover {
   border-color: var(--p-primary-color);
   background: var(--p-surface-50);
@@ -193,6 +198,7 @@ const preferredTrainingDays = computed({
 .day-label {
   cursor: pointer;
   font-weight: 600;
+  color: var(--p-text-color);
 }
 
 .error-text {

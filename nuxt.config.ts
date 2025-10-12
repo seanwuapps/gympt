@@ -23,7 +23,10 @@ export default defineNuxtConfig({
   primevue: {
     options: {
       theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+          darkModeSelector: false, // Disable dark mode to prevent white-on-white controls
+        }
       },
       ripple: true,
     },
