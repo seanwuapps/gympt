@@ -11,9 +11,7 @@
           <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
           <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
         </div>
-      </template>
 
-      <template #footer>
         <div class="step-actions">
           <Button
             v-if="onboardingStore.currentStep > 0"
