@@ -3,7 +3,7 @@ import type { Profile } from '../../db/schema'
 const STORAGE_KEY = 'gympt_onboarding_progress'
 
 export interface ProfileFormData {
-  goals?: string
+  goals?: string[]
   experienceLevel: 'beginner' | 'intermediate' | 'advanced'
   preferredTrainingDays: string[]
   injuryFlags?: string
@@ -49,9 +49,15 @@ export const useProfile = () => {
     error.value = null
 
     try {
+      // Convert goals array to comma-separated string for backend
+      const payload = {
+        ...data,
+        goals: data.goals && data.goals.length > 0 ? data.goals.join(', ') : undefined,
+      }
+
       const result = await $fetch<Profile>('/api/profile', {
         method: 'POST',
-        body: data,
+        body: payload,
       })
       profile.value = result
       return result
