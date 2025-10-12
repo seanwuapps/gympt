@@ -1,42 +1,44 @@
 <template>
   <div class="onboarding-container">
-    <Card class="onboarding-card">
-      <template #header>
-        <Steps :model="stepItems" :activeStep="onboardingStore.currentStep" />
-      </template>
+    <ClientOnly>
+      <Card class="onboarding-card">
+        <template #header>
+          <Steps :model="stepItems" :activeStep="onboardingStore.currentStep" />
+        </template>
 
-      <template #content>
-        <div class="step-content">
-          <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
-          <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
-          <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
-        </div>
+        <template #content>
+          <div class="step-content">
+            <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
+            <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
+            <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
+          </div>
 
-        <div class="step-actions">
-          <Button
-            v-if="onboardingStore.currentStep > 0"
-            label="Back"
-            severity="secondary"
-            @click="handleBack"
-          />
-          <div class="spacer" />
-          <Button
-            v-if="onboardingStore.currentStep < 2"
-            label="Next"
-            :disabled="!canProceed"
-            @click="handleNext"
-          />
-          <Button
-            v-if="onboardingStore.currentStep === 2"
-            label="Complete Setup"
-            :loading="saving"
-            @click="handleComplete"
-          />
-        </div>
+          <div class="step-actions">
+            <Button
+              v-if="onboardingStore.currentStep > 0"
+              label="Back"
+              severity="secondary"
+              @click="handleBack"
+            />
+            <div class="spacer" />
+            <Button
+              v-if="onboardingStore.currentStep < 2"
+              label="Next"
+              :disabled="!canProceed"
+              @click="handleNext"
+            />
+            <Button
+              v-if="onboardingStore.currentStep === 2"
+              label="Complete Setup"
+              :loading="saving"
+              @click="handleComplete"
+            />
+          </div>
 
-        <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 3</div>
-      </template>
-    </Card>
+          <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 3</div>
+        </template>
+      </Card>
+    </ClientOnly>
   </div>
 </template>
 
