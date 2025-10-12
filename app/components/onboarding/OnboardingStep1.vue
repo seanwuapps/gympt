@@ -55,16 +55,16 @@
 const onboardingStore = useOnboardingStore()
 
 const experienceLevels = [
-  { value: 'beginner', label: 'Beginner', desc: 'New to training' },
-  { value: 'intermediate', label: 'Intermediate', desc: '6+ months experience' },
-  { value: 'advanced', label: 'Advanced', desc: '2+ years experience' },
+  { value: 'beginner' as const, label: 'Beginner', desc: 'New to training' },
+  { value: 'intermediate' as const, label: 'Intermediate', desc: '6+ months experience' },
+  { value: 'advanced' as const, label: 'Advanced', desc: '2+ years experience' },
 ]
 
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const experienceLevel = computed({
   get: () => onboardingStore.formData.experienceLevel || 'beginner',
-  set: (value) => onboardingStore.updateFormData({ experienceLevel: value }),
+  set: (value: 'beginner' | 'intermediate' | 'advanced') => onboardingStore.updateFormData({ experienceLevel: value }),
 })
 
 const preferredTrainingDays = computed({
@@ -117,6 +117,11 @@ const preferredTrainingDays = computed({
   border-radius: var(--p-border-radius);
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+}
+
+.radio-option :deep(.p-radiobutton) {
+  flex-shrink: 0;
 }
 
 .radio-option:hover {
@@ -157,6 +162,7 @@ const preferredTrainingDays = computed({
 .day-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem;
   border: 2px solid var(--p-surface-border);
@@ -165,6 +171,13 @@ const preferredTrainingDays = computed({
   min-height: 3rem;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+}
+
+.day-button :deep(.p-checkbox) {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .day-button:hover {

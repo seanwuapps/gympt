@@ -4,7 +4,7 @@
       <template #header>
         <Steps :model="stepItems" :activeStep="onboardingStore.currentStep" />
       </template>
-      
+
       <template #content>
         <div class="step-content">
           <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
@@ -12,11 +12,11 @@
           <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
         </div>
       </template>
-      
+
       <template #footer>
         <div class="step-actions">
-          <Button 
-            v-if="onboardingStore.currentStep > 0" 
+          <Button
+            v-if="onboardingStore.currentStep > 0"
             label="Back"
             severity="secondary"
             @click="handleBack"
@@ -35,10 +35,8 @@
             @click="handleComplete"
           />
         </div>
-        
-        <div class="step-indicator">
-          Step {{ onboardingStore.currentStep + 1 }} of 3
-        </div>
+
+        <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 3</div>
       </template>
     </Card>
   </div>
@@ -58,11 +56,7 @@ const onboardingStore = useOnboardingStore()
 
 const saving = ref(false)
 
-const stepItems = ref([
-  { label: 'Basics' },
-  { label: 'Goals' },
-  { label: 'Safety' },
-])
+const stepItems = ref([{ label: 'Basics' }, { label: 'Goals' }, { label: 'Safety' }])
 
 // Load progress from localStorage on mount
 onMounted(() => {
