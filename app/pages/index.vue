@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['auth', 'profile-check'],
+  middleware: 'auth',
 })
 
 const supabase = useSupabaseClient()
