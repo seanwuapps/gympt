@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'auth'
+  middleware: ['auth', 'profile-check'],
 })
 
 const supabase = useSupabaseClient()
@@ -20,12 +20,15 @@ const signOut = async () => {
           <h2>AI Training Companion (MVP)</h2>
         </div>
       </template>
-      
+
       <template #content>
         <div v-if="user">
           <Message severity="success" :closable="false">
             <strong>Welcome!</strong>
-            <p>Signed in as: <strong>{{ user.email }}</strong></p>
+            <pre>{{ user }}</pre>
+            <p>
+              Signed in as: <strong>{{ user.email }}</strong>
+            </p>
           </Message>
           <div class="button-group">
             <Button label="My Profile" @click="$router.push('/profile')" />
@@ -63,10 +66,9 @@ const signOut = async () => {
   .home-container {
     padding: 1rem 0.5rem;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
 }
 </style>
-

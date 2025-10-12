@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
     const existing = await db
       .select()
       .from(profiles)
-      .where(eq(profiles.userId, user.id))
+      .where(eq(profiles.userId, user.sub))
       .limit(1)
 
     let result
@@ -71,14 +71,14 @@ export default defineEventHandler(async (event) => {
           ...profileData,
           updatedAt: new Date(),
         })
-        .where(eq(profiles.userId, user.id))
+        .where(eq(profiles.userId, user.sub))
         .returning()
     } else {
       // Insert new profile
       result = await db
         .insert(profiles)
         .values({
-          userId: user.id,
+          userId: user.sub,
           ...profileData,
         })
         .returning()

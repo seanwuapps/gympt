@@ -178,7 +178,7 @@
 import type { ProfileFormData } from '~/composables/useProfile'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'profile-check'],
 })
 
 const toast = useToast()

@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     const profile = await db
       .select()
       .from(profiles)
-      .where(eq(profiles.userId, user.id))
+      .where(eq(profiles.userId, user.sub))
       .limit(1)
 
     if (profile.length === 0) {
