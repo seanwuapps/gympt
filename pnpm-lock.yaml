@@ -20,9 +20,15 @@ importers:
       '@pinia/nuxt':
         specifier: ^0.11.2
         version: 0.11.2(magicast@0.3.5)(pinia@3.0.3(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3)))
+      '@primeuix/themes':
+        specifier: ^1.2.5
+        version: 1.2.5
       '@primevue/nuxt-module':
         specifier: ^4.4.1
         version: 4.4.1(@babel/parser@7.28.4)(magicast@0.3.5)(vue@3.5.22(typescript@5.9.3))
+      '@primevue/themes':
+        specifier: ^4.4.1
+        version: 4.4.1
       dayjs:
         specifier: ^1.11.18
         version: 1.11.18
@@ -1141,6 +1147,9 @@ packages:
   '@primeuix/styles@1.2.5':
     resolution: {integrity: sha512-nypFRct/oaaBZqP4jinT0puW8ZIfs4u+l/vqUFmJEPU332fl5ePj6DoOpQgTLzo3OfmvSmz5a5/5b4OJJmmi7Q==}
 
+  '@primeuix/themes@1.2.5':
+    resolution: {integrity: sha512-n3YkwJrHQaEESc/D/A/iD815sxp8cKnmzscA6a8Tm8YvMtYU32eCahwLLe6h5rywghVwxASWuG36XBgISYOIjQ==}
+
   '@primeuix/utils@0.6.1':
     resolution: {integrity: sha512-tQL/ZOPgCdD+NTimlUmhyD0ey8J1XmpZE4hDHM+/fnuBicVVmlKOd5HpS748LcOVRUKbWjmEPdHX4hi5XZoC1Q==}
     engines: {node: '>=12.11.0'}
@@ -1169,6 +1178,10 @@ packages:
 
   '@primevue/nuxt-module@4.4.1':
     resolution: {integrity: sha512-x1yLIcYBSHy1NGkJ9ui78NeO7QQV2kapSvDZHBK3G2WpnyAzgeoS3vAMzhyCKA0u4vf3n9KEaL4rol8Dp6LXnw==}
+    engines: {node: '>=12.11.0'}
+
+  '@primevue/themes@4.4.1':
+    resolution: {integrity: sha512-3qofw+UhTG5rZXUU+RtYY1ea5Q84LvfHtDuzFLUSK9pL1SLS+S4CBnoMuVM9I009FdVyNGT0Bib3sLMf21SBVQ==}
     engines: {node: '>=12.11.0'}
 
   '@rolldown/pluginutils@1.0.0-beta.29':
@@ -6136,6 +6149,10 @@ snapshots:
     dependencies:
       '@primeuix/styled': 0.7.4
 
+  '@primeuix/themes@1.2.5':
+    dependencies:
+      '@primeuix/styled': 0.7.4
+
   '@primeuix/utils@0.6.1': {}
 
   '@primevue/auto-import-resolver@4.4.1':
@@ -6181,6 +6198,11 @@ snapshots:
       - magicast
       - supports-color
       - vue
+
+  '@primevue/themes@4.4.1':
+    dependencies:
+      '@primeuix/styled': 0.7.4
+      '@primeuix/themes': 1.2.5
 
   '@rolldown/pluginutils@1.0.0-beta.29': {}
 
