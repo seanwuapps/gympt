@@ -1,4 +1,9 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
+  // Only run on client side to prevent hydration mismatches
+  if (import.meta.server) {
+    return
+  }
+
   const user = useSupabaseUser()
 
   // Only check if user is authenticated
