@@ -2,51 +2,65 @@
   <div class="onboarding-step">
     <h2 class="step-title">Let's get started!</h2>
 
-    <el-form label-position="top">
-      <el-form-item label="Experience Level" required>
-        <el-radio-group v-model="experienceLevel" class="experience-selector">
-          <el-radio value="beginner" border>
-            <div class="radio-content">
-              <span class="label">Beginner</span>
-              <span class="desc">New to training</span>
-            </div>
-          </el-radio>
-          <el-radio value="intermediate" border>
-            <div class="radio-content">
-              <span class="label">Intermediate</span>
-              <span class="desc">6+ months experience</span>
-            </div>
-          </el-radio>
-          <el-radio value="advanced" border>
-            <div class="radio-content">
-              <span class="label">Advanced</span>
-              <span class="desc">2+ years experience</span>
-            </div>
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item label="Preferred Training Days" required>
-        <el-checkbox-group v-model="preferredTrainingDays" class="day-selector">
-          <el-checkbox-button
-            v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
-            :key="day"
-            :value="day"
-            class="day-button"
+    <form>
+      <div class="field">
+        <label class="field-label">Experience Level <span class="required">*</span></label>
+        <div class="experience-selector">
+          <div 
+            v-for="level in experienceLevels" 
+            :key="level.value"
+            class="radio-option"
+            :class="{ 'selected': experienceLevel === level.value }"
+            @click="experienceLevel = level.value"
           >
-            {{ day.charAt(0) }}
-          </el-checkbox-button>
-        </el-checkbox-group>
-        <div v-if="preferredTrainingDays.length === 0" class="error-text">
-          Please select at least one training day
+            <RadioButton 
+              v-model="experienceLevel" 
+              :inputId="level.value" 
+              :value="level.value" 
+            />
+            <label :for="level.value" class="radio-content">
+              <span class="label">{{ level.label }}</span>
+              <span class="desc">{{ level.desc }}</span>
+            </label>
+          </div>
         </div>
-      </el-form-item>
-    </el-form>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Preferred Training Days <span class="required">*</span></label>
+        <div class="day-selector">
+          <div 
+            v-for="day in days" 
+            :key="day"
+            class="day-button"
+            :class="{ 'selected': preferredTrainingDays.includes(day) }"
+          >
+            <Checkbox 
+              v-model="preferredTrainingDays" 
+              :inputId="day" 
+              :value="day"
+            />
+            <label :for="day" class="day-label">{{ day.charAt(0) }}</label>
+          </div>
+        </div>
+        <small v-if="preferredTrainingDays.length === 0" class="error-text">
+          Please select at least one training day
+        </small>
+      </div>
+    </form>
   </div>
 </template>
 
 <script setup lang="ts">
 const onboardingStore = useOnboardingStore()
+
+const experienceLevels = [
+  { value: 'beginner', label: 'Beginner', desc: 'New to training' },
+  { value: 'intermediate', label: 'Intermediate', desc: '6+ months experience' },
+  { value: 'advanced', label: 'Advanced', desc: '2+ years experience' },
+]
+
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const experienceLevel = computed({
   get: () => onboardingStore.formData.experienceLevel || 'beginner',
@@ -73,23 +87,53 @@ const preferredTrainingDays = computed({
   text-align: center;
 }
 
+.field {
+  margin-bottom: 2rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.required {
+  color: var(--p-red-500);
+}
+
 .experience-selector {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
 }
 
-.experience-selector :deep(.el-radio) {
-  margin-right: 0;
-  width: 100%;
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.radio-option:hover {
+  border-color: var(--p-primary-color);
+  background: var(--p-surface-50);
+}
+
+.radio-option.selected {
+  border-color: var(--p-primary-color);
+  background: var(--p-primary-50);
 }
 
 .radio-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0.5rem 0;
+  flex: 1;
+  cursor: pointer;
 }
 
 .radio-content .label {
@@ -99,7 +143,7 @@ const preferredTrainingDays = computed({
 
 .radio-content .desc {
   font-size: 0.875rem;
-  color: var(--el-text-color-secondary);
+  color: var(--p-text-muted-color);
   margin-top: 0.25rem;
 }
 
@@ -111,18 +155,38 @@ const preferredTrainingDays = computed({
 }
 
 .day-button {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid var(--p-surface-border);
+  border-radius: 50%;
+  min-width: 3rem;
+  min-height: 3rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.day-button:hover {
+  border-color: var(--p-primary-color);
+  background: var(--p-surface-50);
+}
+
+.day-button.selected {
+  border-color: var(--p-primary-color);
+  background: var(--p-primary-50);
+}
+
+.day-label {
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .error-text {
-  color: var(--el-color-danger);
+  color: var(--p-red-500);
   font-size: 0.875rem;
   margin-top: 0.5rem;
+  display: block;
 }
 
 @media (max-width: 768px) {

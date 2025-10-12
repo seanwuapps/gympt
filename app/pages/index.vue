@@ -13,30 +13,60 @@ const signOut = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <el-card>
+  <div class="home-container">
+    <Card>
       <template #header>
         <div class="card-header">
-          <span>AI Training Companion (MVP)</span>
+          <h2>AI Training Companion (MVP)</h2>
         </div>
       </template>
-      <div class="space-y-4">
+      
+      <template #content>
         <div v-if="user">
-          <el-alert title="Welcome!" type="success" :closable="false">
+          <Message severity="success" :closable="false">
+            <strong>Welcome!</strong>
             <p>Signed in as: <strong>{{ user.email }}</strong></p>
-          </el-alert>
-          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <el-button type="primary" @click="$router.push('/profile')">
-              My Profile
-            </el-button>
-            <el-button @click="signOut">Sign out</el-button>
+          </Message>
+          <div class="button-group">
+            <Button label="My Profile" @click="$router.push('/profile')" />
+            <Button label="Sign out" severity="secondary" @click="signOut" />
           </div>
         </div>
         <div v-else>
           <p>Loading...</p>
         </div>
-      </div>
-    </el-card>
+      </template>
+    </Card>
   </div>
 </template>
+
+<style scoped>
+.home-container {
+  padding: 2rem 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+}
+</style>
 

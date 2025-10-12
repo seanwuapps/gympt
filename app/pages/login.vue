@@ -36,35 +36,94 @@ const signInWithOtp = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <el-card style="max-width: 400px; margin: 0 auto;">
+  <div class="login-container">
+    <Card class="login-card">
       <template #header>
         <div class="card-header">
-          <span>Sign In</span>
+          <h2>Sign In</h2>
         </div>
       </template>
-      <div class="space-y-4">
-        <!-- Google OAuth -->
-        <el-button type="primary" @click="signInWithGoogle" style="width: 100%;">
-          Sign in with Google
-        </el-button>
+      
+      <template #content>
+        <div class="login-content">
+          <!-- Google OAuth -->
+          <Button 
+            label="Sign in with Google" 
+            icon="pi pi-google"
+            @click="signInWithGoogle" 
+            class="w-full"
+          />
 
-        <el-divider>OR</el-divider>
+          <Divider align="center">
+            <span class="divider-text">OR</span>
+          </Divider>
 
-        <!-- Email OTP -->
-        <el-input
-          v-model="email"
-          type="email"
-          placeholder="Enter your email"
-          @keyup.enter="signInWithOtp"
-        />
-        <el-button @click="signInWithOtp" style="width: 100%;">
-          Sign in with Email
-        </el-button>
+          <!-- Email OTP -->
+          <div class="field">
+            <InputText
+              v-model="email"
+              type="email"
+              placeholder="Enter your email"
+              class="w-full"
+              @keyup.enter="signInWithOtp"
+            />
+          </div>
+          
+          <Button 
+            label="Sign in with Email" 
+            severity="secondary"
+            @click="signInWithOtp" 
+            class="w-full"
+          />
 
-        <el-alert v-if="message" :title="message" type="info" :closable="false" />
-      </div>
-    </el-card>
+          <Message v-if="message" severity="info" :closable="false">
+            {{ message }}
+          </Message>
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
+
+<style scoped>
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--p-surface-ground);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.field {
+  margin: 0;
+}
+
+.divider-text {
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+}
+</style>
 

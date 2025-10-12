@@ -2,33 +2,30 @@
   <div class="onboarding-step">
     <h2 class="step-title">Any injuries or limitations?</h2>
 
-    <el-form label-position="top">
-      <el-form-item label="Injury Flags (Optional)">
-        <el-input
+    <form>
+      <div class="field">
+        <label class="field-label">
+          <i class="pi pi-exclamation-triangle" style="color: var(--p-orange-500); margin-right: 0.5rem;"></i>
+          Injury Flags (Optional)
+        </label>
+        <Textarea
           v-model="injuryFlags"
-          type="textarea"
           :rows="3"
           :maxlength="300"
-          show-word-limit
           placeholder="e.g., Lower back pain, right knee issues, shoulder mobility..."
-        >
-          <template #prepend>
-            <el-icon><WarningFilled /></el-icon>
-          </template>
-        </el-input>
+          class="w-full"
+        />
+        <small class="char-count">{{ injuryFlags.length }}/300</small>
         <div class="help-text">
-          <el-text size="small" type="info">
-            This helps the AI avoid exercises that may aggravate your condition
-          </el-text>
+          <i class="pi pi-info-circle" style="margin-right: 0.25rem;"></i>
+          <small>This helps the AI avoid exercises that may aggravate your condition</small>
         </div>
-      </el-form-item>
-    </el-form>
+      </div>
+    </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { WarningFilled } from '@element-plus/icons-vue'
-
 const onboardingStore = useOnboardingStore()
 
 const injuryFlags = computed({
@@ -51,8 +48,40 @@ const injuryFlags = computed({
   text-align: center;
 }
 
-.help-text {
+.field {
+  margin-bottom: 2rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
   margin-top: 0.5rem;
+}
+
+.help-text {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--p-blue-50);
+  border-radius: var(--p-border-radius);
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
 }
 
 @media (max-width: 768px) {
