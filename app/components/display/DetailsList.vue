@@ -1,12 +1,11 @@
 <template>
   <ul class="details-list">
-    <li v-for="(detail, index) in details" :key="detail.label" class="details-list-item">
+    <li v-for="detail in details" :key="detail.label" class="details-list-item">
       <FieldRow :label="detail.label" :value="detail.value" :default-value="detail.defaultValue">
         <template v-if="detail.slot" #default>
           <slot :name="detail.slot" :value="detail.value" />
         </template>
       </FieldRow>
-      <Divider v-if="index < details.length - 1" />
     </li>
   </ul>
 </template>

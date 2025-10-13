@@ -157,3 +157,41 @@ body {
 .p-divider {
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Fix checkbox/radio button labels - remove white background */
+.day-button {
+  background: transparent !important;
+}
+
+.day-button.selected {
+  background: rgba(251, 146, 60, 0.1) !important;
+}
+
+.day-button label {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/* Fix Select dropdown options text color */
+.p-select-option,
+.p-dropdown-item {
+  background: transparent !important;
+}
+
+.p-select-option:not(.p-disabled):hover,
+.p-dropdown-item:not(.p-disabled):hover {
+  background: rgba(251, 146, 60, 0.1) !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.p-select-option.p-focus,
+.p-dropdown-item.p-focus {
+  background: rgba(251, 146, 60, 0.2) !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.p-select-option.p-selected,
+.p-dropdown-item.p-selected {
+  background: rgba(251, 146, 60, 0.15) !important;
+  color: var(--energy-orange) !important;
+}
