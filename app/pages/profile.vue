@@ -26,22 +26,29 @@
           <div v-if="!isEditing" class="profile-view">
             <FieldRow label="Experience Level" :value="profile.experienceLevel" />
             <Divider />
-            
-            <FieldRow label="Preferred Training Days" :value="profile.preferredTrainingDays.join(', ')" />
+
+            <FieldRow
+              label="Preferred Training Days"
+              :value="profile.preferredTrainingDays.join(', ')"
+            />
             <Divider />
-            
-            <FieldRow label="Goals" :value="formatGoals(profile.goals)" default-value="Not specified" />
+
+            <FieldRow
+              label="Goals"
+              :value="formatGoals(profile.goals)"
+              default-value="Not specified"
+            />
             <Divider />
-            
+
             <FieldRow label="Progression Pace" :value="profile.aggressiveness" />
             <Divider />
-            
+
             <FieldRow label="Injury Flags" :value="profile.injuryFlags" default-value="None" />
             <Divider />
-            
+
             <FieldRow label="Units" :value="profile.units" />
             <Divider />
-            
+
             <FieldRow label="Language" :value="profile.language" />
           </div>
 
@@ -62,15 +69,15 @@
               <div class="field">
                 <label class="field-label">Preferred Training Days</label>
                 <div class="day-selector">
-                  <div 
-                    v-for="day in days" 
+                  <div
+                    v-for="day in days"
                     :key="day"
                     class="day-button"
-                    :class="{ 'selected': editForm.preferredTrainingDays.includes(day) }"
+                    :class="{ selected: editForm.preferredTrainingDays.includes(day) }"
                   >
-                    <Checkbox 
-                      v-model="editForm.preferredTrainingDays" 
-                      :inputId="`edit-${day}`" 
+                    <Checkbox
+                      v-model="editForm.preferredTrainingDays"
+                      :inputId="`edit-${day}`"
                       :value="day"
                     />
                     <label :for="`edit-${day}`">{{ day }}</label>
@@ -138,7 +145,7 @@
 
         <div v-else class="no-profile">
           <div class="empty-state">
-            <i class="pi pi-user" style="font-size: 3rem; color: var(--p-text-muted-color);"></i>
+            <i class="pi pi-user" style="font-size: 3rem; color: var(--p-text-muted-color)"></i>
             <p>No profile found</p>
             <Button label="Create Profile" @click="$router.push('/onboarding')" />
           </div>
@@ -188,9 +195,7 @@ const unitsOptions = [
   { value: 'imperial', label: 'Imperial (lb/in)' },
 ]
 
-const languageOptions = [
-  { value: 'en', label: 'English' },
-]
+const languageOptions = [{ value: 'en', label: 'English' }]
 
 const goalOptions = [
   { value: 'strength', label: 'Build Strength', icon: '💪' },
@@ -210,7 +215,10 @@ onMounted(async () => {
 // Convert comma-separated string from DB to array for UI
 const parseGoals = (goals: string | null | undefined): string[] => {
   if (!goals) return []
-  return goals.split(',').map(g => g.trim()).filter(Boolean)
+  return goals
+    .split(',')
+    .map((g) => g.trim())
+    .filter(Boolean)
 }
 
 // Format goals array for display

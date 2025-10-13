@@ -60,6 +60,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
   css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
   fonts: {
     families: [{ name: 'Inter', provider: 'google' }],
   },
