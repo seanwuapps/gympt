@@ -1,10 +1,18 @@
 <template>
   <div class="profile-container">
-    <Card class="profile-card">
-      <template #header>
-        <div class="card-header">
-          <h2>My Profile</h2>
-          <Button v-if="!isEditing" label="Edit Profile" @click="startEdit" />
+    <Card title="My Profile">
+      <template #title>
+        <div class="">
+          <h2>
+            My Profile
+            <Button
+              v-if="!isEditing"
+              text
+              icon="pi pi-pencil"
+              aria-label="Edit Profile"
+              @click="startEdit"
+            />
+          </h2>
         </div>
       </template>
 
@@ -146,7 +154,7 @@ const saving = ref(false)
 // Data-driven profile details for view mode
 const profileDetails = computed(() => {
   if (!profile.value) return []
-  
+
   return [
     {
       label: 'Experience Level',
@@ -290,18 +298,6 @@ const saveChanges = async () => {
   padding: 2rem 1rem;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
 }
 
 .loading-state {
