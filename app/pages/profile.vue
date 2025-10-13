@@ -24,32 +24,7 @@
         <div v-else-if="profile">
           <!-- View Mode -->
           <div v-if="!isEditing" class="profile-view">
-            <FieldRow label="Experience Level" :value="profile.experienceLevel" />
-            <Divider />
-
-            <FieldRow
-              label="Preferred Training Days"
-              :value="profile.preferredTrainingDays.join(', ')"
-            />
-            <Divider />
-
-            <FieldRow
-              label="Goals"
-              :value="formatGoals(profile.goals)"
-              default-value="Not specified"
-            />
-            <Divider />
-
-            <FieldRow label="Progression Pace" :value="profile.aggressiveness" />
-            <Divider />
-
-            <FieldRow label="Injury Flags" :value="profile.injuryFlags" default-value="None" />
-            <Divider />
-
-            <FieldRow label="Units" :value="profile.units" />
-            <Divider />
-
-            <FieldRow label="Language" :value="profile.language" />
+            <FieldList :fields="profileFields" />
           </div>
 
           <!-- Edit Mode -->
@@ -167,6 +142,44 @@ const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
 
 const isEditing = ref(false)
 const saving = ref(false)
+
+// Data-driven profile fields for view mode
+const profileFields = computed(() => {
+  if (!profile.value) return []
+  
+  return [
+    {
+      label: 'Experience Level',
+      value: profile.value.experienceLevel,
+    },
+    {
+      label: 'Preferred Training Days',
+      value: profile.value.preferredTrainingDays.join(', '),
+    },
+    {
+      label: 'Goals',
+      value: formatGoals(profile.value.goals),
+      defaultValue: 'Not specified',
+    },
+    {
+      label: 'Progression Pace',
+      value: profile.value.aggressiveness,
+    },
+    {
+      label: 'Injury Flags',
+      value: profile.value.injuryFlags,
+      defaultValue: 'None',
+    },
+    {
+      label: 'Units',
+      value: profile.value.units,
+    },
+    {
+      label: 'Language',
+      value: profile.value.language,
+    },
+  ]
+})
 const editForm = ref<ProfileFormData>({
   goals: [],
   experienceLevel: 'beginner',
