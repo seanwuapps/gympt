@@ -24,7 +24,7 @@
         <div v-else-if="profile">
           <!-- View Mode -->
           <div v-if="!isEditing" class="profile-view">
-            <FieldList :fields="profileFields" />
+            <DetailsList :details="profileDetails" />
           </div>
 
           <!-- Edit Mode -->
@@ -143,8 +143,8 @@ const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
 const isEditing = ref(false)
 const saving = ref(false)
 
-// Data-driven profile fields for view mode
-const profileFields = computed(() => {
+// Data-driven profile details for view mode
+const profileDetails = computed(() => {
   if (!profile.value) return []
   
   return [
