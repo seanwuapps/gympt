@@ -24,46 +24,25 @@
         <div v-else-if="profile">
           <!-- View Mode -->
           <div v-if="!isEditing" class="profile-view">
-            <div class="profile-field">
-              <label>Experience Level</label>
-              <div class="field-value">{{ profile.experienceLevel }}</div>
-            </div>
+            <FieldRow label="Experience Level" :value="profile.experienceLevel" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Preferred Training Days</label>
-              <div class="field-value">{{ profile.preferredTrainingDays.join(', ') }}</div>
-            </div>
+            <FieldRow label="Preferred Training Days" :value="profile.preferredTrainingDays.join(', ')" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Goals</label>
-              <div class="field-value">{{ formatGoals(profile.goals) || 'Not specified' }}</div>
-            </div>
+            <FieldRow label="Goals" :value="formatGoals(profile.goals)" default-value="Not specified" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Progression Pace</label>
-              <div class="field-value">{{ profile.aggressiveness }}</div>
-            </div>
+            <FieldRow label="Progression Pace" :value="profile.aggressiveness" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Injury Flags</label>
-              <div class="field-value">{{ profile.injuryFlags || 'None' }}</div>
-            </div>
+            <FieldRow label="Injury Flags" :value="profile.injuryFlags" default-value="None" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Units</label>
-              <div class="field-value">{{ profile.units }}</div>
-            </div>
+            <FieldRow label="Units" :value="profile.units" />
             <Divider />
             
-            <div class="profile-field">
-              <label>Language</label>
-              <div class="field-value">{{ profile.language }}</div>
-            </div>
+            <FieldRow label="Language" :value="profile.language" />
           </div>
 
           <!-- Edit Mode -->
@@ -335,25 +314,6 @@ const saveChanges = async () => {
   padding: 0;
 }
 
-.profile-field {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 0;
-}
-
-.profile-field label {
-  font-weight: 600;
-  color: var(--p-text-color);
-  min-width: 200px;
-}
-
-.profile-field .field-value {
-  flex: 1;
-  text-align: right;
-  color: var(--p-text-muted-color);
-}
-
 .profile-edit {
   padding: 1rem 0;
 }
@@ -434,19 +394,6 @@ const saveChanges = async () => {
 @media (max-width: 768px) {
   .profile-container {
     padding: 1rem 0.5rem;
-  }
-  
-  .profile-field {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .profile-field label {
-    min-width: auto;
-  }
-  
-  .profile-field .field-value {
-    text-align: left;
   }
 }
 </style>

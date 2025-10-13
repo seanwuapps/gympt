@@ -23,7 +23,7 @@ const EnergyBoostDark = definePreset(Aura, {
       dark: {
         // Deep, modern dark surface (slate for cool, professional look)
         surface: {
-          0: '#ffffff',
+          0: '#000000',
           50: '{slate.50}',
           100: '{slate.100}',
           200: '{slate.200}',
@@ -56,22 +56,12 @@ const EnergyBoostDark = definePreset(Aura, {
 })
 
 export default defineNuxtConfig({
-  compatibilityDate: "2025-07-15",
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: [
-    "@nuxtjs/supabase",
-    "@nuxt/fonts",
-    "@primevue/nuxt-module",
-    "@pinia/nuxt"
-  ],
-  css: [
-    "primeicons/primeicons.css",
-    "~/assets/css/main.css"
-  ],
+  modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
+  css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
   fonts: {
-    families: [
-      { name: "Inter", provider: "google" }
-    ]
+    families: [{ name: 'Inter', provider: 'google' }],
   },
   primevue: {
     options: {
@@ -80,16 +70,16 @@ export default defineNuxtConfig({
         options: {
           darkModeSelector: 'class',
           cssLayer: false,
-        }
+        },
       },
       ripple: true,
     },
   },
   supabase: {
     redirectOptions: {
-      login: "/login",
-      callback: "/confirm",
-      exclude: ["/login", "/confirm"],
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/login', '/confirm'],
     },
   },
   vite: {
@@ -97,4 +87,4 @@ export default defineNuxtConfig({
       noExternal: ['primevue'],
     },
   },
-});
+})

@@ -121,6 +121,134 @@ export function useProfile() {
 - Lazy load heavy components not immediately visible
 - Code-split by route for optimal bundle sizes
 
+## Component Reusability
+
+### Extract Repeated Patterns
+- **Identify repeated UI patterns** across pages and components
+- **Create shared components** for patterns used 2+ times
+- **Prioritize reusability** - easier to update in one place
+- **Use generic naming** - avoid page-specific names for shared components
+
+### When to Extract a Component
+
+**Extract if:**
+- Pattern appears 2+ times in codebase
+- Pattern has consistent structure/behavior
+- Pattern will likely be used in future features
+- Updating the pattern requires changes in multiple places
+
+**Don't extract if:**
+- Pattern appears only once
+- Pattern is highly page-specific
+- Extraction adds unnecessary complexity
+- Pattern is likely to diverge in different contexts
+
+### Shared Component Patterns
+
+#### Display Components
+For read-only data display patterns:
+
+```vue
+<!-- components/display/FieldRow.vue -->
+<template>
+  <div class="field-row">
+    <label class="field-label">{{ label }}</label>
+    <div class="field-value">
+      <slot>{{ value }}</slot>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  label: string
+  value?: string | number
+}>()
+</script>
+```
+
+**Usage:**
+```vue
+<FieldRow label="Experience Level" :value="profile.experienceLevel" />
+<FieldRow label="Goals">
+  <span class="custom-formatting">{{ formatGoals(profile.goals) }}</span>
+</FieldRow>
+```
+
+#### Form Components
+For input patterns with consistent styling:
+
+```vue
+<!-- components/form/FormField.vue -->
+<template>
+  <div class="form-field">
+    <label class="field-label">{{ label }}</label>
+    <slot />
+    <small v-if="hint" class="field-hint">{{ hint }}</small>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  label: string
+  hint?: string
+}>()
+</script>
+```
+
+### Component Organization
+
+```
+components/
+├── display/          # Read-only display components
+│   ├── FieldRow.vue
+│   ├── StatCard.vue
+│   └── DataList.vue
+├── form/             # Form input components
+│   ├── FormField.vue
+│   ├── ChipGroup.vue
+│   └── RadioGroup.vue
+├── layout/           # Layout components
+│   ├── PageHeader.vue
+│   └── Section.vue
+└── [feature]/        # Feature-specific components
+    └── SessionRunner.vue
+```
+
+### Refactoring Guidelines
+
+1. **Identify the pattern** - Look for repeated markup/logic
+2. **Extract to component** - Create in appropriate directory
+3. **Add TypeScript types** - Props and emits interfaces
+4. **Add slots for flexibility** - Allow customization where needed
+5. **Update all usages** - Replace old pattern with new component
+6. **Test thoroughly** - Ensure all instances work correctly
+
+### Example Refactor
+
+**Before:**
+```vue
+<!-- Repeated in multiple places -->
+<div class="profile-field">
+  <label>Experience Level</label>
+  <div class="field-value">{{ profile.experienceLevel }}</div>
+</div>
+<Divider />
+```
+
+**After:**
+```vue
+<!-- components/display/FieldRow.vue created -->
+<FieldRow label="Experience Level" :value="profile.experienceLevel" />
+<Divider />
+```
+
+**Benefits:**
+- ✅ Update styling in one place
+- ✅ Consistent appearance across app
+- ✅ Easier to add features (icons, tooltips, etc.)
+- ✅ Reduced code duplication
+
 ## Best Practices
 
 1. **Single Responsibility** - Each component should do one thing well
@@ -129,3 +257,5 @@ export function useProfile() {
 4. **Reactive Patterns** - Use Vue's reactivity system, don't fight it
 5. **Avoid Deep Nesting** - Keep component trees shallow when possible
 6. **Test Boundaries** - Components should be testable in isolation
+7. **Reusability First** - Extract repeated patterns into shared components
+8. **Flexible Components** - Use slots for customization points
