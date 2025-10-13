@@ -25,7 +25,6 @@ const signOut = async () => {
         <div v-if="user">
           <Message severity="success" :closable="false">
             <strong>Welcome!</strong>
-            <pre>{{ user }}</pre>
             <p>
               Signed in as: <strong>{{ user.email }}</strong>
             </p>

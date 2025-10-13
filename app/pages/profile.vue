@@ -38,7 +38,7 @@
             
             <div class="profile-field">
               <label>Goals</label>
-              <div class="field-value">{{ profile.goals || 'Not specified' }}</div>
+              <div class="field-value">{{ formatGoals(profile.goals) || 'Not specified' }}</div>
             </div>
             <Divider />
             
@@ -101,13 +101,8 @@
 
               <div class="field">
                 <label class="field-label">Goals</label>
-                <Textarea
-                  v-model="editForm.goals"
-                  :rows="3"
-                  :maxlength="500"
-                  class="w-full"
-                />
-                <small class="char-count">{{ (editForm.goals || '').length }}/500</small>
+                <FormChipGroup v-model="editForm.goals" :options="goalOptions" />
+                <small class="help-text">Select all that apply</small>
               </div>
 
               <div class="field">
@@ -217,14 +212,37 @@ const languageOptions = [
   { value: 'en', label: 'English' },
 ]
 
+const goalOptions = [
+  { value: 'strength', label: 'Build Strength', icon: '💪' },
+  { value: 'muscle', label: 'Gain Muscle', icon: '🏋️' },
+  { value: 'weight_loss', label: 'Lose Weight', icon: '⚖️' },
+  { value: 'endurance', label: 'Improve Endurance', icon: '🏃' },
+  { value: 'flexibility', label: 'Increase Flexibility', icon: '🧘' },
+  { value: 'athletic', label: 'Athletic Performance', icon: '⚡' },
+  { value: 'health', label: 'General Health', icon: '❤️' },
+  { value: 'rehab', label: 'Rehabilitation', icon: '🩹' },
+]
+
 onMounted(async () => {
   await fetchProfile()
 })
 
+// Convert comma-separated string from DB to array for UI
+const parseGoals = (goals: string | null | undefined): string[] => {
+  if (!goals) return []
+  return goals.split(',').map(g => g.trim()).filter(Boolean)
+}
+
+// Format goals array for display
+const formatGoals = (goals: string | null | undefined): string => {
+  if (!goals) return ''
+  return goals
+}
+
 const startEdit = () => {
   if (profile.value) {
     editForm.value = {
-      goals: profile.value.goals || undefined,
+      goals: parseGoals(profile.value.goals),
       experienceLevel: profile.value.experienceLevel,
       preferredTrainingDays: [...profile.value.preferredTrainingDays],
       injuryFlags: profile.value.injuryFlags || undefined,
@@ -352,6 +370,14 @@ const saveChanges = async () => {
 
 .w-full {
   width: 100%;
+}
+
+.help-text {
+  display: block;
+  text-align: center;
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+  margin-top: 0.75rem;
 }
 
 .char-count {
