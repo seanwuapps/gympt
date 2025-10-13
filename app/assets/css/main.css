@@ -72,3 +72,88 @@ body {
 * {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
+
+/* Force dark theme on PrimeVue cards */
+.p-card {
+  background: var(--bg-secondary) !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.p-card .p-card-title,
+.p-card .p-card-header h2,
+.p-card .p-card-header h3 {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.p-card .p-card-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.p-card .p-card-content {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+/* Dark theme for all form inputs */
+.p-inputtext,
+.p-dropdown,
+.p-select,
+.p-textarea {
+  background: var(--bg-elevated) !important;
+  color: rgba(255, 255, 255, 0.87) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover,
+.p-select:not(.p-disabled):hover,
+.p-textarea:enabled:hover {
+  border-color: var(--energy-orange) !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-select:not(.p-disabled).p-focus,
+.p-textarea:enabled:focus {
+  border-color: var(--energy-orange) !important;
+  box-shadow: 0 0 0 0.2rem rgba(251, 146, 60, 0.25) !important;
+}
+
+/* Dark dropdown panels */
+.p-dropdown-panel,
+.p-select-panel {
+  background: var(--bg-elevated) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.p-dropdown-item,
+.p-select-option {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.p-dropdown-item:not(.p-disabled):hover,
+.p-select-option:not(.p-disabled):hover {
+  background: rgba(251, 146, 60, 0.1) !important;
+}
+
+.p-dropdown-item.p-focus,
+.p-select-option.p-focus {
+  background: rgba(251, 146, 60, 0.2) !important;
+}
+
+/* Dark checkboxes and radio buttons */
+.p-checkbox .p-checkbox-box,
+.p-radiobutton .p-radiobutton-box {
+  background: var(--bg-elevated) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-box:hover) .p-checkbox-box,
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-box:hover) .p-radiobutton-box {
+  border-color: var(--energy-orange) !important;
+}
+
+/* Dark dividers */
+.p-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
