@@ -182,6 +182,7 @@ const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
 const isEditing = ref(false)
 const saving = ref(false)
 const editForm = ref<ProfileFormData>({
+  goals: [],
   experienceLevel: 'beginner',
   preferredTrainingDays: [],
   aggressiveness: 'moderate',

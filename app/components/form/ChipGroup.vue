@@ -25,7 +25,7 @@ interface ChipOption {
 }
 
 interface Props {
-  modelValue: string[]
+  modelValue?: string[]
   options: ChipOption[]
 }
 
@@ -35,13 +35,14 @@ const emit = defineEmits<{
 }>()
 
 const isSelected = (value: string) => {
-  return props.modelValue.includes(value)
+  return props.modelValue?.includes(value) ?? false
 }
 
 const toggleOption = (value: string) => {
+  const currentValue = props.modelValue ?? []
   const newValue = isSelected(value)
-    ? props.modelValue.filter((v) => v !== value)
-    : [...props.modelValue, value]
+    ? currentValue.filter((v) => v !== value)
+    : [...currentValue, value]
   emit('update:modelValue', newValue)
 }
 </script>

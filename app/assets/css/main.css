@@ -1,9 +1,41 @@
 /* Global styles for AI Training Companion */
 
+/* Force dark mode globally */
+html {
+  background-color: #020617;
+  color-scheme: dark;
+}
+
 :root {
   /* Font family */
   --font-family:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Dark mode energy colors */
+  --energy-orange: #fb923c;
+  --energy-orange-hover: #fdba74;
+  --energy-orange-active: #fed7aa;
+  
+  /* Dark backgrounds */
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-elevated: #1e293b;
+  
+  /* Energy gradient for dark mode */
+  --energy-gradient: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  --energy-glow: 0 0 20px rgba(251, 146, 60, 0.3);
+  
+  /* Success (green) */
+  --success-color: #34d399;
+  --success-bg: rgba(52, 211, 153, 0.1);
+  
+  /* Warning (amber) */
+  --warning-color: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.1);
+  
+  /* Danger (red) */
+  --danger-color: #f87171;
+  --danger-bg: rgba(248, 113, 113, 0.1);
 }
 
 body {
@@ -12,4 +44,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
+  background-color: var(--bg-primary);
+  color: rgba(255, 255, 255, 0.87);
+}
+
+/* Energetic glow on primary buttons */
+.p-button-primary {
+  box-shadow: 0 4px 14px 0 rgba(251, 146, 60, 0.39);
+  transition: all 0.2s ease;
+}
+
+.p-button-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(251, 146, 60, 0.5);
+  transform: translateY(-1px);
+}
+
+.p-button-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Glowing selected chips */
+.chip.selected {
+  box-shadow: var(--energy-glow);
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
