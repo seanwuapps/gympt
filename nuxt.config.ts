@@ -66,11 +66,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
-  css: ['primeicons/primeicons.css', '~/assets/css/main.css'],
+  css: ['primeicons/primeicons.css', '~/assets/css/main.css', '~/assets/css/grid.css'],
   components: [
     {
       path: '~/components',
       pathPrefix: false,
+      global: true,
     },
   ],
   fonts: {

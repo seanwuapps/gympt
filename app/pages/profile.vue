@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-container">
+  <div class="container">
     <Card title="My Profile">
       <template #title>
         <div class="">
@@ -51,20 +51,15 @@
 
               <div class="field">
                 <label class="field-label">Preferred Training Days</label>
-                <div class="day-selector">
-                  <div
+                <div class="day-cards-grid">
+                  <CheckboxCard
                     v-for="day in days"
                     :key="day"
-                    class="day-button"
-                    :class="{ selected: editForm.preferredTrainingDays.includes(day) }"
-                  >
-                    <Checkbox
-                      v-model="editForm.preferredTrainingDays"
-                      :inputId="`edit-${day}`"
-                      :value="day"
-                    />
-                    <label :for="`edit-${day}`">{{ day }}</label>
-                  </div>
+                    v-model="daySelections[day]"
+                    :label="day"
+                    :inputId="`edit-${day}`"
+                    @update:modelValue="updateTrainingDays"
+                  />
                 </div>
               </div>
 
@@ -150,6 +145,17 @@ const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
 
 const isEditing = ref(false)
 const saving = ref(false)
+
+// Day selections for CheckboxCard components
+const daySelections = ref<Record<string, boolean>>({
+  Mon: false,
+  Tue: false,
+  Wed: false,
+  Thu: false,
+  Fri: false,
+  Sat: false,
+  Sun: false,
+})
 
 // Data-driven profile details for view mode
 const profileDetails = computed(() => {
@@ -248,6 +254,13 @@ const formatGoals = (goals: string | null | undefined): string => {
   return goals
 }
 
+const updateTrainingDays = () => {
+  // Sync daySelections to editForm.preferredTrainingDays
+  editForm.value.preferredTrainingDays = Object.keys(daySelections.value).filter(
+    (day) => daySelections.value[day]
+  )
+}
+
 const startEdit = () => {
   if (profile.value) {
     editForm.value = {
@@ -259,6 +272,10 @@ const startEdit = () => {
       language: profile.value.language,
       aggressiveness: profile.value.aggressiveness,
     }
+    // Initialize day selections from preferredTrainingDays
+    days.forEach((day) => {
+      daySelections.value[day] = profile.value!.preferredTrainingDays.includes(day)
+    })
     isEditing.value = true
   }
 }
@@ -292,125 +309,3 @@ const saveChanges = async () => {
   }
 }
 </script>
-
-<style scoped>
-.profile-container {
-  padding: 2rem 1rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.loading-state {
-  padding: 1rem 0;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.no-profile {
-  padding: 2rem 0;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem 1rem;
-  text-align: center;
-}
-
-.empty-state p {
-  color: var(--p-text-muted-color);
-  font-size: 1.125rem;
-  margin: 0;
-}
-
-.profile-view {
-  padding: 0;
-}
-
-.profile-edit {
-  padding: 1rem 0;
-}
-
-.field {
-  margin-bottom: 1.5rem;
-}
-
-.field-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.help-text {
-  display: block;
-  text-align: center;
-  color: var(--p-text-muted-color);
-  font-size: 0.875rem;
-  margin-top: 0.75rem;
-}
-
-.char-count {
-  display: block;
-  text-align: right;
-  color: var(--p-text-muted-color);
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-}
-
-.day-selector {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.day-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border: 2px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.day-button:hover {
-  border-color: var(--p-primary-color);
-  background: var(--p-surface-50);
-}
-
-.day-button.selected {
-  border-color: var(--p-primary-color);
-  background: var(--p-primary-50);
-}
-
-.day-button label {
-  cursor: pointer;
-  font-weight: 600;
-  margin: 0;
-}
-
-.edit-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--p-surface-border);
-  margin-top: 1rem;
-}
-
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 1rem 0.5rem;
-  }
-}
-</style>

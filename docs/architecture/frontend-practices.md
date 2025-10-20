@@ -249,6 +249,147 @@ components/
 - ✅ Easier to add features (icons, tooltips, etc.)
 - ✅ Reduced code duplication
 
+## Styling Standards
+
+### CSS Units and Values
+
+**CRITICAL RULES:**
+- ❌ **NO magic numbers** - Never use hardcoded numeric values without context
+- ❌ **NO `px` units** - Always use `rem` for scalability and accessibility
+- ❌ **NO arbitrary colors** - Only use design token variables
+
+### Design Tokens
+
+All spacing, sizing, and colors MUST use global CSS variables (design tokens):
+
+**Spacing:**
+```css
+/* ❌ WRONG - Magic numbers and px */
+.component {
+  padding: 16px;
+  margin: 24px;
+  gap: 8px;
+}
+
+/* ✅ CORRECT - Design tokens with rem */
+.component {
+  padding: 1rem;           /* Base spacing unit */
+  margin: 1.5rem;          /* 1.5x base unit */
+  gap: 0.5rem;             /* 0.5x base unit */
+}
+```
+
+**Colors:**
+```css
+/* ❌ WRONG - Arbitrary color values */
+.component {
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #333333;
+}
+
+/* ✅ CORRECT - PrimeVue design tokens */
+.component {
+  background: var(--p-surface-900);
+  color: var(--p-text-color);
+  border: 1px solid var(--p-surface-border);
+}
+```
+
+**Sizing:**
+```css
+/* ❌ WRONG - Hardcoded px values */
+.button {
+  font-size: 14px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+/* ✅ CORRECT - Relative units and tokens */
+.button {
+  font-size: 0.875rem;
+  height: 2.5rem;
+  border-radius: var(--p-border-radius);
+}
+```
+
+### Available Design Tokens
+
+**PrimeVue Theme Tokens:**
+- `--p-surface-{0|50|100|200|...|950}` - Surface colors
+- `--p-primary-color` - Primary brand color
+- `--p-text-color` - Primary text color
+- `--p-text-muted-color` - Secondary/muted text
+- `--p-surface-border` - Border colors
+- `--p-border-radius` - Standard border radius
+- `--p-focus-ring` - Focus state styling
+
+**Custom Project Tokens:**
+Define project-specific tokens in `assets/css/main.css`:
+```css
+:root {
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+}
+```
+
+### When to Create New Tokens
+
+**Create a new token when:**
+- Value is used 2+ times across components
+- Value represents a semantic concept (e.g., "card-padding")
+- Value needs to be consistent across the app
+- Value might need theme-specific variations
+
+**Example:**
+```css
+/* In main.css */
+:root {
+  --card-padding: 1rem;
+  --card-gap: 0.75rem;
+  --input-height: 2.5rem;
+}
+
+/* In component */
+.custom-card {
+  padding: var(--card-padding);
+  gap: var(--card-gap);
+}
+```
+
+### Rem Conversion Reference
+
+Base font size: 16px (browser default)
+
+| rem    | px  |
+|--------|-----|
+| 0.25   | 4   |
+| 0.5    | 8   |
+| 0.75   | 12  |
+| 1      | 16  |
+| 1.25   | 20  |
+| 1.5    | 24  |
+| 2      | 32  |
+| 3      | 48  |
+
+### Enforcement
+
+**Code Review Checklist:**
+- [ ] No hardcoded pixel values
+- [ ] No magic numbers without token variables
+- [ ] No arbitrary color hex codes
+- [ ] All spacing uses rem units
+- [ ] All colors use design tokens
+
 ## Best Practices
 
 1. **Single Responsibility** - Each component should do one thing well
@@ -259,3 +400,5 @@ components/
 6. **Test Boundaries** - Components should be testable in isolation
 7. **Reusability First** - Extract repeated patterns into shared components
 8. **Flexible Components** - Use slots for customization points
+9. **Design Tokens Only** - Use CSS variables for all values, no magic numbers
+10. **Rem Units Always** - Use rem for scalability, never px
