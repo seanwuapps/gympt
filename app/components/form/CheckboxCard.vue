@@ -1,25 +1,17 @@
 <template>
-  <Card
-    class="checkbox-card"
-    :class="{ selected: checked }"
-    @click="handleClick"
-    role="button"
-    tabindex="0"
-    @keydown.enter.prevent="handleClick"
-    @keydown.space.prevent="handleClick"
-  >
-    <div class="checkbox-wrapper">
-      <Checkbox v-model="checked" :inputId="inputId" :binary="true" @click.stop />
-    </div>
-    <div class="label-wrapper">
+  <span class="checkbox-card">
+    <span class="checkbox-mark">
+      <input type="checkbox" v-model="checked" :inputId="inputId" :binary="true" @click.stop />
+    </span>
+    <span class="checkbox-label">
       <label :for="inputId" class="card-label" @click.stop="handleClick">
         {{ label }}
       </label>
-      <div v-if="description" class="card-description">
+      <span v-if="description" class="card-description">
         {{ description }}
-      </div>
-    </div>
-  </Card>
+      </span>
+    </span>
+  </span>
 </template>
 
 <script setup lang="ts">
@@ -42,62 +34,23 @@ const handleClick = () => {
 
 <style scoped>
 .checkbox-card {
+  display: inline-block;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  box-shadow: 0 0 0 1px #000;
   padding: 1rem;
-  border: 2px solid var(--p-surface-700);
-  border-radius: var(--p-border-radius);
-  background: var(--p-surface-900);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 100px;
+  border: 1px solid red;
 }
 
-.checkbox-card:hover {
-  border-color: var(--p-surface-600);
-  background: var(--p-surface-800);
+.checkbox-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-.checkbox-card:focus {
-  outline: 2px solid var(--p-primary-color);
-  outline-offset: 2px;
-}
-
-.checkbox-card.selected {
-  border-color: var(--p-primary-color);
-  background: var(--p-surface-800);
-}
-
-.checkbox-wrapper {
-  display: flex;
-  align-items: flex-start;
-}
-
-.label-wrapper {
+.checkbox-label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.card-label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--p-text-color);
-  cursor: pointer;
-  user-select: none;
-}
-
-.card-description {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  line-height: 1.4;
-}
-
-/* Ensure checkbox doesn't shrink */
-.checkbox-wrapper :deep(.p-checkbox) {
-  flex-shrink: 0;
 }
 </style>

@@ -3,7 +3,9 @@
     <ClientOnly>
       <Toast />
       <NuxtRouteAnnouncer />
-      <NuxtPage />
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </ClientOnly>
   </div>
 </template>
