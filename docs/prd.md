@@ -27,15 +27,28 @@ A mobile‑first AI training companion that generates and adapts training plans 
 - Onboarding
   - Collect goals, experience, schedule (days per week), available equipment, injury flags, units, language.
   - Create profile and default preferences.
+  - Generate initial training plan as final onboarding step.
+- AI Training Plan Generation
+  - Generate multi-week high-level training plan based on user profile (goals, experience, preferred training days, equipment, injuries).
+  - AI determines plan duration based on fitness level and goals.
+  - Plan maps each preferred training day to training focus/modality (e.g., Mon: Chest, Tue: Back+Cardio, Wed: Rest).
+  - Plans stored in DB; user can generate multiple plans and switch between them.
+  - Only one active plan at a time; user can switch active plan mid-cycle.
+  - Plan management: view all plans, set active plan, delete plans.
+  - Entry points: final onboarding step, home page (if no active plan), dedicated plan management page.
+  - High-level plan not affected by individual session feedback.
 - AI Session Generation
-  - For a selected day/modality, generate a session comprised of AI-generated exercises with targets per modality.
+  - For a selected day from active training plan, generate detailed session with AI-generated exercises and targets.
+  - Session generation uses plan day focus + user profile + recent performance history.
   - Substitutions available on-demand via AI given constraints.
+  - Session targets adapt based on previous session feedback (load/volume progression).
 - Session Runner
   - Show one exercise at a time with target info and controls to log actual values.
   - Auto rest timer after set completion; allow skip/replace exercise.
 - Feedback & Adaptation
   - End-of-session questionnaire: session RPE, perceived difficulty, notes, soreness/injury flags.
   - Next session targets adjusted via deterministic rules per modality; safety caps on load/volume progression.
+  - Feedback affects future session generation, not the high-level training plan.
 - Reports
   - Session report: volume or modality metrics, e1RM (strength), adherence, notes.
   - Weekly report: total volume, e1RM trend, PRs, adherence, average session RPE, duration.
