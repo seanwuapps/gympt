@@ -130,11 +130,83 @@
         </div>
       </template>
     </Card>
+
+    <!-- Plan Regeneration Prompt Dialog -->
+    <Dialog
+      v-model:visible="showPlanRegenerationPrompt"
+      modal
+      :header="getDialogHeader()"
+      :style="{ width: '90vw', maxWidth: '30rem' }"
+      :closable="!generatingPlan"
+    >
+      <!-- Loading State -->
+      <div v-if="generatingPlan" class="prompt-loading">
+        <ProgressSpinner />
+        <p class="loading-message">Creating your new training plan...</p>
+      </div>
+
+      <!-- Success State -->
+      <div v-else-if="generatedPlanId" class="prompt-success">
+        <div class="success-icon">
+          <i class="pi pi-check-circle" />
+        </div>
+        <p class="success-message">Your new training plan has been generated and activated!</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="generationError" class="prompt-error">
+        <div class="error-icon">
+          <i class="pi pi-exclamation-triangle" />
+        </div>
+        <p class="error-message">{{ generationError }}</p>
+      </div>
+
+      <!-- Prompt State -->
+      <div v-else class="prompt-content">
+        <p class="prompt-message">
+          Your profile has changed significantly. Would you like to generate a new training plan?
+        </p>
+
+        <div v-if="profileChangeSummary.length > 0" class="changes-summary">
+          <p class="summary-label">What changed:</p>
+          <ul>
+            <li v-for="change in profileChangeSummary" :key="change">
+              {{ change }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <template #footer>
+        <!-- Initial Prompt Buttons -->
+        <div v-if="!generatingPlan && !generatedPlanId && !generationError">
+          <Button label="Keep Current Plan" @click="dismissPrompt" text />
+          <Button label="Generate New Plan" @click="generateNewPlan" icon="pi pi-refresh" />
+        </div>
+
+        <!-- Success Buttons -->
+        <div v-else-if="generatedPlanId">
+          <Button label="Close" @click="dismissPrompt" text />
+          <Button label="View Plan" @click="viewGeneratedPlan" icon="pi pi-eye" />
+        </div>
+
+        <!-- Error Buttons -->
+        <div v-else-if="generationError">
+          <Button label="Close" @click="dismissPrompt" text />
+          <Button label="Try Again" @click="retryGeneration" icon="pi pi-refresh" />
+        </div>
+      </template>
+    </Dialog>
+
+    <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ProfileFormData } from '~/composables/useProfile'
+import type { Profile } from '../../db/schema'
+import { detectSignificantProfileChanges, getChangeSummary } from '~/utils/profile-changes'
+import { usePlansStore } from '~/stores/plans'
 
 definePageMeta({
   middleware: 'auth',
@@ -142,9 +214,18 @@ definePageMeta({
 
 const toast = useToast()
 const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
+const plansStore = usePlansStore()
 
 const isEditing = ref(false)
 const saving = ref(false)
+
+// Plan regeneration prompt state
+const showPlanRegenerationPrompt = ref(false)
+const profileChangeSummary = ref<string[]>([])
+const oldProfileSnapshot = ref<Profile | null>(null)
+const generatingPlan = ref(false)
+const generatedPlanId = ref<string | null>(null)
+const generationError = ref<string | null>(null)
 
 // Day selections for CheckboxCard components
 const daySelections = ref<Record<string, boolean>>({
@@ -237,6 +318,8 @@ const goalOptions = [
 
 onMounted(async () => {
   await fetchProfile()
+  // Fetch plans to check if user has active plan
+  await plansStore.fetchPlans()
 })
 
 // Convert comma-separated string from DB to array for UI
@@ -287,8 +370,11 @@ const cancelEdit = () => {
 const saveChanges = async () => {
   saving.value = true
 
+  // Capture old profile before saving
+  oldProfileSnapshot.value = profile.value ? { ...profile.value } : null
+
   try {
-    await saveProfile(editForm.value)
+    const updatedProfile = await saveProfile(editForm.value)
     isEditing.value = false
 
     toast.add({
@@ -297,6 +383,33 @@ const saveChanges = async () => {
       detail: 'Your changes have been saved successfully.',
       life: 3000,
     })
+
+    // Check if we should prompt for plan regeneration
+    if (oldProfileSnapshot.value && updatedProfile) {
+      const hasSignificantChanges = detectSignificantProfileChanges(
+        oldProfileSnapshot.value,
+        updatedProfile
+      )
+
+      console.log('[Profile] Checking for plan regeneration prompt:', {
+        hasSignificantChanges,
+        hasActivePlan: plansStore.hasActivePlan,
+        plansCount: plansStore.plans.length,
+      })
+
+      // Ensure plans are loaded to check for active plan
+      if (plansStore.plans.length === 0) {
+        await plansStore.fetchPlans()
+      }
+
+      if (hasSignificantChanges && plansStore.hasActivePlan) {
+        profileChangeSummary.value = getChangeSummary(oldProfileSnapshot.value, updatedProfile)
+        showPlanRegenerationPrompt.value = true
+        console.log('[Profile] Showing plan regeneration prompt with changes:', profileChangeSummary.value)
+      } else {
+        console.log('[Profile] Not showing prompt - conditions not met')
+      }
+    }
   } catch (err: any) {
     toast.add({
       severity: 'error',
@@ -308,4 +421,165 @@ const saveChanges = async () => {
     saving.value = false
   }
 }
+
+// Plan regeneration prompt handlers
+function getDialogHeader() {
+  if (generatingPlan.value) return 'Generating Plan'
+  if (generatedPlanId.value) return 'Plan Generated!'
+  if (generationError.value) return 'Generation Failed'
+  return 'Profile Updated'
+}
+
+async function generateNewPlan() {
+  generatingPlan.value = true
+  generationError.value = null
+
+  try {
+    // Generate the plan directly
+    const newPlan = await plansStore.generatePlan()
+
+    if (newPlan) {
+      generatingPlan.value = false
+      generatedPlanId.value = newPlan.id
+    }
+  } catch (err: any) {
+    generatingPlan.value = false
+    generationError.value = err.message || 'Failed to generate plan. Please try again.'
+  }
+}
+
+function retryGeneration() {
+  generationError.value = null
+  generateNewPlan()
+}
+
+function viewGeneratedPlan() {
+  showPlanRegenerationPrompt.value = false
+  // Reset state
+  generatedPlanId.value = null
+  generationError.value = null
+  // Navigate to plans page to view the new plan
+  navigateTo('/plans')
+}
+
+function dismissPrompt() {
+  showPlanRegenerationPrompt.value = false
+  // Reset state
+  generatedPlanId.value = null
+  generationError.value = null
+
+  if (!generatedPlanId.value && !generationError.value) {
+    toast.add({
+      severity: 'info',
+      summary: 'Plan Unchanged',
+      detail: 'You can generate a new plan anytime from the Plans page',
+      life: 3000,
+    })
+  }
+}
 </script>
+
+<style scoped>
+.prompt-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.prompt-message {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.changes-summary {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  padding: var(--spacing-md);
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.changes-summary ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.changes-summary li {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 0.25rem;
+}
+
+.changes-summary li:last-child {
+  margin-bottom: 0;
+}
+
+/* Loading state */
+.prompt-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) 0;
+}
+
+.loading-message {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin: 0;
+}
+
+/* Success state */
+.prompt-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) 0;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: var(--p-green-500);
+}
+
+.success-message {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Error state */
+.prompt-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) 0;
+}
+
+.error-icon {
+  font-size: 3rem;
+  color: var(--p-red-500);
+}
+
+.error-message {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+</style>

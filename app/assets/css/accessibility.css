@@ -1,0 +1,205 @@
+/**
+ * Accessibility Enhancements for WCAG AA Compliance
+ * 
+ * This file ensures all text meets WCAG AA contrast requirements:
+ * - Normal text: minimum 4.5:1 contrast ratio
+ * - Large text (18pt+): minimum 3:1 contrast ratio
+ * - Interactive elements: minimum 4.5:1 contrast ratio
+ */
+
+/* Override PrimeVue text colors for better contrast */
+:root {
+  /* Enhanced text color overrides */
+  --p-text-color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+  --p-text-muted-color: var(--text-muted-contrast, rgba(255, 255, 255, 0.65)) !important;
+  --p-text-hover-muted-color: var(--text-secondary-contrast, rgba(255, 255, 255, 0.78)) !important;
+}
+
+/* Ensure all body text meets contrast requirements */
+body {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95));
+}
+
+/* Enhanced contrast for muted/secondary text elements */
+.user-email,
+.meta-item,
+.stat-item,
+.day-name,
+.week-label,
+.p-text-secondary {
+  color: var(--text-muted-contrast, rgba(255, 255, 255, 0.65)) !important;
+}
+
+/* Enhanced contrast for primary action text buttons */
+.p-button-text.p-button-primary,
+.p-button-text:not(.p-button-secondary):not(.p-button-danger) {
+  color: var(--primary-text-contrast, #d4ff00) !important;
+}
+
+.p-button-text.p-button-primary:hover,
+.p-button-text:not(.p-button-secondary):not(.p-button-danger):hover {
+  color: var(--primary-hover-contrast, #e5ff33) !important;
+}
+
+/* Enhanced contrast for links */
+a {
+  color: var(--primary-text-contrast, #d4ff00);
+}
+
+a:hover {
+  color: var(--primary-hover-contrast, #e5ff33);
+}
+
+/* Ensure form labels have sufficient contrast */
+label,
+.p-label {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for placeholder text */
+::placeholder {
+  color: var(--text-muted-contrast, rgba(255, 255, 255, 0.65)) !important;
+  opacity: 1;
+}
+
+/* Enhanced contrast for disabled text */
+.p-disabled,
+[disabled] {
+  color: var(--text-disabled-contrast, rgba(255, 255, 255, 0.45)) !important;
+}
+
+/* Ensure icons have sufficient contrast */
+.pi,
+.p-icon {
+  color: inherit;
+}
+
+/* Enhanced contrast for card content */
+.p-card-content {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95));
+}
+
+/* Enhanced contrast for headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for table headers */
+th,
+.p-datatable-thead > tr > th {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for menu items */
+.p-menuitem-text,
+.p-menuitem-icon {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for tabs */
+.p-tab,
+.p-tablist-tab-list button {
+  color: var(--text-muted-contrast, rgba(255, 255, 255, 0.65)) !important;
+}
+
+.p-tab.p-tab-active,
+.p-tablist-tab-list button[aria-selected="true"] {
+  color: var(--primary-text-contrast, #d4ff00) !important;
+}
+
+/* Enhanced contrast for badges */
+.p-badge {
+  font-weight: 600;
+}
+
+/* Enhanced contrast for toast messages */
+.p-toast-message-text {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--primary-text-contrast, #d4ff00);
+  outline-offset: 2px;
+}
+
+/* Enhanced contrast for dialog headers */
+.p-dialog-header,
+.p-dialog-title {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for dropdown items */
+.p-select-option,
+.p-dropdown-item {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Enhanced contrast for input fields */
+.p-inputtext,
+.p-textarea {
+  color: var(--text-primary-contrast, rgba(255, 255, 255, 0.95)) !important;
+}
+
+/* Ensure sufficient contrast for error messages */
+.p-error,
+.p-invalid {
+  color: #ff6b6b !important; /* Bright red with good contrast */
+}
+
+/* Enhanced contrast for success messages */
+.p-success {
+  color: #51cf66 !important; /* Bright green with good contrast */
+}
+
+/* Enhanced contrast for warning messages */
+.p-warning {
+  color: #ffd43b !important; /* Bright yellow with good contrast */
+}
+
+/* Enhanced contrast for info messages */
+.p-info {
+  color: #74c0fc !important; /* Bright blue with good contrast */
+}
+
+/* Fix specific component contrast issues */
+
+/* Day labels in schedule cards - these are the FRI, MON, SAT, etc. labels */
+/* Note: Removed global override - components handle their own contrast based on background */
+
+/* Meta items (12 weeks, dates, etc.) */
+.meta-item,
+.plan-meta .meta-item,
+[class*="meta-"] {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Week labels */
+.week-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* View Details and similar text buttons */
+.p-button-text,
+.p-button.p-button-text {
+  color: #d4ff00 !important;
+}
+
+.p-button-text:hover,
+.p-button.p-button-text:hover {
+  color: #e5ff33 !important;
+}
+
+/* Ensure all text on dark cards has good contrast */
+.p-card {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Schedule items and day cards have light backgrounds, so they need dark text */
+/* Component styles handle this - no global override needed */
+
+/* Training Schedule heading */
+.plan-schedule h4,
+[class*="schedule"] h4 {
+  color: rgba(255, 255, 255, 0.95) !important;
+}

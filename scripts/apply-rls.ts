@@ -25,15 +25,31 @@ async function applyRLS() {
 
   try {
     console.log('📄 Reading RLS policies...')
-    const rlsSQL = readFileSync(
-      join(__dirname, '../db/migrations/0001_rls_policies.sql'),
-      'utf-8'
-    )
+    const rlsFiles = [
+      '0001_rls_policies.sql',
+      '0003_training_plans_rls.sql'
+    ]
 
-    console.log('🔐 Applying RLS policies...')
-    await client.unsafe(rlsSQL)
+    for (const file of rlsFiles) {
+      console.log(`🔐 Applying ${file}...`)
+      try {
+        const rlsSQL = readFileSync(
+          join(__dirname, '../db/migrations', file),
+          'utf-8'
+        )
+        await client.unsafe(rlsSQL)
+        console.log(`✅ ${file} applied successfully!`)
+      } catch (error: any) {
+        // Ignore "already exists" errors for idempotency
+        if (error.message?.includes('already exists')) {
+          console.log(`ℹ️  ${file} already applied, skipping...`)
+        } else {
+          throw error
+        }
+      }
+    }
 
-    console.log('✅ RLS policies applied successfully!')
+    console.log('✅ All RLS policies applied successfully!')
   } catch (error) {
     console.error('❌ Error applying RLS policies:', error)
     process.exit(1)

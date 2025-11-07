@@ -20,6 +20,17 @@
   --z-bottom-nav: 1000;
   --z-modal: 2000;
   --z-toast: 3000;
+  
+  /* Accessibility: Enhanced Contrast Colors for WCAG AA Compliance */
+  /* These override PrimeVue defaults to ensure minimum 4.5:1 contrast ratio */
+  --text-primary-contrast: rgba(255, 255, 255, 0.95);        /* ~19:1 on dark bg */
+  --text-secondary-contrast: rgba(255, 255, 255, 0.78);      /* ~11:1 on dark bg */
+  --text-muted-contrast: rgba(255, 255, 255, 0.65);          /* ~7:1 on dark bg */
+  --text-disabled-contrast: rgba(255, 255, 255, 0.45);       /* ~4.5:1 on dark bg */
+  
+  /* Primary color with enhanced contrast for text buttons */
+  --primary-text-contrast: #d4ff00;                          /* Brighter lime for better contrast */
+  --primary-hover-contrast: #e5ff33;                         /* Even brighter on hover */
 }
 
 html {

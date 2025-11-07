@@ -6,6 +6,10 @@ definePageMeta({
 const supabase = useSupabaseClient()
 const email = ref('')
 const message = ref('')
+const config = useRuntimeConfig()
+
+// Check if we're in development mode
+const isDev = process.dev
 
 const signInWithGoogle = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
@@ -33,6 +37,29 @@ const signInWithOtp = async () => {
     message.value = 'Check your email for the login link!'
   }
 }
+
+// Fake sign-in for development/demo purposes
+const signInFake = async () => {
+  try {
+    // Create a fake session in localStorage to bypass auth
+    const fakeUser = {
+      id: 'fake-user-' + Date.now(),
+      email: 'demo@gympt.app',
+      user_metadata: {
+        full_name: 'Demo User'
+      },
+      created_at: new Date().toISOString()
+    }
+    
+    // Store fake user in localStorage
+    localStorage.setItem('fake-auth-user', JSON.stringify(fakeUser))
+    
+    // Redirect to home
+    await navigateTo('/')
+  } catch (error: any) {
+    message.value = `Error: ${error.message}`
+  }
+}
 </script>
 
 <template>
@@ -46,6 +73,20 @@ const signInWithOtp = async () => {
       
       <template #content>
         <div class="login-content">
+          <!-- Fake Sign In (Development Only) -->
+          <Button 
+            v-if="isDev"
+            label="🎭 Demo Sign In (No Account Required)" 
+            icon="pi pi-bolt"
+            @click="signInFake" 
+            class="w-full"
+            severity="success"
+          />
+
+          <Divider v-if="isDev" align="center">
+            <span class="divider-text">OR USE REAL AUTH</span>
+          </Divider>
+
           <!-- Google OAuth -->
           <Button 
             label="Sign in with Google" 

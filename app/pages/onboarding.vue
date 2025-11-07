@@ -10,9 +10,14 @@
           <OnboardingStep1 v-if="onboardingStore.currentStep === 0" />
           <OnboardingStep2 v-if="onboardingStore.currentStep === 1" />
           <OnboardingStep3 v-if="onboardingStore.currentStep === 2" />
+          <OnboardingStep4
+            v-if="onboardingStore.currentStep === 3"
+            @plan-generated="handlePlanGenerated"
+            @skip="handleSkipPlan"
+          />
         </div>
 
-        <div class="step-actions">
+        <div class="step-actions" v-if="onboardingStore.currentStep < 3">
           <Button
             v-if="onboardingStore.currentStep > 0"
             label="Back"
@@ -28,13 +33,13 @@
           />
           <Button
             v-if="onboardingStore.currentStep === 2"
-            label="Complete Setup"
+            label="Next: Generate Plan"
             :loading="saving"
-            @click="handleComplete"
+            @click="handleSaveAndContinue"
           />
         </div>
 
-        <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 3</div>
+        <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 4</div>
       </template>
     </Card>
   </div>
@@ -54,7 +59,12 @@ const onboardingStore = useOnboardingStore()
 
 const saving = ref(false)
 
-const stepItems = ref([{ label: 'Basics' }, { label: 'Goals' }, { label: 'Safety' }])
+const stepItems = ref([
+  { label: 'Basics' },
+  { label: 'Goals' },
+  { label: 'Safety' },
+  { label: 'Training Plan' }
+])
 
 // Load progress from localStorage on mount
 onMounted(() => {
@@ -78,12 +88,11 @@ const handleBack = () => {
   onboardingStore.previousStep()
 }
 
-const handleComplete = async () => {
+const handleSaveAndContinue = async () => {
   saving.value = true
 
   try {
     await saveProfile(onboardingStore.formData as ProfileFormData)
-    onboardingStore.clearProgress()
 
     // Clear the profile check cache so middleware knows profile exists
     const hasProfile = useState<boolean | null>('user-has-profile')
@@ -91,13 +100,13 @@ const handleComplete = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Profile Created!',
-      detail: 'Your training profile has been saved successfully.',
+      summary: 'Profile Saved!',
+      detail: 'Now let\'s create your training plan.',
       life: 3000,
     })
 
-    // Redirect to home
-    await router.push('/')
+    // Move to plan generation step
+    onboardingStore.nextStep()
   } catch (error: any) {
     toast.add({
       severity: 'error',
@@ -108,6 +117,34 @@ const handleComplete = async () => {
   } finally {
     saving.value = false
   }
+}
+
+const handlePlanGenerated = async () => {
+  onboardingStore.clearProgress()
+  
+  toast.add({
+    severity: 'success',
+    summary: 'Setup Complete!',
+    detail: 'Your profile and training plan are ready.',
+    life: 3000,
+  })
+
+  // Redirect to home
+  await router.push('/')
+}
+
+const handleSkipPlan = async () => {
+  onboardingStore.clearProgress()
+  
+  toast.add({
+    severity: 'info',
+    summary: 'Setup Complete!',
+    detail: 'You can generate a training plan anytime from the home page.',
+    life: 3000,
+  })
+
+  // Redirect to home
+  await router.push('/')
 }
 </script>
 
