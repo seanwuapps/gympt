@@ -123,6 +123,32 @@ export const usePlansStore = defineStore('plans', () => {
     }
   }
 
+  async function deactivatePlan(planId: string) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(`/api/plans/${planId}`, {
+        method: 'PATCH',
+        body: { isActive: false }
+      })
+
+      if (response.success && response.plan) {
+        // Update local state - set plan to inactive
+        plans.value = plans.value.map(plan => 
+          plan.id === planId ? { ...plan, isActive: false } : plan
+        )
+        return response.plan
+      }
+    } catch (err: any) {
+      error.value = err.message || 'Failed to deactivate plan'
+      console.error('Error deactivating plan:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function deletePlan(planId: string) {
     loading.value = true
     error.value = null
@@ -251,15 +277,17 @@ export const usePlansStore = defineStore('plans', () => {
     plans,
     loading,
     error,
-    // Computed
+
+    // Getters
     activePlan,
     inactivePlans,
     hasActivePlan,
-    activePlanDetails,
+
     // Actions
     fetchPlans,
     generatePlan,
     setActivePlan,
+    deactivatePlan,
     deletePlan,
     getPlanById,
     autoActivateSinglePlan,

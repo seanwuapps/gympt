@@ -22,17 +22,11 @@
     <template #content>
       <div class="plan-schedule">
         <h4>Training Schedule</h4>
-        <div class="schedule-preview">
-          <div
-            v-for="(modality, day) in getFirstWeekSchedule()"
-            :key="day"
-            class="schedule-item"
-            :class="{ 'is-rest': modality.toLowerCase() === 'rest' }"
-          >
-            <span class="day">{{ day }}</span>
-            <span class="modality">{{ modality }}</span>
-          </div>
-        </div>
+        <PlanWeekViewCards
+          :weekly-schedule="plan.weeklySchedule as Record<string, Record<string, string>>"
+          :total-weeks="plan.durationWeeks"
+          :initial-week="1"
+        />
       </div>
     </template>
 
@@ -45,6 +39,15 @@
           @click="emit('set-active', plan.id)"
           size="small"
           outlined
+        />
+        <Button
+          v-if="plan.isActive"
+          label="Deactivate"
+          icon="pi pi-times"
+          @click="emit('deactivate', plan.id)"
+          size="small"
+          outlined
+          severity="secondary"
         />
         <Button
           label="View Details"
@@ -69,6 +72,7 @@
 
 <script setup lang="ts">
 import type { TrainingPlan } from '~/db/schema'
+import PlanWeekViewCards from './PlanWeekViewCards.vue'
 
 interface Props {
   plan: TrainingPlan
@@ -78,26 +82,10 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'set-active': [planId: string]
+  'deactivate': [planId: string]
   'view': [plan: TrainingPlan]
   'delete': [planId: string]
 }>()
-
-const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-function getFirstWeekSchedule() {
-  const schedule = props.plan.weeklySchedule as Record<string, Record<string, string>>
-  const week1 = schedule.week1 || {}
-  
-  // Return ordered array of [day, modality] pairs
-  const orderedSchedule: Record<string, string> = {}
-  dayOrder.forEach(day => {
-    if (week1[day]) {
-      orderedSchedule[day] = week1[day]
-    }
-  })
-  
-  return orderedSchedule
-}
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
@@ -171,41 +159,6 @@ function formatDate(date: Date | string) {
   color: var(--p-text-color);
 }
 
-.schedule-preview {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
-  gap: var(--spacing-sm);
-}
-
-.schedule-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
-  text-align: center;
-}
-
-.schedule-item.is-rest {
-  opacity: 0.6;
-}
-
-.schedule-item .day {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-}
-
-.schedule-item .modality {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.95);
-  word-break: break-word;
-}
-
 .card-actions {
   display: flex;
   gap: var(--spacing-sm);
@@ -216,10 +169,6 @@ function formatDate(date: Date | string) {
 @media (max-width: 768px) {
   .plan-name {
     font-size: 1.125rem;
-  }
-
-  .schedule-preview {
-    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
   }
 
   .card-actions {

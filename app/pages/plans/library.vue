@@ -51,6 +51,7 @@
         <PlanCard
           :plan="plansStore.activePlan"
           @view="handleViewPlan"
+          @deactivate="handleDeactivatePlan"
           @delete="handleDeletePlan"
         />
       </section>
@@ -237,6 +238,26 @@ async function handleActivatePlan(planId: string) {
 function handleViewPlan(plan: TrainingPlan) {
   selectedPlan.value = plan
   showDetails.value = true
+}
+
+async function handleDeactivatePlan(planId: string) {
+  try {
+    await plansStore.deactivatePlan(planId)
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Plan Deactivated',
+      detail: 'Training plan has been set to inactive.',
+      life: 3000
+    })
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Deactivation Failed',
+      detail: error.message || 'Failed to deactivate plan',
+      life: 5000
+    })
+  }
 }
 
 function handleDeletePlan(planId: string) {

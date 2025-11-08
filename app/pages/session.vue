@@ -1,27 +1,447 @@
 <template>
   <div class="session-page">
-    <h1>Workout Session</h1>
-    <p>Your active workout session will appear here.</p>
+    <!-- No Session State -->
+    <div v-if="!sessionStore.currentSession" class="no-session">
+      <Card>
+        <template #content>
+          <div class="no-session-content">
+            <i class="pi pi-bolt no-session-icon" />
+            <h2>No Active Session</h2>
+            <p>Start a training session from the home page</p>
+            <Button
+              label="Go to Home"
+              icon="pi pi-home"
+              @click="router.push('/')"
+              size="large"
+            />
+          </div>
+        </template>
+      </Card>
+    </div>
+
+    <!-- Active Session -->
+    <div v-else class="session-active">
+      <!-- Session Header -->
+      <Card class="session-header-card">
+        <template #content>
+          <div class="session-header">
+            <div class="session-info">
+              <h1>{{ sessionStore.currentSession.modality }} Workout</h1>
+              <p class="session-meta">
+                Week {{ sessionStore.currentSession.week }} • {{ formatDayKey(sessionStore.currentSession.dayKey) }}
+              </p>
+            </div>
+            <div class="session-status">
+              <Tag :value="sessionStore.currentSession.status" :severity="getStatusSeverity(sessionStore.currentSession.status)" />
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Exercises List -->
+      <div class="exercises-section">
+        <h2>Exercises</h2>
+        <div class="exercises-list">
+          <Card
+            v-for="(exercise, index) in sessionStore.currentSession.exercises"
+            :key="index"
+            class="exercise-card"
+          >
+            <template #header>
+              <div class="exercise-header">
+                <span class="exercise-number">{{ index + 1 }}</span>
+                <h3>{{ exercise.name }}</h3>
+              </div>
+            </template>
+            <template #content>
+              <div class="exercise-targets">
+                <!-- Strength Exercise -->
+                <div v-if="exercise.type === 'strength'" class="targets-grid">
+                  <div class="target-item">
+                    <span class="target-label">Sets</span>
+                    <span class="target-value">{{ exercise.targets.sets }}</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Reps</span>
+                    <span class="target-value">{{ formatReps(exercise.targets.reps) }}</span>
+                  </div>
+                  <div v-if="exercise.targets.loadKg" class="target-item">
+                    <span class="target-label">Load</span>
+                    <span class="target-value">{{ exercise.targets.loadKg }} kg</span>
+                  </div>
+                  <div v-if="exercise.targets.rir" class="target-item">
+                    <span class="target-label">RIR</span>
+                    <span class="target-value">{{ exercise.targets.rir }}</span>
+                  </div>
+                  <div v-if="exercise.targets.restSec" class="target-item">
+                    <span class="target-label">Rest</span>
+                    <span class="target-value">{{ exercise.targets.restSec }}s</span>
+                  </div>
+                </div>
+
+                <!-- Cardio Exercise -->
+                <div v-else-if="exercise.type === 'cardio'" class="targets-grid">
+                  <div class="target-item">
+                    <span class="target-label">Duration</span>
+                    <span class="target-value">{{ exercise.targets.durationMin }} min</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Intensity</span>
+                    <span class="target-value">{{ exercise.targets.intensity }}</span>
+                  </div>
+                  <div v-if="exercise.targets.distanceKm" class="target-item">
+                    <span class="target-label">Distance</span>
+                    <span class="target-value">{{ exercise.targets.distanceKm }} km</span>
+                  </div>
+                </div>
+
+                <!-- HIIT Exercise -->
+                <div v-else-if="exercise.type === 'hiit'" class="targets-grid">
+                  <div class="target-item">
+                    <span class="target-label">Rounds</span>
+                    <span class="target-value">{{ exercise.targets.rounds }}</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Work</span>
+                    <span class="target-value">{{ exercise.targets.workSec }}s</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Rest</span>
+                    <span class="target-value">{{ exercise.targets.restSec }}s</span>
+                  </div>
+                </div>
+
+                <!-- Crossfit Exercise -->
+                <div v-else-if="exercise.type === 'crossfit'" class="targets-grid">
+                  <div class="target-item">
+                    <span class="target-label">Format</span>
+                    <span class="target-value">{{ exercise.targets.format }}</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Duration</span>
+                    <span class="target-value">{{ exercise.targets.durationMin }} min</span>
+                  </div>
+                </div>
+
+                <!-- Rehab Exercise -->
+                <div v-else-if="exercise.type === 'rehab'" class="targets-grid">
+                  <div class="target-item">
+                    <span class="target-label">Sets</span>
+                    <span class="target-value">{{ exercise.targets.sets }}</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Reps</span>
+                    <span class="target-value">{{ exercise.targets.reps }}</span>
+                  </div>
+                  <div class="target-item">
+                    <span class="target-label">Pain Ceiling</span>
+                    <span class="target-value">{{ exercise.targets.painCeiling }}/3</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </Card>
+        </div>
+      </div>
+
+      <!-- Session Actions -->
+      <Card class="session-actions-card">
+        <template #content>
+          <div class="session-actions">
+            <Button
+              label="Complete Session"
+              icon="pi pi-check"
+              @click="handleCompleteSession"
+              severity="success"
+              size="large"
+            />
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              @click="handleCancelSession"
+              text
+              size="large"
+            />
+          </div>
+        </template>
+      </Card>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// TODO: Implement session runner
+import { useSessionStore } from '~/stores/session'
+
+definePageMeta({
+  middleware: 'auth',
+})
+
+const sessionStore = useSessionStore()
+const router = useRouter()
+const toast = useToast()
+
+// Redirect if no session and auto-start if generated
+onMounted(async () => {
+  if (!sessionStore.currentSession) {
+    router.push('/')
+    return
+  }
+  
+  // Auto-start session if it's newly generated
+  if (sessionStore.currentSession.status === 'generated') {
+    try {
+      await sessionStore.startSession(sessionStore.currentSession.id)
+    } catch (error) {
+      console.error('Failed to auto-start session:', error)
+      // Continue anyway - user can still view the session
+    }
+  }
+})
+
+function formatDayKey(dayKey: string): string {
+  const days: Record<string, string> = {
+    Mon: 'Monday',
+    Tue: 'Tuesday',
+    Wed: 'Wednesday',
+    Thu: 'Thursday',
+    Fri: 'Friday',
+    Sat: 'Saturday',
+    Sun: 'Sunday'
+  }
+  return days[dayKey] || dayKey
+}
+
+function formatReps(reps: number | [number, number]): string {
+  if (Array.isArray(reps)) {
+    return `${reps[0]}-${reps[1]}`
+  }
+  return String(reps)
+}
+
+function getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+  const severityMap: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = {
+    generated: 'info',
+    in_progress: 'warn',
+    completed: 'success',
+    cancelled: 'secondary'
+  }
+  return severityMap[status]
+}
+
+async function handleCompleteSession() {
+  if (!sessionStore.currentSession) return
+  
+  try {
+    await sessionStore.completeSession(sessionStore.currentSession.id)
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Session Complete!',
+      detail: 'Great work today!',
+      life: 3000
+    })
+    
+    router.push('/')
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to complete session',
+      life: 5000
+    })
+  }
+}
+
+async function handleCancelSession() {
+  if (!sessionStore.currentSession) return
+  
+  try {
+    await sessionStore.cancelSession(sessionStore.currentSession.id)
+    router.push('/')
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to cancel session',
+      life: 5000
+    })
+  }
+}
 </script>
 
 <style scoped>
 .session-page {
   padding: var(--spacing-lg);
+  max-width: 60rem;
+  margin: 0 auto;
 }
 
-h1 {
+/* No Session State */
+.no-session-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-lg);
+}
+
+.no-session-icon {
+  font-size: 4rem;
+  color: var(--p-text-muted-color);
+}
+
+.no-session-content h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: var(--spacing-md);
+  margin: 0;
   color: var(--p-text-color);
 }
 
-p {
+.no-session-content p {
+  font-size: 1rem;
   color: var(--p-text-muted-color);
+  margin: 0;
+}
+
+/* Session Header */
+.session-header-card {
+  margin-bottom: var(--spacing-lg);
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.session-info h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--p-text-color);
+}
+
+.session-meta {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  margin: 0;
+}
+
+/* Exercises Section */
+.exercises-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.exercises-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--p-text-color);
+}
+
+.exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.exercise-card {
+  border-left: 0.25rem solid var(--p-primary-color);
+}
+
+.exercise-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.exercise-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: var(--p-primary-color);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.exercise-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--p-text-color);
+}
+
+.targets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--spacing-md);
+}
+
+.target-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.target-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--p-text-muted-color);
+  font-weight: 600;
+}
+
+.target-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+/* Session Actions */
+.session-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.session-actions :deep(.p-button) {
+  min-width: 12rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .session-page {
+    padding: var(--spacing-md);
+  }
+
+  .session-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .session-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .targets-grid {
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  }
+
+  .session-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .session-actions :deep(.p-button) {
+    width: 100%;
+  }
 }
 </style>

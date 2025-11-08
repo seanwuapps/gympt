@@ -40,17 +40,18 @@ Return a JSON object with this exact structure:
   }
 }
 
-MODALITY EXAMPLES:
-- "Chest" - chest-focused training
-- "Back" - back-focused training
-- "Legs" - leg-focused training
-- "Shoulders+Arms" - combined upper body
-- "Full Body" - full body workout
-- "Cardio" - cardiovascular training
-- "HIIT" - high-intensity interval training
-- "Core+Mobility" - core and flexibility work
-- "Active Recovery" - light movement
-- "Rest" - complete rest day
+MODALITY TYPES (use ONLY these exact single values):
+- "strength" - any resistance/weight training (chest, back, legs, arms, full body, etc.)
+- "cardio" - cardiovascular endurance training (running, cycling, swimming, etc.)
+- "hiit" - high-intensity interval training
+- "crossfit" - functional fitness workouts
+- "rehab" - recovery, mobility, or rehabilitation work
+- "rest" - complete rest day
+
+CRITICAL: 
+- Use ONLY ONE modality per day (no mixed modalities like "hiit+strength" or "cardio+strength")
+- For any strength-based workout (chest, back, legs, push, pull, upper, lower, full body), use "strength"
+- Do NOT combine modalities with "+" or any other separator
 
 Respond ONLY with valid JSON, no additional text.`
 }
@@ -79,11 +80,11 @@ USER PROFILE:
 
 REQUIREMENTS:
 1. Determine optimal plan duration (4-16 weeks) based on goals and experience
-2. Map each preferred training day to a specific training focus/modality
+2. Map each preferred training day to ONE single modality (strength, cardio, hiit, crossfit, rehab, or rest)
 3. Include rest days on non-training days
 4. Ensure balanced programming with adequate recovery
 5. Consider injury flags when assigning training focus
-6. Use mixed modalities where appropriate (e.g., "Chest+Triceps", "Back+Cardio")
+6. DO NOT use mixed modalities - use only ONE modality per day
 
 Generate the training plan now.`
 }

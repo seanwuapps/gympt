@@ -27,7 +27,8 @@ async function applyRLS() {
     console.log('📄 Reading RLS policies...')
     const rlsFiles = [
       '0001_rls_policies.sql',
-      '0003_training_plans_rls.sql'
+      '0003_training_plans_rls.sql',
+      '0005_sessions_rls.sql'
     ]
 
     for (const file of rlsFiles) {

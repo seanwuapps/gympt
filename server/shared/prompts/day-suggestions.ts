@@ -29,13 +29,19 @@ CRITICAL REQUIREMENTS:
 - Ensure adequate recovery between similar muscle groups (48-72 hours)
 
 SUGGESTION STRATEGY:
-1. Option 1: Similar alternative (e.g., "Upper Body" instead of "Push")
-2. Option 2: Recovery-focused (e.g., "Rest" or "Light Cardio")
-3. Option 3: Complementary workout (e.g., different body part or modality)
+1. Option 1: Similar alternative (e.g., different strength focus)
+2. Option 2: Recovery-focused (e.g., "rest" or "rehab")
+3. Option 3: Complementary workout (e.g., different modality type)
 
-VALID MODALITIES:
-- Pull, Push, Legs, Upper, Lower, Full Body, Cardio, Rest
-- Mixed modalities allowed (e.g., "Legs+Core", "Upper+Cardio")
+VALID MODALITY TYPES (use these exact values):
+- "strength" - any resistance/weight training
+- "cardio" - cardiovascular endurance training
+- "hiit" - high-intensity interval training
+- "crossfit" - functional fitness workouts
+- "rehab" - recovery, mobility, or rehabilitation work
+- "rest" - complete rest day
+
+IMPORTANT: Use ONLY these exact modality values. Do not use specific body part names like "Push", "Pull", "Legs", etc.
 
 OUTPUT FORMAT:
 Return a JSON object with this exact structure:
