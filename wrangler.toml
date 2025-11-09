@@ -10,19 +10,19 @@ pages_build_output_dir = ".output/public"
 # OPENAI_MODEL
 # DATABASE_URL (if needed for build-time operations)
 
-[build]
-command = "npm i -g pnpm && pnpm i && pnpm build"
+# [build]
+# command = "pnpm build"
 
 # Cloudflare Pages automatically provides these bindings
 # You can add KV, D1, R2, etc. bindings here if needed
-[observability]
-[observability.logs]
-enabled = true
-head_sampling_rate = 1
-invocation_logs = true
-persist = true
+# [observability]
+# [observability.logs]
+# enabled = true
+# head_sampling_rate = 1
+# invocation_logs = true
+# persist = true
 
-[observability.traces]
-enabled = false
-persist = true
-head_sampling_rate = 1
+# [observability.traces]
+# enabled = false
+# persist = true
+# head_sampling_rate = 1
