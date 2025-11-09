@@ -38,23 +38,23 @@ const EnergyBoostDark = definePreset(Lara, {
         },
         // Bright, energetic primary for dark backgrounds with enhanced contrast
         primary: {
-          color: '#d4ff00',  // Brighter lime for WCAG AA compliance (7:1 contrast)
+          color: '#d4ff00', // Brighter lime for WCAG AA compliance (7:1 contrast)
           contrastColor: '{slate.950}',
-          hoverColor: '#e5ff33',  // Even brighter on hover
-          activeColor: '#f0ff66',  // Brightest on active
+          hoverColor: '#e5ff33', // Even brighter on hover
+          activeColor: '#f0ff66', // Brightest on active
         },
         // Enhanced text colors for WCAG AA compliance
         text: {
-          color: 'rgba(255, 255, 255, 0.95)',  // Primary text: ~19:1 contrast
+          color: 'rgba(255, 255, 255, 0.95)', // Primary text: ~19:1 contrast
           hoverColor: 'rgba(255, 255, 255, 1)',
-          mutedColor: 'rgba(255, 255, 255, 0.65)',  // Muted text: ~7:1 contrast (WCAG AA)
+          mutedColor: 'rgba(255, 255, 255, 0.65)', // Muted text: ~7:1 contrast (WCAG AA)
           hoverMutedColor: 'rgba(255, 255, 255, 0.78)',
         },
         // Glowing highlights for energy
         highlight: {
           background: 'rgba(251, 146, 60, 0.16)',
           focusBackground: 'rgba(251, 146, 60, 0.24)',
-          color: 'rgba(255, 255, 255, 0.95)',  // Enhanced from 0.87
+          color: 'rgba(255, 255, 255, 0.95)', // Enhanced from 0.87
           focusColor: 'rgba(255, 255, 255, 0.95)',
         },
       },
@@ -69,7 +69,7 @@ const EnergyBoostDark = definePreset(Lara, {
     button: {
       text: {
         primary: {
-          color: '#d4ff00',  // Enhanced contrast for text buttons
+          color: '#d4ff00', // Enhanced contrast for text buttons
           hoverColor: '#e5ff33',
           activeColor: '#f0ff66',
         },
@@ -80,9 +80,19 @@ const EnergyBoostDark = definePreset(Lara, {
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+  nitro: {
+    prerender: {
+      autoSubfolderIndex: false,
+    },
+  },
   devtools: { enabled: true },
   modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
-  css: ['primeicons/primeicons.css', '~/assets/css/main.css', '~/assets/css/grid.css', '~/assets/css/accessibility.css'],
+  css: [
+    'primeicons/primeicons.css',
+    '~/assets/css/main.css',
+    '~/assets/css/grid.css',
+    '~/assets/css/accessibility.css',
+  ],
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL,
     openaiApiKey: process.env.OPENAI_API_KEY,
@@ -98,11 +108,11 @@ export default defineNuxtConfig({
   ],
   fonts: {
     families: [
-      { 
-        name: 'Inter', 
+      {
+        name: 'Inter',
         provider: 'google',
-        fallbacks: ['system-ui', 'sans-serif']
-      }
+        fallbacks: ['system-ui', 'sans-serif'],
+      },
     ],
   },
   primevue: {
