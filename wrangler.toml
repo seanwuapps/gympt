@@ -11,7 +11,7 @@ pages_build_output_dir = ".output/public"
 # DATABASE_URL (if needed for build-time operations)
 
 [build]
-command = "pnpm run build"
+command = "npm i && pnpm i && pnpm build"
 
 # Cloudflare Pages automatically provides these bindings
 # You can add KV, D1, R2, etc. bindings here if needed
