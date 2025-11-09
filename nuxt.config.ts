@@ -81,6 +81,7 @@ const EnergyBoostDark = definePreset(Lara, {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   nitro: {
+    preset: 'cloudflare-pages',
     prerender: {
       autoSubfolderIndex: false,
     },

@@ -16,7 +16,9 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:apply-rls": "tsx scripts/apply-rls.ts"
+    "db:apply-rls": "tsx scripts/apply-rls.ts",
+    "deploy": "pnpm run build && wrangler pages deploy .output/public",
+    "deploy:preview": "pnpm run build && wrangler pages deploy .output/public --branch=preview"
   },
   "dependencies": {
     "@nuxtjs/supabase": "^2.0.1",
@@ -50,6 +52,7 @@
     "postgres": "^3.4.7",
     "prettier": "^3.6.2",
     "tsx": "^4.20.6",
-    "vue-eslint-parser": "^10.2.0"
+    "vue-eslint-parser": "^10.2.0",
+    "wrangler": "^3.94.0"
   }
 }
