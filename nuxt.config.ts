@@ -97,7 +97,13 @@ export default defineNuxtConfig({
     },
   ],
   fonts: {
-    families: [{ name: 'Inter', provider: 'google' }],
+    families: [
+      { 
+        name: 'Inter', 
+        provider: 'google',
+        fallbacks: ['system-ui', 'sans-serif']
+      }
+    ],
   },
   primevue: {
     options: {

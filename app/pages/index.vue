@@ -120,8 +120,6 @@ async function confirmSessionLength() {
 
   if (!modality) return
 
-  showSessionLengthDialog.value = false
-
   try {
     console.log('Generating session...', { sessionLength: selectedSessionLength.value })
     await sessionStore.generateSession(
@@ -133,10 +131,14 @@ async function confirmSessionLength() {
     )
 
     console.log('Session generated, navigating...')
-    // Navigate to session page
-    await router.push('/session')
+    // Close dialog after successful generation
+    showSessionLengthDialog.value = false
+    // Navigate to preview page to review and swap exercises
+    await router.push('/session/preview')
   } catch (error: any) {
     console.error('Error generating session:', error)
+    // Close dialog on error too
+    showSessionLengthDialog.value = false
     toast.add({
       severity: 'error',
       summary: 'Generation Failed',
@@ -295,6 +297,8 @@ function handleViewPlan() {
       modal
       header="How long do you have?"
       :style="{ width: '90vw', maxWidth: '28rem' }"
+      :closable="!sessionStore.generating"
+      :dismissableMask="!sessionStore.generating"
     >
       <div class="session-length-content">
         <p class="dialog-description">
@@ -308,6 +312,7 @@ function handleViewPlan() {
             class="length-option"
             :class="{ selected: selectedSessionLength === option.value }"
             @click="selectedSessionLength = option.value"
+            :style="{ pointerEvents: sessionStore.generating ? 'none' : 'auto', opacity: sessionStore.generating ? 0.6 : 1 }"
           >
             <i :class="`pi ${option.icon}`" />
             <span>{{ option.label }}</span>
@@ -316,7 +321,12 @@ function handleViewPlan() {
       </div>
 
       <template #footer>
-        <Button label="Cancel" @click="showSessionLengthDialog = false" text />
+        <Button 
+          label="Cancel" 
+          @click="showSessionLengthDialog = false" 
+          text 
+          :disabled="sessionStore.generating"
+        />
         <Button
           label="Generate Workout"
           icon="pi pi-bolt"

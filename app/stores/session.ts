@@ -1,47 +1,32 @@
 import { defineStore } from 'pinia'
 import { $fetch } from 'ofetch'
 
-// Type definitions matching db/schema/sessions.ts
-export interface StrengthTarget {
-  sets: number
-  reps: number | [number, number]
-  loadKg?: number
-  rir?: number
-  restSec?: number
+// Type definitions matching unified flat structure
+export interface SessionExercise {
+  type: 'strength' | 'cardio' | 'hiit' | 'crossfit' | 'rehab'
+  name: string
+  // Strength fields
+  sets?: number | null
+  reps?: number | [number, number] | null
+  loadKg?: number | null
+  rir?: number | null
+  restSec?: number | null
+  // Cardio fields
+  durationMin?: number | null
+  intensity?: 'easy' | 'moderate' | 'hard' | null
+  distanceKm?: number | null
+  // HIIT fields
+  rounds?: number | null
+  workSec?: number | null
+  // Crossfit fields
+  format?: 'AMRAP' | 'ForTime' | 'EMOM' | null
+  components?: string[] | null
+  // Rehab fields
+  painCeiling?: number | null
+  tempo?: string | null
+  // HIIT modality
+  modality?: string | null
 }
-
-export interface CardioTarget {
-  durationMin: number
-  intensity: 'easy' | 'moderate' | 'hard'
-  distanceKm?: number
-}
-
-export interface HIITTarget {
-  rounds: number
-  workSec: number
-  restSec: number
-  modality: string
-}
-
-export interface CrossfitTarget {
-  format: 'AMRAP' | 'ForTime' | 'EMOM'
-  durationMin: number
-  components: string[]
-}
-
-export interface RehabTarget {
-  sets: number
-  reps: number
-  painCeiling: number
-  tempo?: string
-}
-
-export type SessionExercise =
-  | { type: 'strength'; name: string; targets: StrengthTarget }
-  | { type: 'cardio'; name: string; targets: CardioTarget }
-  | { type: 'hiit'; name: string; targets: HIITTarget }
-  | { type: 'crossfit'; name: string; targets: CrossfitTarget }
-  | { type: 'rehab'; name: string; targets: RehabTarget }
 
 export interface SessionFeedback {
   sessionRPE?: number
@@ -203,6 +188,27 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  async function swapExercise(sessionId: string, exerciseIndex: number) {
+    try {
+      const response = await $fetch<{ success: boolean; exercise: SessionExercise }>(`/api/sessions/${sessionId}/swap-exercise`, {
+        method: 'POST',
+        body: {
+          exerciseIndex
+        }
+      })
+
+      // Update the exercise in current session
+      if (currentSession.value && response.exercise) {
+        currentSession.value.exercises[exerciseIndex] = response.exercise
+      }
+
+      return response.exercise
+    } catch (err: any) {
+      error.value = err.message || 'Failed to swap exercise'
+      throw err
+    }
+  }
+
   function clearSession() {
     currentSession.value = null
     error.value = null
@@ -219,6 +225,7 @@ export const useSessionStore = defineStore('session', () => {
     completeSession,
     cancelSession,
     loadSession,
+    swapExercise,
     clearSession
   }
 })

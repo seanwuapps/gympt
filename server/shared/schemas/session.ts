@@ -1,48 +1,32 @@
 import { z } from 'zod'
 
-// Exercise target schemas matching db/schema/sessions.ts
-export const StrengthTargetSchema = z.object({
-  sets: z.number().int().positive(),
-  reps: z.union([z.number().int().positive(), z.tuple([z.number(), z.number()])]),
-  loadKg: z.number().nonnegative().nullable().optional(),
-  rir: z.number().min(0).max(5).nullable().optional(),
-  restSec: z.number().int().positive().nullable().optional()
+// Unified exercise schema with flat structure
+// All fields are nullable with defaults to support different exercise types
+export const SessionExerciseSchema = z.object({
+  type: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab']),
+  name: z.string(),
+  // Strength fields
+  sets: z.number().int().positive().nullable().default(null),
+  reps: z.union([z.number().int().positive(), z.tuple([z.number(), z.number()])]).nullable().default(null),
+  loadKg: z.number().nonnegative().nullable().default(null),
+  rir: z.number().min(0).max(5).nullable().default(null),
+  restSec: z.number().int().positive().nullable().default(null),
+  // Cardio fields
+  durationMin: z.number().nullable().default(null),
+  intensity: z.enum(['easy', 'moderate', 'hard']).nullable().default(null),
+  distanceKm: z.number().nullable().default(null),
+  // HIIT fields
+  rounds: z.number().int().nullable().default(null),
+  workSec: z.number().int().nullable().default(null),
+  // Crossfit fields
+  format: z.enum(['AMRAP', 'ForTime', 'EMOM']).nullable().default(null),
+  components: z.array(z.string()).nullable().default(null),
+  // Rehab fields
+  painCeiling: z.number().max(3).nullable().default(null),
+  tempo: z.string().nullable().default(null),
+  // HIIT modality
+  modality: z.string().nullable().default(null),
 })
-
-export const CardioTargetSchema = z.object({
-  durationMin: z.number().positive(),
-  intensity: z.enum(['easy', 'moderate', 'hard']),
-  distanceKm: z.number().nonnegative().nullable().optional()
-})
-
-export const HIITTargetSchema = z.object({
-  rounds: z.number().int().positive(),
-  workSec: z.number().int().positive(),
-  restSec: z.number().int().positive(),
-  modality: z.string()
-})
-
-export const CrossfitTargetSchema = z.object({
-  format: z.enum(['AMRAP', 'ForTime', 'EMOM']),
-  durationMin: z.number().positive(),
-  components: z.array(z.string())
-})
-
-export const RehabTargetSchema = z.object({
-  sets: z.number().int().positive(),
-  reps: z.number().int().positive(),
-  painCeiling: z.number().max(3),
-  tempo: z.string().nullable().optional()
-})
-
-// Exercise schema (discriminated union)
-export const SessionExerciseSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('strength'), name: z.string(), targets: StrengthTargetSchema }),
-  z.object({ type: z.literal('cardio'), name: z.string(), targets: CardioTargetSchema }),
-  z.object({ type: z.literal('hiit'), name: z.string(), targets: HIITTargetSchema }),
-  z.object({ type: z.literal('crossfit'), name: z.string(), targets: CrossfitTargetSchema }),
-  z.object({ type: z.literal('rehab'), name: z.string(), targets: RehabTargetSchema })
-])
 
 // Session feedback schema
 export const SessionFeedbackSchema = z.object({

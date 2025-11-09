@@ -6,43 +6,34 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { profiles } from '../../../db/schema'
 
-const StrengthTarget = z.object({
-  sets: z.number().int().positive(),
-  reps: z.union([z.number().int().positive(), z.tuple([z.number(), z.number()])]),
-  loadKg: z.number().nonnegative().nullable(),
-  rir: z.number().min(0).max(5).nullable(),
-  restSec: z.number().int().positive().nullable(),
+const Exercise = z.object({
+  type: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab']),
+  name: z.string(),
+  // Strength fields
+  sets: z.number().int().positive().nullable().default(null),
+  reps: z
+    .union([z.number().int().positive(), z.tuple([z.number(), z.number()])])
+    .nullable()
+    .default(null),
+  loadKg: z.number().nonnegative().nullable().default(null),
+  rir: z.number().min(0).max(5).nullable().default(null),
+  restSec: z.number().int().positive().nullable().default(null),
+  // Cardio fields
+  durationMin: z.number().nullable().default(null),
+  intensity: z.enum(['easy', 'moderate', 'hard']).nullable().default(null),
+  distanceKm: z.number().nullable().default(null),
+  // HIIT fields
+  rounds: z.number().int().nullable().default(null),
+  workSec: z.number().int().nullable().default(null),
+  // Crossfit fields
+  format: z.enum(['AMRAP', 'ForTime', 'EMOM']).nullable().default(null),
+  components: z.array(z.string()).nullable().default(null),
+  // Rehab fields
+  painCeiling: z.number().max(3).nullable().default(null),
+  tempo: z.string().nullable().default(null),
+  // HIIT modality
+  modality: z.string().nullable().default(null),
 })
-const CardioTarget = z.object({
-  durationMin: z.number(),
-  intensity: z.enum(['easy', 'moderate', 'hard']),
-  distanceKm: z.number().nullable(),
-})
-const HIITTarget = z.object({
-  rounds: z.number().int(),
-  workSec: z.number().int(),
-  restSec: z.number().int(),
-  modality: z.string(),
-})
-const CrossfitTarget = z.object({
-  format: z.enum(['AMRAP', 'ForTime', 'EMOM']),
-  durationMin: z.number(),
-  components: z.array(z.string()),
-})
-const RehabTarget = z.object({
-  sets: z.number().int(),
-  reps: z.number().int(),
-  painCeiling: z.number().max(3),
-  tempo: z.string().nullable(),
-})
-
-const Exercise = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('strength'), name: z.string(), targets: StrengthTarget }),
-  z.object({ type: z.literal('cardio'), name: z.string(), targets: CardioTarget }),
-  z.object({ type: z.literal('hiit'), name: z.string(), targets: HIITTarget }),
-  z.object({ type: z.literal('crossfit'), name: z.string(), targets: CrossfitTarget }),
-  z.object({ type: z.literal('rehab'), name: z.string(), targets: RehabTarget }),
-])
 
 const SessionPlan = z.object({ exercises: z.array(Exercise) })
 
@@ -59,7 +50,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
@@ -70,7 +61,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       message: 'Invalid input',
-      data: parsed.error.flatten()
+      data: parsed.error.flatten(),
     })
   }
 
@@ -80,7 +71,7 @@ export default defineEventHandler(async (event) => {
   if (!connectionString) {
     throw createError({
       statusCode: 500,
-      message: 'Database configuration missing'
+      message: 'Database configuration missing',
     })
   }
 
@@ -89,16 +80,12 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Fetch user profile
-    const [profile] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.sub))
-      .limit(1)
+    const [profile] = await db.select().from(profiles).where(eq(profiles.userId, user.sub)).limit(1)
 
     if (!profile) {
       throw createError({
         statusCode: 404,
-        message: 'User profile not found. Please complete onboarding first.'
+        message: 'User profile not found. Please complete onboarding first.',
       })
     }
 
@@ -107,40 +94,43 @@ export default defineEventHandler(async (event) => {
       experience: profile.experienceLevel || 'beginner',
       units: profile.units || 'metric',
       equipment: [], // TODO: Add equipment field to profile schema
-      goals: profile.goals || 'general_strength'
+      goals: profile.goals || 'general_strength',
     }
 
     // Build AI prompts
+    // TODO: take previous workout history (similar session performed before that user reviewed positively) into consideration
     const systemPrompt = `You are an expert fitness coach and workout session designer.
 
 CRITICAL REQUIREMENTS:
-- Generate a workout session that fits within the specified time limit
-- Return ONLY valid JSON matching the exact schema
-- Each exercise must have the correct type and targets structure
+- Session duration must be within the specified time limit
 - Consider warm-up, work sets, and rest periods when calculating total time
 - For beginners, use fewer exercises with more rest time
+- MUST return valid JSON with an "exercises" array
+- Set unused fields to null (not undefined or omitted)
 
-EXERCISE TYPES:
-- "strength": Use targets { sets, reps, loadKg, rir, restSec }
-- "cardio": Use targets { durationMin, intensity: "easy"|"moderate"|"hard", distanceKm }
-- "hiit": Use targets { rounds, workSec, restSec, modality }
-- "crossfit": Use targets { format: "AMRAP"|"ForTime"|"EMOM", durationMin, components: [] }
-- "rehab": Use targets { sets, reps, painCeiling, tempo }
+EXERCISE TYPES (all include "type" and "name" fields):
+- "strength": { type: "strength", name, sets, reps, loadKg, rir, restSec }
+  Example: { "type": "strength", "name": "Bench Press", "sets": 4, "reps": 8, "loadKg": 60, "rir": 2, "restSec": 120 }
+- "cardio": { type: "cardio", name, durationMin, intensity: "easy"|"moderate"|"hard", distanceKm }
+  Example: { "type": "cardio", "name": "Running", "durationMin": 20, "intensity": "moderate", "distanceKm": 3 }
+- "hiit": { type: "hiit", name, rounds, workSec, restSec, modality }
+  Example: { "type": "hiit", "name": "Burpees", "rounds": 5, "workSec": 30, "restSec": 30, "modality": "bodyweight" }
+- "crossfit": { type: "crossfit", name, format: "AMRAP"|"ForTime"|"EMOM", durationMin, components: [] }
+  Example: { "type": "crossfit", "name": "Cindy", "format": "AMRAP", "durationMin": 20, "components": ["5 Pull-ups", "10 Push-ups", "15 Squats"] }
+- "rehab": { type: "rehab", name, sets, reps, painCeiling, tempo }
+  Example: { "type": "rehab", "name": "Shoulder Rotations", "sets": 3, "reps": 12, "painCeiling": 2, "tempo": "2-0-2-0" }
 
-TIME CALCULATION GUIDELINES:
-- Strength: ~2-3 min per set (including rest), so 3 sets = ~8 min per exercise
-- Cardio: Use durationMin directly
-- HIIT: (workSec + restSec) * rounds / 60 = total minutes
-- Add 5-10 min for warm-up and cool-down
-
-Respond with valid JSON only.`
+OUTPUT FORMAT:
+{
+  "exercises": [
+    { exercise objects here }
+  ]
+}
+`
 
     const userPrompt = `Generate a ${parsed.data.modality} workout session for ${parsed.data.sessionLengthMin} minutes.
 User: ${userProfile.experience} level, ${userProfile.units} units.
 Goals: ${userProfile.goals}.
-
-IMPORTANT: The TOTAL session must fit in ${parsed.data.sessionLengthMin} minutes including warm-up and rest.
-For ${userProfile.experience} level, use appropriate exercise count and rest periods.
 `
 
     // Call AI service with structured outputs
@@ -150,21 +140,30 @@ For ${userProfile.experience} level, use appropriate exercise count and rest per
       temperature: 0.5,
       maxRetries: 2,
       responseSchema: SessionPlan,
-      schemaName: 'session_plan',
+      schemaName: 'SessionPlan',
     })
 
     if (!aiResponse.success || !aiResponse.data) {
       throw createError({
         statusCode: 500,
-        message: aiResponse.error || 'Failed to generate session'
+        message: aiResponse.error || 'Failed to generate session',
       })
     }
 
     console.log('[AI Session] AI response data type:', typeof aiResponse.data)
-    console.log('[AI Session] AI response data:', JSON.stringify(aiResponse.data).substring(0, 200))
+    console.log('[AI Session] AI response data:', JSON.stringify(aiResponse.data, null, 2))
+
+    // When using zodResponseFormat, the response is wrapped with the schema name as key
+    // Extract the actual data from the wrapper
+    let sessionData = aiResponse.data
+
+    // Check if data is wrapped with schema name
+    if (sessionData && typeof sessionData === 'object' && 'SessionPlan' in sessionData) {
+      console.log('[AI Session] Extracting data from SessionPlan wrapper')
+      sessionData = sessionData.SessionPlan
+    }
 
     // Handle case where AI might return array directly instead of wrapped in object
-    let sessionData = aiResponse.data
     if (Array.isArray(sessionData)) {
       console.log('[AI Session] AI returned array, wrapping in object')
       sessionData = { exercises: sessionData }
@@ -178,7 +177,7 @@ For ${userProfile.experience} level, use appropriate exercise count and rest per
       throw createError({
         statusCode: 500,
         message: 'Invalid session generated. Please try again.',
-        data: result.error.flatten()
+        data: result.error.flatten(),
       })
     }
 
@@ -192,7 +191,7 @@ For ${userProfile.experience} level, use appropriate exercise count and rest per
 
     throw createError({
       statusCode: 500,
-      message: error.message || 'Failed to generate session'
+      message: error.message || 'Failed to generate session',
     })
   } finally {
     await pg.end()

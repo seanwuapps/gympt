@@ -57,85 +57,99 @@
               <div class="exercise-targets">
                 <!-- Strength Exercise -->
                 <div v-if="exercise.type === 'strength'" class="targets-grid">
-                  <div class="target-item">
+                  <div v-if="exercise.sets" class="target-item">
                     <span class="target-label">Sets</span>
-                    <span class="target-value">{{ exercise.targets.sets }}</span>
+                    <span class="target-value">{{ exercise.sets }}</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.reps" class="target-item">
                     <span class="target-label">Reps</span>
-                    <span class="target-value">{{ formatReps(exercise.targets.reps) }}</span>
+                    <span class="target-value">{{ formatReps(exercise.reps) }}</span>
                   </div>
-                  <div v-if="exercise.targets.loadKg" class="target-item">
+                  <div v-if="exercise.loadKg" class="target-item">
                     <span class="target-label">Load</span>
-                    <span class="target-value">{{ exercise.targets.loadKg }} kg</span>
+                    <span class="target-value">{{ exercise.loadKg }} kg</span>
                   </div>
-                  <div v-if="exercise.targets.rir" class="target-item">
+                  <div v-if="exercise.rir" class="target-item">
                     <span class="target-label">RIR</span>
-                    <span class="target-value">{{ exercise.targets.rir }}</span>
+                    <span class="target-value">{{ exercise.rir }}</span>
                   </div>
-                  <div v-if="exercise.targets.restSec" class="target-item">
+                  <div v-if="exercise.restSec" class="target-item">
                     <span class="target-label">Rest</span>
-                    <span class="target-value">{{ exercise.targets.restSec }}s</span>
+                    <span class="target-value">{{ exercise.restSec }}s</span>
                   </div>
                 </div>
 
                 <!-- Cardio Exercise -->
                 <div v-else-if="exercise.type === 'cardio'" class="targets-grid">
-                  <div class="target-item">
+                  <div v-if="exercise.durationMin" class="target-item">
                     <span class="target-label">Duration</span>
-                    <span class="target-value">{{ exercise.targets.durationMin }} min</span>
+                    <span class="target-value">{{ exercise.durationMin }} min</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.intensity" class="target-item">
                     <span class="target-label">Intensity</span>
-                    <span class="target-value">{{ exercise.targets.intensity }}</span>
+                    <span class="target-value">{{ exercise.intensity }}</span>
                   </div>
-                  <div v-if="exercise.targets.distanceKm" class="target-item">
+                  <div v-if="exercise.distanceKm" class="target-item">
                     <span class="target-label">Distance</span>
-                    <span class="target-value">{{ exercise.targets.distanceKm }} km</span>
+                    <span class="target-value">{{ exercise.distanceKm }} km</span>
                   </div>
                 </div>
 
                 <!-- HIIT Exercise -->
                 <div v-else-if="exercise.type === 'hiit'" class="targets-grid">
-                  <div class="target-item">
+                  <div v-if="exercise.rounds" class="target-item">
                     <span class="target-label">Rounds</span>
-                    <span class="target-value">{{ exercise.targets.rounds }}</span>
+                    <span class="target-value">{{ exercise.rounds }}</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.workSec" class="target-item">
                     <span class="target-label">Work</span>
-                    <span class="target-value">{{ exercise.targets.workSec }}s</span>
+                    <span class="target-value">{{ exercise.workSec }}s</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.restSec" class="target-item">
                     <span class="target-label">Rest</span>
-                    <span class="target-value">{{ exercise.targets.restSec }}s</span>
+                    <span class="target-value">{{ exercise.restSec }}s</span>
+                  </div>
+                  <div v-if="exercise.modality" class="target-item">
+                    <span class="target-label">Modality</span>
+                    <span class="target-value">{{ exercise.modality }}</span>
                   </div>
                 </div>
 
                 <!-- Crossfit Exercise -->
                 <div v-else-if="exercise.type === 'crossfit'" class="targets-grid">
-                  <div class="target-item">
+                  <div v-if="exercise.format" class="target-item">
                     <span class="target-label">Format</span>
-                    <span class="target-value">{{ exercise.targets.format }}</span>
+                    <span class="target-value">{{ exercise.format }}</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.durationMin" class="target-item">
                     <span class="target-label">Duration</span>
-                    <span class="target-value">{{ exercise.targets.durationMin }} min</span>
+                    <span class="target-value">{{ exercise.durationMin }} min</span>
+                  </div>
+                  <div v-if="exercise.components && exercise.components.length" class="target-item full-width">
+                    <span class="target-label">Components</span>
+                    <ul class="components-list">
+                      <li v-for="(component, i) in exercise.components" :key="i">{{ component }}</li>
+                    </ul>
                   </div>
                 </div>
 
                 <!-- Rehab Exercise -->
                 <div v-else-if="exercise.type === 'rehab'" class="targets-grid">
-                  <div class="target-item">
+                  <div v-if="exercise.sets" class="target-item">
                     <span class="target-label">Sets</span>
-                    <span class="target-value">{{ exercise.targets.sets }}</span>
+                    <span class="target-value">{{ exercise.sets }}</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.reps" class="target-item">
                     <span class="target-label">Reps</span>
-                    <span class="target-value">{{ exercise.targets.reps }}</span>
+                    <span class="target-value">{{ formatReps(exercise.reps) }}</span>
                   </div>
-                  <div class="target-item">
+                  <div v-if="exercise.painCeiling" class="target-item">
                     <span class="target-label">Pain Ceiling</span>
-                    <span class="target-value">{{ exercise.targets.painCeiling }}/3</span>
+                    <span class="target-value">{{ exercise.painCeiling }}/3</span>
+                  </div>
+                  <div v-if="exercise.tempo" class="target-item">
+                    <span class="target-label">Tempo</span>
+                    <span class="target-value">{{ exercise.tempo }}</span>
                   </div>
                 </div>
               </div>
@@ -180,21 +194,10 @@ const sessionStore = useSessionStore()
 const router = useRouter()
 const toast = useToast()
 
-// Redirect if no session and auto-start if generated
-onMounted(async () => {
+// Redirect if no session
+onMounted(() => {
   if (!sessionStore.currentSession) {
     router.push('/')
-    return
-  }
-  
-  // Auto-start session if it's newly generated
-  if (sessionStore.currentSession.status === 'generated') {
-    try {
-      await sessionStore.startSession(sessionStore.currentSession.id)
-    } catch (error) {
-      console.error('Failed to auto-start session:', error)
-      // Continue anyway - user can still view the session
-    }
   }
 })
 
@@ -211,7 +214,8 @@ function formatDayKey(dayKey: string): string {
   return days[dayKey] || dayKey
 }
 
-function formatReps(reps: number | [number, number]): string {
+function formatReps(reps: number | [number, number] | null): string {
+  if (!reps) return '-'
   if (Array.isArray(reps)) {
     return `${reps[0]}-${reps[1]}`
   }
@@ -388,6 +392,34 @@ async function handleCancelSession() {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+}
+
+.target-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.components-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.components-list li {
+  font-size: 0.9375rem;
+  color: var(--p-text-color);
+  padding-left: var(--spacing-md);
+  position: relative;
+}
+
+.components-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--p-primary-color);
+  font-weight: bold;
 }
 
 .target-label {
