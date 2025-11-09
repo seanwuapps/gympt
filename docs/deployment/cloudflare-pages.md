@@ -23,29 +23,9 @@ This Nuxt app is configured to deploy to Cloudflare Pages using the Nitro Cloudf
 
 ## Deployment Methods
 
-### Method 1: CLI Deployment (Recommended for First Deploy)
+### Method 1: Git Integration (Recommended)
 
-1. **Install dependencies**:
-   ```bash
-   pnpm install
-   ```
-
-2. **Authenticate with Cloudflare**:
-   ```bash
-   pnpm wrangler login
-   ```
-
-3. **Deploy to production**:
-   ```bash
-   pnpm run deploy
-   ```
-
-4. **Deploy preview**:
-   ```bash
-   pnpm run deploy:preview
-   ```
-
-### Method 2: Git Integration (Recommended for CI/CD)
+This is the **recommended approach** for Cloudflare Pages as it provides automatic deployments and preview URLs for PRs.
 
 1. **Connect Repository**:
    - Go to Cloudflare Dashboard → Pages
@@ -95,10 +75,36 @@ When you run `pnpm run build`:
 3. Creates Cloudflare Workers for server routes
 4. Bundles all assets and pages
 
+## CLI Deployment (Alternative)
+
+If you need to deploy via CLI:
+
+1. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+2. **Authenticate with Cloudflare**:
+   ```bash
+   pnpm wrangler login
+   ```
+
+3. **Deploy to production**:
+   ```bash
+   pnpm run pages:deploy
+   ```
+
+4. **Deploy preview**:
+   ```bash
+   pnpm run pages:deploy:preview
+   ```
+
+**Note**: CLI deployment requires the project to be created in Cloudflare Dashboard first via Git integration.
+
 ## Deployment Scripts
 
-- **`pnpm run deploy`** - Build and deploy to production
-- **`pnpm run deploy:preview`** - Build and deploy to preview branch
+- **`pnpm run pages:deploy`** - Build and deploy to production via CLI
+- **`pnpm run pages:deploy:preview`** - Build and deploy to preview branch via CLI
 
 ## Post-Deployment
 

@@ -1,28 +1,17 @@
-name = "gympt"
-compatibility_date = "2025-07-15"
-pages_build_output_dir = ".output/public"
+# Cloudflare Pages Configuration
+# This file is optional for Pages projects
+# Most configuration should be done via the Cloudflare Dashboard
 
-# Environment variables (set these in Cloudflare dashboard)
-# SUPABASE_URL
-# SUPABASE_ANON_KEY
-# OPENAI_API_KEY
-# OPENAI_BASE_URL
-# OPENAI_MODEL
-# DATABASE_URL (if needed for build-time operations)
+# For Pages projects, use Git integration or:
+# pnpm run pages:deploy
 
-# [build]
-# command = "pnpm build"
+# Environment variables should be set in:
+# Cloudflare Dashboard → Pages → Settings → Environment Variables
 
-# Cloudflare Pages automatically provides these bindings
-# You can add KV, D1, R2, etc. bindings here if needed
-# [observability]
-# [observability.logs]
-# enabled = true
-# head_sampling_rate = 1
-# invocation_logs = true
-# persist = true
-
-# [observability.traces]
-# enabled = false
-# persist = true
-# head_sampling_rate = 1
+# Required environment variables:
+# - SUPABASE_URL
+# - SUPABASE_ANON_KEY
+# - OPENAI_API_KEY
+# - OPENAI_BASE_URL
+# - OPENAI_MODEL
+# - DATABASE_URL
