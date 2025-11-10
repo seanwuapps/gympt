@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
 import { useSessionStore } from '~/stores/session'
-
+// TODO: Remove fake auth
 definePageMeta({
   middleware: 'auth',
 })
@@ -312,7 +312,10 @@ function handleViewPlan() {
             class="length-option"
             :class="{ selected: selectedSessionLength === option.value }"
             @click="selectedSessionLength = option.value"
-            :style="{ pointerEvents: sessionStore.generating ? 'none' : 'auto', opacity: sessionStore.generating ? 0.6 : 1 }"
+            :style="{
+              pointerEvents: sessionStore.generating ? 'none' : 'auto',
+              opacity: sessionStore.generating ? 0.6 : 1,
+            }"
           >
             <i :class="`pi ${option.icon}`" />
             <span>{{ option.label }}</span>
@@ -321,10 +324,10 @@ function handleViewPlan() {
       </div>
 
       <template #footer>
-        <Button 
-          label="Cancel" 
-          @click="showSessionLengthDialog = false" 
-          text 
+        <Button
+          label="Cancel"
+          @click="showSessionLengthDialog = false"
+          text
           :disabled="sessionStore.generating"
         />
         <Button
