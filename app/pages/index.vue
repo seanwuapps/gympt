@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
 import { useSessionStore } from '~/stores/session'
-// TODO: Remove fake auth
+
 definePageMeta({
   middleware: 'auth',
 })
