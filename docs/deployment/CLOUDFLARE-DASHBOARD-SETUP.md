@@ -46,10 +46,16 @@ Click **Add variable** for each of these:
 | `OPENAI_BASE_URL` | `https://api.cloudflare.com/client/v4/accounts/<account_id>/ai/v1` | Replace `<account_id>` with your Cloudflare account ID |
 | `OPENAI_MODEL` | `@cf/meta/llama-4-scout-17b-16e-instruct` | Model identifier |
 | `DATABASE_URL` | `postgres://user:pass@host:5432/db` | Your PostgreSQL connection string |
+| `NUXT_APP_URL` | `https://gympt.pages.dev` | **CRITICAL**: Your production URL (for OAuth redirects) |
 
 **Important**: 
 - Add variables to **both** Production and Preview environments
+- `NUXT_APP_URL` should be:
+  - **Production**: Your actual domain (e.g., `https://gympt.pages.dev` or `https://yourdomain.com`)
+  - **Preview**: Use the preview URL pattern (e.g., `https://preview.gympt.pages.dev`) or set per-branch
 - Click **Save** after adding all variables
+
+**⚠️ Critical for OAuth**: If `NUXT_APP_URL` is incorrect, Google sign-in will redirect to localhost!
 
 ### 5. Deploy
 

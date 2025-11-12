@@ -15,7 +15,7 @@ const signInWithGoogle = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/confirm`
+      redirectTo: `${config.public.appUrl}/confirm`
     }
   })
   if (error) {
@@ -28,7 +28,7 @@ const signInWithOtp = async () => {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.value,
     options: {
-      emailRedirectTo: `${window.location.origin}/confirm`
+      emailRedirectTo: `${config.public.appUrl}/confirm`
     }
   })
   if (error) {

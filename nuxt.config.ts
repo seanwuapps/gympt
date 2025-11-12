@@ -99,6 +99,9 @@ export default defineNuxtConfig({
     openaiApiKey: process.env.OPENAI_API_KEY,
     openaiBaseUrl: process.env.OPENAI_BASE_URL,
     openaiModel: process.env.OPENAI_MODEL || '@cf/meta/llama-3.1-8b-instruct',
+    public: {
+      appUrl: process.env.NUXT_APP_URL || 'http://localhost:3000',
+    },
   },
   components: [
     {
