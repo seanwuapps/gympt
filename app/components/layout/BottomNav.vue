@@ -2,14 +2,30 @@
   <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
     <Tabs :value="activeRoute">
       <TabList>
-        <Tab v-for="item in navItems" :key="item.route" :value="item.route" as-child>
-          <NuxtLink :to="item.route" class="nav-item" :aria-label="item.label">
-            <span class="nav-item__icon-wrapper">
-              <i :class="item.icon" class="nav-item__icon" />
-              <span v-if="item.badge" class="nav-item__badge" aria-label="Active session"></span>
-            </span>
-            <span class="nav-item__label">{{ item.label }}</span>
-          </NuxtLink>
+        <Tab v-for="item in navItems" :key="item.route + item.action" :value="item.route" as-child>
+          <template v-if="item.action">
+            <button
+              type="button"
+              class="nav-item"
+              :aria-label="item.label"
+              @click="handleAction(item.action)"
+            >
+              <span class="nav-item__icon-wrapper">
+                <i :class="item.icon" class="nav-item__icon" />
+                <span v-if="item.badge" class="nav-item__badge" aria-hidden="true"></span>
+              </span>
+              <span class="nav-item__label">{{ item.label }}</span>
+            </button>
+          </template>
+          <template v-else>
+            <NuxtLink :to="item.route" class="nav-item" :aria-label="item.label">
+              <span class="nav-item__icon-wrapper">
+                <i :class="item.icon" class="nav-item__icon" />
+                <span v-if="item.badge" class="nav-item__badge" aria-hidden="true"></span>
+              </span>
+              <span class="nav-item__label">{{ item.label }}</span>
+            </NuxtLink>
+          </template>
         </Tab>
       </TabList>
     </Tabs>
@@ -28,6 +44,7 @@ interface NavItem {
   label: string
   icon: string
   badge?: boolean
+  action?: string
 }
 
 const route = useRoute()
@@ -57,6 +74,13 @@ const navItems = computed<NavItem[]>(() => [
     label: 'Profile',
     icon: 'pi pi-user',
   },
+  {
+    // Rendered as an action button instead of a link
+    route: '/',
+    label: 'Sign Out',
+    icon: 'pi pi-sign-out',
+    action: 'signOut',
+  },
 ])
 
 const activeRoute = computed(() => {
@@ -70,6 +94,32 @@ const activeRoute = computed(() => {
 
   return matchedItem?.route || currentPath
 })
+
+const supabase = useSupabaseClient()
+const router = useRouter()
+const { clearFakeAuth } = useFakeAuth()
+
+async function signOut() {
+  // Clear fake auth if present
+  clearFakeAuth()
+
+  // Also sign out from Supabase if real user
+  try {
+    await supabase.auth.signOut()
+  } catch (e) {
+    // Ignore sign out failures; continue to route to login
+    // console.warn('Supabase signOut failed', e)
+  }
+
+  await router.push('/login')
+}
+
+function handleAction(action?: string) {
+  if (!action) return
+  if (action === 'signOut') {
+    void signOut()
+  }
+}
 </script>
 
 <style scoped>
