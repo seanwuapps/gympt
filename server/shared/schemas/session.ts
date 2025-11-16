@@ -46,7 +46,7 @@ export const CreateSessionSchema = z.object({
   week: z.number().int().positive(),
   dayKey: z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
   modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab', 'rest']),
-  focus: z.string().optional(), // For strength: chest, back, legs, etc.; for cardio: running, cycling, etc.
+  focus: z.string().optional(), // For strength: chest, back, legs, etc.; for cardio: running, cycling, etc. Taken from LLM generated plan
   exercises: z.array(SessionExerciseSchema),
   status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).default('generated'),
 })
