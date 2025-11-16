@@ -218,7 +218,7 @@ export const usePlansStore = defineStore('plans', () => {
     }
   }
 
-  async function updatePlanDay(planId: string, week: string, day: string, modality: string) {
+  async function updatePlanDay(planId: string, week: string, day: string, modality: string, focus?: string) {
     loading.value = true
     error.value = null
 
@@ -230,10 +230,13 @@ export const usePlansStore = defineStore('plans', () => {
       const planIndex = plans.value.findIndex((p: TrainingPlan) => p.id === planId)
       if (planIndex !== -1) {
         const plan = plans.value[planIndex]
-        const weeklySchedule = JSON.parse(JSON.stringify(plan.weeklySchedule)) as Record<string, Record<string, string>>
+        const weeklySchedule = JSON.parse(JSON.stringify(plan.weeklySchedule)) as Record<string, Record<string, any>>
         
         if (weeklySchedule[week] && weeklySchedule[week][day]) {
-          weeklySchedule[week][day] = modality
+          weeklySchedule[week][day] = {
+            modality,
+            ...(focus && { focus })
+          }
           plans.value[planIndex] = {
             ...plan,
             weeklySchedule,
@@ -247,7 +250,7 @@ export const usePlansStore = defineStore('plans', () => {
         `/api/plans/${planId}`,
         {
           method: 'PATCH',
-          body: { week, day, modality }
+          body: { week, day, modality, ...(focus && { focus }) }
         }
       )
 

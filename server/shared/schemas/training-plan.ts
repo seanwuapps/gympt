@@ -1,6 +1,14 @@
 import { z } from 'zod'
 
 /**
+ * Day plan with modality and optional focus
+ */
+export const DayPlanSchema = z.object({
+  modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab', 'rest']),
+  focus: z.string().max(50).optional(), // e.g., "chest", "back", "legs" for strength; "running", "cycling" for cardio
+})
+
+/**
  * Schema for validating AI-generated training plan responses
  */
 export const TrainingPlanAIResponseSchema = z.object({
@@ -10,7 +18,11 @@ export const TrainingPlanAIResponseSchema = z.object({
     z.string().regex(/^week\d+$/), // week1, week2, etc.
     z.record(
       z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
-      z.string().min(1).max(50) // modality or "Rest"
+      z.union([
+        DayPlanSchema,
+        // Support string for backward compatibility (will be converted to DayPlanSchema)
+        z.string().min(1).max(50)
+      ])
     )
   )
 })

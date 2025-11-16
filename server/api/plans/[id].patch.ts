@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const { isActive, week, day, modality } = body
+  const { isActive, week, day, modality, focus } = body
 
   // Validate request - either isActive or weeklySchedule update
   const isActivatingPlan = typeof isActive === 'boolean'
@@ -70,6 +70,15 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 400,
         message: 'Modality must be a non-empty string'
+      })
+    }
+
+    // Validate modality is one of the valid types
+    const validModalities = ['strength', 'cardio', 'hiit', 'crossfit', 'rehab', 'rest']
+    if (!validModalities.includes(modality.toLowerCase())) {
+      throw createError({
+        statusCode: 400,
+        message: `Modality must be one of: ${validModalities.join(', ')}`
       })
     }
   }
@@ -139,7 +148,8 @@ export default defineEventHandler(async (event) => {
       }
 
       // Deep clone and update weeklySchedule
-      const weeklySchedule = JSON.parse(JSON.stringify(currentPlan.weeklySchedule)) as Record<string, Record<string, string>>
+      // Handle both old string format and new DayPlan object format
+      const weeklySchedule = JSON.parse(JSON.stringify(currentPlan.weeklySchedule)) as Record<string, Record<string, any>>
 
       if (!weeklySchedule[week]) {
         throw createError({
@@ -155,8 +165,11 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      // Update the specific day
-      weeklySchedule[week][day] = modality.trim()
+      // Update the specific day with new DayPlan structure
+      weeklySchedule[week][day] = {
+        modality: modality.trim().toLowerCase(),
+        ...(focus && { focus })
+      }
 
       // Update the plan with new schedule
       const [updatedPlan] = await db

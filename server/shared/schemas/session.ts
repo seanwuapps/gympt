@@ -7,7 +7,10 @@ export const SessionExerciseSchema = z.object({
   name: z.string(),
   // Strength fields
   sets: z.number().int().positive().nullable().default(null),
-  reps: z.union([z.number().int().positive(), z.tuple([z.number(), z.number()])]).nullable().default(null),
+  reps: z
+    .union([z.number().int().positive(), z.tuple([z.number(), z.number()])])
+    .nullable()
+    .default(null),
   loadKg: z.number().nonnegative().nullable().default(null),
   rir: z.number().min(0).max(5).nullable().default(null),
   restSec: z.number().int().positive().nullable().default(null),
@@ -34,7 +37,7 @@ export const SessionFeedbackSchema = z.object({
   difficulty: z.enum(['too_easy', 'just_right', 'too_hard']).optional(),
   notes: z.string().optional(),
   soreness: z.array(z.string()).optional(),
-  injuries: z.array(z.string()).optional()
+  injuries: z.array(z.string()).optional(),
 })
 
 // Create session request
@@ -42,9 +45,10 @@ export const CreateSessionSchema = z.object({
   planId: z.string().uuid(),
   week: z.number().int().positive(),
   dayKey: z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
-  modality: z.string(),
+  modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab', 'rest']),
+  focus: z.string().optional(), // For strength: chest, back, legs, etc.; for cardio: running, cycling, etc.
   exercises: z.array(SessionExerciseSchema),
-  status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).default('generated')
+  status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).default('generated'),
 })
 
 // Update session request
@@ -52,7 +56,7 @@ export const UpdateSessionSchema = z.object({
   status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).optional(),
   startedAt: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),
-  feedback: SessionFeedbackSchema.optional()
+  feedback: SessionFeedbackSchema.optional(),
 })
 
 // List sessions query params
@@ -60,5 +64,5 @@ export const ListSessionsQuerySchema = z.object({
   status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).optional(),
   planId: z.string().uuid().optional(),
   limit: z.coerce.number().int().positive().max(100).default(50),
-  offset: z.coerce.number().int().nonnegative().default(0)
+  offset: z.coerce.number().int().nonnegative().default(0),
 })

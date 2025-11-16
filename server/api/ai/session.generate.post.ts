@@ -39,6 +39,7 @@ const SessionPlan = z.object({ exercises: z.array(Exercise) })
 
 const InputSchema = z.object({
   modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab']),
+  focus: z.string().optional().nullable(), // For strength: chest, back, legs, etc.; for cardio: running, cycling, etc.
   sessionLengthMin: z.number().int().positive().default(45),
   day: z.number().int().positive().optional(),
   constraints: z.record(z.any()).default({}),
@@ -107,6 +108,8 @@ CRITICAL REQUIREMENTS:
 - For beginners, use fewer exercises with more rest time
 - MUST return valid JSON with an "exercises" array
 - Set unused fields to null (not undefined or omitted)
+- For strength sessions, use the provided focus to guide exercise selection
+- For cardio sessions, use the provided focus to guide cardio type selection
 
 EXERCISE TYPES (all include "type" and "name" fields):
 - "strength": { type: "strength", name, sets, reps, loadKg, rir, restSec }
@@ -129,6 +132,7 @@ OUTPUT FORMAT:
 `
 
     const userPrompt = `Generate a ${parsed.data.modality} workout session for ${parsed.data.sessionLengthMin} minutes.
+${parsed.data.focus ? `Focus: ${parsed.data.focus}` : ''}
 User: ${userProfile.experience} level, ${userProfile.units} units.
 Goals: ${userProfile.goals}.
 `

@@ -79,6 +79,26 @@ export default defineEventHandler(async (event) => {
 
     const planData = validationResult.data
 
+    // Convert string modalities to DayPlan objects for backward compatibility
+    const weeklySchedule = Object.entries(planData.weekly_schedule).reduce(
+      (acc, [week, days]) => {
+        acc[week] = Object.entries(days).reduce(
+          (dayAcc, [day, value]) => {
+            if (typeof value === 'string') {
+              // Convert legacy string format to DayPlan object
+              dayAcc[day] = { modality: value as any }
+            } else {
+              dayAcc[day] = value
+            }
+            return dayAcc
+          },
+          {} as Record<string, any>
+        )
+        return acc
+      },
+      {} as Record<string, Record<string, any>>
+    )
+
     // Store plan in database
     const [newPlan] = await db
       .insert(trainingPlans)
@@ -86,7 +106,7 @@ export default defineEventHandler(async (event) => {
         userId: user.sub,
         name: planData.name,
         durationWeeks: planData.duration_weeks,
-        weeklySchedule: planData.weekly_schedule,
+        weeklySchedule,
         isActive: false, // User must explicitly activate
       })
       .returning()
