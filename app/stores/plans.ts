@@ -9,11 +9,11 @@ export const usePlansStore = defineStore('plans', () => {
 
   // Computed
   const activePlan = computed(() => {
-    return plans.value.find(plan => plan.isActive) || null
+    return plans.value.find((plan) => plan.isActive) || null
   })
 
   const inactivePlans = computed(() => {
-    return plans.value.filter(plan => !plan.isActive)
+    return plans.value.filter((plan) => !plan.isActive)
   })
 
   const hasActivePlan = computed(() => {
@@ -25,11 +25,11 @@ export const usePlansStore = defineStore('plans', () => {
 
     const plan = activePlan.value
     const schedule = plan.weeklySchedule as Record<string, Record<string, string>>
-    
+
     return {
       ...plan,
       totalWeeks: plan.durationWeeks,
-      weeklySchedule: schedule
+      weeklySchedule: schedule,
     }
   })
 
@@ -40,10 +40,10 @@ export const usePlansStore = defineStore('plans', () => {
 
     try {
       const response = await $fetch<{ success: boolean; plans: TrainingPlan[] }>('/api/plans')
-      
+
       if (response.success) {
         plans.value = response.plans
-        
+
         // Auto-activate if there's exactly one plan and no active plan
         await autoActivateSinglePlan()
       }
@@ -75,16 +75,19 @@ export const usePlansStore = defineStore('plans', () => {
     error.value = null
 
     try {
-      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>('/api/plans/generate', {
-        method: 'POST'
-      })
+      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(
+        '/api/plans/generate',
+        {
+          method: 'POST',
+        }
+      )
 
       if (response.success && response.plan) {
         plans.value.push(response.plan)
-        
+
         // Auto-activate if this is the only plan
         await autoActivateSinglePlan()
-        
+
         return response.plan
       }
     } catch (err: any) {
@@ -101,16 +104,19 @@ export const usePlansStore = defineStore('plans', () => {
     error.value = null
 
     try {
-      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(`/api/plans/${planId}`, {
-        method: 'PATCH',
-        body: { isActive: true }
-      })
+      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(
+        `/api/plans/${planId}`,
+        {
+          method: 'PATCH',
+          body: { isActive: true },
+        }
+      )
 
       if (response.success && response.plan) {
         // Update local state
-        plans.value = plans.value.map(plan => ({
+        plans.value = plans.value.map((plan) => ({
           ...plan,
-          isActive: plan.id === planId
+          isActive: plan.id === planId,
         }))
         return response.plan
       }
@@ -128,14 +134,17 @@ export const usePlansStore = defineStore('plans', () => {
     error.value = null
 
     try {
-      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(`/api/plans/${planId}`, {
-        method: 'PATCH',
-        body: { isActive: false }
-      })
+      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(
+        `/api/plans/${planId}`,
+        {
+          method: 'PATCH',
+          body: { isActive: false },
+        }
+      )
 
       if (response.success && response.plan) {
         // Update local state - set plan to inactive
-        plans.value = plans.value.map(plan => 
+        plans.value = plans.value.map((plan) =>
           plan.id === planId ? { ...plan, isActive: false } : plan
         )
         return response.plan
@@ -155,12 +164,12 @@ export const usePlansStore = defineStore('plans', () => {
 
     try {
       const response = await $fetch<{ success: boolean }>(`/api/plans/${planId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       })
 
       if (response.success) {
         // Remove from local state
-        plans.value = plans.value.filter(plan => plan.id !== planId)
+        plans.value = plans.value.filter((plan) => plan.id !== planId)
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to delete training plan'
@@ -173,8 +182,10 @@ export const usePlansStore = defineStore('plans', () => {
 
   async function getPlanById(planId: string) {
     try {
-      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(`/api/plans/${planId}`)
-      
+      const response = await $fetch<{ success: boolean; plan: TrainingPlan }>(
+        `/api/plans/${planId}`
+      )
+
       if (response.success) {
         return response.plan
       }
@@ -200,7 +211,7 @@ export const usePlansStore = defineStore('plans', () => {
         `/api/plans/${planId}/suggest-day`,
         {
           method: 'POST',
-          body: { week, day }
+          body: { week, day },
         }
       )
 
@@ -218,7 +229,13 @@ export const usePlansStore = defineStore('plans', () => {
     }
   }
 
-  async function updatePlanDay(planId: string, week: string, day: string, modality: string, focus?: string) {
+  async function updatePlanDay(
+    planId: string,
+    week: string,
+    day: string,
+    modality: string,
+    focus?: string
+  ) {
     loading.value = true
     error.value = null
 
@@ -230,17 +247,20 @@ export const usePlansStore = defineStore('plans', () => {
       const planIndex = plans.value.findIndex((p: TrainingPlan) => p.id === planId)
       if (planIndex !== -1) {
         const plan = plans.value[planIndex]
-        const weeklySchedule = JSON.parse(JSON.stringify(plan.weeklySchedule)) as Record<string, Record<string, any>>
-        
+        const weeklySchedule = JSON.parse(JSON.stringify(plan.weeklySchedule)) as Record<
+          string,
+          Record<string, any>
+        >
+
         if (weeklySchedule[week] && weeklySchedule[week][day]) {
           weeklySchedule[week][day] = {
             modality,
-            ...(focus && { focus })
+            ...(focus && { focus }),
           }
           plans.value[planIndex] = {
             ...plan,
             weeklySchedule,
-            updatedAt: new Date()
+            updatedAt: new Date(),
           }
         }
       }
@@ -250,7 +270,7 @@ export const usePlansStore = defineStore('plans', () => {
         `/api/plans/${planId}`,
         {
           method: 'PATCH',
-          body: { week, day, modality, ...(focus && { focus }) }
+          body: { week, day, modality, ...(focus && { focus }) },
         }
       )
 
@@ -295,6 +315,6 @@ export const usePlansStore = defineStore('plans', () => {
     getPlanById,
     autoActivateSinglePlan,
     generateDayPlanSuggestions,
-    updatePlanDay
+    updatePlanDay,
   }
 })

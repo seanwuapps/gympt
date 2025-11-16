@@ -21,10 +21,10 @@ export const TrainingPlanAIResponseSchema = z.object({
       z.union([
         DayPlanSchema,
         // Support string for backward compatibility (will be converted to DayPlanSchema)
-        z.string().min(1).max(50)
+        z.string().min(1).max(50),
       ])
     )
-  )
+  ),
 })
 
 export type TrainingPlanAIResponse = z.infer<typeof TrainingPlanAIResponseSchema>

@@ -129,8 +129,8 @@ Generate the training plan now.`
  * Validates and formats the AI response
  */
 export function formatPlanName(goals: string, experience: string): string {
-  const goalParts = goals.split(',').map(g => g.trim())
+  const goalParts = goals.split(',').map((g) => g.trim())
   const primaryGoal = goalParts[0] || 'Fitness'
-  
+
   return `${experience.charAt(0).toUpperCase() + experience.slice(1)} ${primaryGoal} Plan`
 }

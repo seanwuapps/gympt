@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   if (!planId) {
     throw createError({
       statusCode: 400,
-      message: 'Plan ID is required'
+      message: 'Plan ID is required',
     })
   }
 
@@ -38,14 +38,14 @@ export default defineEventHandler(async (event) => {
   if (!isActivatingPlan && !isUpdatingSchedule) {
     throw createError({
       statusCode: 400,
-      message: 'Either isActive or (week, day, modality) must be provided'
+      message: 'Either isActive or (week, day, modality) must be provided',
     })
   }
 
   if (isActivatingPlan && isUpdatingSchedule) {
     throw createError({
       statusCode: 400,
-      message: 'Cannot update isActive and weeklySchedule in the same request'
+      message: 'Cannot update isActive and weeklySchedule in the same request',
     })
   }
 
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
     if (!week.match(/^week\d+$/)) {
       throw createError({
         statusCode: 400,
-        message: 'Invalid week format. Expected format: week1, week2, etc.'
+        message: 'Invalid week format. Expected format: week1, week2, etc.',
       })
     }
 
@@ -62,14 +62,14 @@ export default defineEventHandler(async (event) => {
     if (!validDays.includes(day)) {
       throw createError({
         statusCode: 400,
-        message: `Invalid day. Must be one of: ${validDays.join(', ')}`
+        message: `Invalid day. Must be one of: ${validDays.join(', ')}`,
       })
     }
 
     if (typeof modality !== 'string' || modality.trim().length === 0) {
       throw createError({
         statusCode: 400,
-        message: 'Modality must be a non-empty string'
+        message: 'Modality must be a non-empty string',
       })
     }
 
@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
     if (!validModalities.includes(modality.toLowerCase())) {
       throw createError({
         statusCode: 400,
-        message: `Modality must be one of: ${validModalities.join(', ')}`
+        message: `Modality must be one of: ${validModalities.join(', ')}`,
       })
     }
   }
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
   if (!connectionString) {
     throw createError({
       statusCode: 500,
-      message: 'Database configuration missing'
+      message: 'Database configuration missing',
     })
   }
 
@@ -110,22 +110,19 @@ export default defineEventHandler(async (event) => {
       const [updatedPlan] = await db
         .update(trainingPlans)
         .set({ isActive, updatedAt: new Date() })
-        .where(and(
-          eq(trainingPlans.id, planId),
-          eq(trainingPlans.userId, user.sub)
-        ))
+        .where(and(eq(trainingPlans.id, planId), eq(trainingPlans.userId, user.sub)))
         .returning()
 
       if (!updatedPlan) {
         throw createError({
           statusCode: 404,
-          message: 'Training plan not found'
+          message: 'Training plan not found',
         })
       }
 
       return {
         success: true,
-        plan: updatedPlan
+        plan: updatedPlan,
       }
     }
 
@@ -134,75 +131,72 @@ export default defineEventHandler(async (event) => {
       const [currentPlan] = await db
         .select()
         .from(trainingPlans)
-        .where(and(
-          eq(trainingPlans.id, planId),
-          eq(trainingPlans.userId, user.sub)
-        ))
+        .where(and(eq(trainingPlans.id, planId), eq(trainingPlans.userId, user.sub)))
         .limit(1)
 
       if (!currentPlan) {
         throw createError({
           statusCode: 404,
-          message: 'Training plan not found'
+          message: 'Training plan not found',
         })
       }
 
       // Deep clone and update weeklySchedule
       // Handle both old string format and new DayPlan object format
-      const weeklySchedule = JSON.parse(JSON.stringify(currentPlan.weeklySchedule)) as Record<string, Record<string, any>>
+      const weeklySchedule = JSON.parse(JSON.stringify(currentPlan.weeklySchedule)) as Record<
+        string,
+        Record<string, any>
+      >
 
       if (!weeklySchedule[week]) {
         throw createError({
           statusCode: 404,
-          message: `Week ${week} not found in plan`
+          message: `Week ${week} not found in plan`,
         })
       }
 
       if (!weeklySchedule[week][day]) {
         throw createError({
           statusCode: 404,
-          message: `Day ${day} not found in ${week}`
+          message: `Day ${day} not found in ${week}`,
         })
       }
 
       // Update the specific day with new DayPlan structure
       weeklySchedule[week][day] = {
         modality: modality.trim().toLowerCase(),
-        ...(focus && { focus })
+        ...(focus && { focus }),
       }
 
       // Update the plan with new schedule
       const [updatedPlan] = await db
         .update(trainingPlans)
         .set({ weeklySchedule, updatedAt: new Date() })
-        .where(and(
-          eq(trainingPlans.id, planId),
-          eq(trainingPlans.userId, user.sub)
-        ))
+        .where(and(eq(trainingPlans.id, planId), eq(trainingPlans.userId, user.sub)))
         .returning()
 
       if (!updatedPlan) {
         throw createError({
           statusCode: 404,
-          message: 'Training plan not found'
+          message: 'Training plan not found',
         })
       }
 
       return {
         success: true,
-        plan: updatedPlan
+        plan: updatedPlan,
       }
     }
   } catch (error: any) {
     console.error('Error updating plan:', error)
-    
+
     if (error.statusCode) {
       throw error
     }
 
     throw createError({
       statusCode: 500,
-      message: 'Failed to update training plan'
+      message: 'Failed to update training plan',
     })
   } finally {
     await pg.end()
