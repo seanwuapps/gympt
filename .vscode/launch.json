@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Nuxt Dev Server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Attach Chrome",
+      "port": 9222,
+      "urlFilter": "localhost:3000/*",
+      "pathMapping": {
+        "/": "${workspaceFolder}/",
+        "/__nuxt/": "${workspaceFolder}/.nuxt/"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Current File",
+      "program": "${file}",
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Nuxt Dev + Chrome",
+      "configurations": ["Nuxt Dev Server", "Attach Chrome"],
+      "stopAll": true
+    }
+  ]
+}

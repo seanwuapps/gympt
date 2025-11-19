@@ -158,18 +158,18 @@ function handleAction(action?: string) {
   align-items: center;
   border: none;
 
-  /* Frosted glass effect - macOS style */
-  background: rgba(255, 255, 255, 0.7);
+  /* Frosted glass effect - macOS style (Dark Mode) */
+  background: rgba(15, 23, 42, 0.7); /* Slate-900 with opacity */
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
 
   /* Dock styling */
   border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border for definition */
   box-shadow:
-    0 0.5rem 2rem rgba(0, 0, 0, 0.1),
-    0 0.25rem 0.5rem rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 0.5rem 2rem rgba(0, 0, 0, 0.3),
+    0 0.25rem 0.5rem rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Mobile: horizontal layout */
@@ -219,14 +219,16 @@ function handleAction(action?: string) {
   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
+  border: none; /* Reset button border */
+  background: transparent; /* Reset button background */
 
   /* High contrast dark text on light background */
-  color: rgba(15, 23, 42, 0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.5);
-  color: rgba(15, 23, 42, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .nav-item:focus-visible {
@@ -236,7 +238,7 @@ function handleAction(action?: string) {
 
 /* Active state - macOS dock active indicator */
 .nav-item.router-link-active {
-  color: rgba(15, 23, 42, 0.95);
+  color: #ffffff; /* White text for active state */
   font-weight: 600;
 }
 
@@ -250,9 +252,10 @@ function handleAction(action?: string) {
     transform: translateX(-50%);
     width: 0.25rem;
     height: 0.25rem;
-    background: rgba(15, 23, 42, 0.7);
+    background: #d4ff00; /* Primary lime for indicator */
     border-radius: 50%;
     animation: dock-indicator 300ms ease-out;
+    box-shadow: 0 0 8px #d4ff00; /* Glow effect */
   }
 }
 
@@ -266,9 +269,10 @@ function handleAction(action?: string) {
     transform: translateY(-50%);
     width: 0.25rem;
     height: 0.25rem;
-    background: rgba(15, 23, 42, 0.7);
+    background: #d4ff00; /* Primary lime for indicator */
     border-radius: 50%;
     animation: dock-indicator 300ms ease-out;
+    box-shadow: 0 0 8px #d4ff00; /* Glow effect */
   }
 }
 
@@ -284,9 +288,10 @@ function handleAction(action?: string) {
 }
 
 .nav-item.router-link-active .nav-item__icon-wrapper {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(255, 255, 255, 0.15); /* Subtle light background */
   border-radius: 0.875rem;
   padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-item__icon-wrapper {

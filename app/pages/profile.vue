@@ -37,87 +37,12 @@
 
           <!-- Edit Mode -->
           <div v-else class="profile-edit">
-            <form>
-              <div class="field">
-                <label class="field-label">Experience Level</label>
-                <Select
-                  v-model="editForm.experienceLevel"
-                  :options="experienceLevelOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full"
-                />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Preferred Training Days</label>
-                <div class="day-cards-grid">
-                  <CheckboxCard
-                    v-for="day in days"
-                    :key="day"
-                    v-model="daySelections[day]"
-                    :label="day"
-                    :inputId="`edit-${day}`"
-                    @update:modelValue="updateTrainingDays"
-                  />
-                </div>
-              </div>
-
-              <div class="field">
-                <label class="field-label">Goals</label>
-                <FormChipGroup v-model="editForm.goals" :options="goalOptions" />
-                <small class="help-text">Select all that apply</small>
-              </div>
-
-              <div class="field">
-                <label class="field-label">Progression Pace</label>
-                <Select
-                  v-model="editForm.aggressiveness"
-                  :options="aggressivenessOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full"
-                />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Injury Flags</label>
-                <Textarea
-                  v-model="editForm.injuryFlags"
-                  :rows="3"
-                  :maxlength="300"
-                  class="w-full"
-                />
-                <small class="char-count">{{ (editForm.injuryFlags || '').length }}/300</small>
-              </div>
-
-              <div class="field">
-                <label class="field-label">Units</label>
-                <Select
-                  v-model="editForm.units"
-                  :options="unitsOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full"
-                />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Language</label>
-                <Select
-                  v-model="editForm.language"
-                  :options="languageOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  class="w-full"
-                />
-              </div>
-            </form>
-
-            <div class="edit-actions">
-              <Button label="Cancel" severity="secondary" @click="cancelEdit" />
-              <Button label="Save Changes" :loading="saving" @click="saveChanges" />
-            </div>
+            <ProfileEditForm
+              :initial-data="editForm"
+              :loading="saving"
+              @save="saveChanges"
+              @cancel="cancelEdit"
+            />
           </div>
         </div>
 
@@ -208,6 +133,8 @@ import type { Profile } from '../../db/schema'
 import { detectSignificantProfileChanges, getChangeSummary } from '~/utils/profile-changes'
 import { usePlansStore } from '~/stores/plans'
 
+import ProfileEditForm from '~/components/profile/ProfileEditForm.vue'
+
 definePageMeta({
   middleware: 'auth',
 })
@@ -226,17 +153,6 @@ const oldProfileSnapshot = ref<Profile | null>(null)
 const generatingPlan = ref(false)
 const generatedPlanId = ref<string | null>(null)
 const generationError = ref<string | null>(null)
-
-// Day selections for CheckboxCard components
-const daySelections = ref<Record<string, boolean>>({
-  Mon: false,
-  Tue: false,
-  Wed: false,
-  Thu: false,
-  Fri: false,
-  Sat: false,
-  Sun: false,
-})
 
 // Data-driven profile details for view mode
 const profileDetails = computed(() => {
@@ -284,38 +200,6 @@ const editForm = ref<ProfileFormData>({
   language: 'en',
 })
 
-const experienceLevelOptions = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
-]
-
-const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-const aggressivenessOptions = [
-  { value: 'conservative', label: 'Conservative' },
-  { value: 'moderate', label: 'Moderate' },
-  { value: 'aggressive', label: 'Aggressive' },
-]
-
-const unitsOptions = [
-  { value: 'metric', label: 'Metric (kg/cm)' },
-  { value: 'imperial', label: 'Imperial (lb/in)' },
-]
-
-const languageOptions = [{ value: 'en', label: 'English' }]
-
-const goalOptions = [
-  { value: 'strength', label: 'Build Strength', icon: '💪' },
-  { value: 'muscle', label: 'Gain Muscle', icon: '🏋️' },
-  { value: 'weight_loss', label: 'Lose Weight', icon: '⚖️' },
-  { value: 'endurance', label: 'Improve Endurance', icon: '🏃' },
-  { value: 'flexibility', label: 'Increase Flexibility', icon: '🧘' },
-  { value: 'athletic', label: 'Athletic Performance', icon: '⚡' },
-  { value: 'health', label: 'General Health', icon: '❤️' },
-  { value: 'rehab', label: 'Rehabilitation', icon: '🩹' },
-]
-
 onMounted(async () => {
   await fetchProfile()
   // Fetch plans to check if user has active plan
@@ -337,13 +221,6 @@ const formatGoals = (goals: string | null | undefined): string => {
   return goals
 }
 
-const updateTrainingDays = () => {
-  // Sync daySelections to editForm.preferredTrainingDays
-  editForm.value.preferredTrainingDays = Object.keys(daySelections.value).filter(
-    (day) => daySelections.value[day]
-  )
-}
-
 const startEdit = () => {
   if (profile.value) {
     editForm.value = {
@@ -355,10 +232,6 @@ const startEdit = () => {
       language: profile.value.language,
       aggressiveness: profile.value.aggressiveness,
     }
-    // Initialize day selections from preferredTrainingDays
-    days.forEach((day) => {
-      daySelections.value[day] = profile.value!.preferredTrainingDays.includes(day)
-    })
     isEditing.value = true
   }
 }
@@ -367,14 +240,14 @@ const cancelEdit = () => {
   isEditing.value = false
 }
 
-const saveChanges = async () => {
+const saveChanges = async (formData: ProfileFormData) => {
   saving.value = true
 
   // Capture old profile before saving
   oldProfileSnapshot.value = profile.value ? { ...profile.value } : null
 
   try {
-    const updatedProfile = await saveProfile(editForm.value)
+    const updatedProfile = await saveProfile(formData)
     isEditing.value = false
 
     toast.add({
@@ -405,7 +278,10 @@ const saveChanges = async () => {
       if (hasSignificantChanges && plansStore.hasActivePlan) {
         profileChangeSummary.value = getChangeSummary(oldProfileSnapshot.value, updatedProfile)
         showPlanRegenerationPrompt.value = true
-        console.log('[Profile] Showing plan regeneration prompt with changes:', profileChangeSummary.value)
+        console.log(
+          '[Profile] Showing plan regeneration prompt with changes:',
+          profileChangeSummary.value
+        )
       } else {
         console.log('[Profile] Not showing prompt - conditions not met')
       }

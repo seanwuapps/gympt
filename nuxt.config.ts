@@ -23,7 +23,7 @@ const EnergyBoostDark = definePreset(Lara, {
       dark: {
         // Deep, modern dark surface (slate for cool, professional look)
         surface: {
-          0: '#ffffff',
+          0: '#020617', // Fixed: Was #ffffff, now slate-950 equivalent for dark mode
           50: '{slate.50}',
           100: '{slate.100}',
           200: '{slate.200}',
@@ -86,6 +86,13 @@ export default defineNuxtConfig({
       autoSubfolderIndex: false,
     },
   },
+  app: {
+    head: {
+      htmlAttrs: {
+        class: 'app-dark', // Enforce dark mode globally
+      },
+    },
+  },
   devtools: { enabled: true },
   modules: ['@nuxtjs/supabase', '@nuxt/fonts', '@primevue/nuxt-module', '@pinia/nuxt'],
   css: [
@@ -124,7 +131,7 @@ export default defineNuxtConfig({
       theme: {
         preset: EnergyBoostDark,
         options: {
-          darkModeSelector: 'system',
+          darkModeSelector: '.app-dark', // Match the class added in app.head
           cssLayer: false,
         },
       },
