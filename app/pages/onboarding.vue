@@ -63,7 +63,7 @@ const stepItems = ref([
   { label: 'Basics' },
   { label: 'Goals' },
   { label: 'Safety' },
-  { label: 'Training Plan' }
+  { label: 'Training Plan' },
 ])
 
 // Load progress from localStorage on mount
@@ -101,7 +101,7 @@ const handleSaveAndContinue = async () => {
     toast.add({
       severity: 'success',
       summary: 'Profile Saved!',
-      detail: 'Now let\'s create your training plan.',
+      detail: "Now let's create your training plan.",
       life: 3000,
     })
 
@@ -121,7 +121,7 @@ const handleSaveAndContinue = async () => {
 
 const handlePlanGenerated = async () => {
   onboardingStore.clearProgress()
-  
+
   toast.add({
     severity: 'success',
     summary: 'Setup Complete!',
@@ -135,7 +135,7 @@ const handlePlanGenerated = async () => {
 
 const handleSkipPlan = async () => {
   onboardingStore.clearProgress()
-  
+
   toast.add({
     severity: 'info',
     summary: 'Setup Complete!',

@@ -1,9 +1,11 @@
 # Product Requirements Document (PRD) — AI Training Companion
 
 ## 1. Vision
+
 A mobile‑first AI training companion that generates and adapts training plans and sessions across strength, cardio, HIIT, crossfit, and rehabilitation. It guides the user through sessions with a minimal step‑focused UI, captures feedback, and adapts subsequent sessions. Provides session and weekly reports.
 
-## 2. Scope (MVP)
+## 2. Scope (Phase 1: MVP Foundation)
+
 - In scope:
   - Google sign‑in via Supabase Auth.
   - Onboarding to capture goals, experience, schedule, equipment, injuries, units (kg/cm), language (en).
@@ -18,10 +20,12 @@ A mobile‑first AI training companion that generates and adapts training plans 
   - Localization beyond English; units beyond metric (later).
 
 ## 3. Users & Assumptions
+
 - Users: beginners and intermediates seeking guided training.
 - Assumptions: mobile web PWA use; always online; minimal manual data entry; safety-first defaults.
 
 ## 4. Functional Requirements
+
 - Auth
   - Sign in with Google via Supabase; sign out; session persistence.
 - Onboarding
@@ -54,12 +58,14 @@ A mobile‑first AI training companion that generates and adapts training plans 
   - Weekly report: total volume, e1RM trend, PRs, adherence, average session RPE, duration.
 
 ## 5. Non‑Functional Requirements
+
 - Mobile-first UX with large tap targets and minimal cognitive load.
 - Performance: first load < 3s on typical mobile; interactions < 100ms.
 - Security: RLS on all data; secrets only server-side.
 - Reliability: avoid data loss during navigation; atomic saves where possible.
 
 ## 6. Tech Stack & Integrations
+
 - Frontend: Nuxt 4 (Vue 3 + TypeScript), Element Plus UI.
 - Backend/DB: Supabase (Postgres + Auth with Google), Row Level Security.
 - ORM: Drizzle ORM (schema/migrations/types).
@@ -67,6 +73,7 @@ A mobile‑first AI training companion that generates and adapts training plans 
 - Validation: Zod (strict JSON contracts from AI).
 
 ## 7. Analytics & Metrics
+
 - Strength: set/rep/load/RPE, per-lift e1RM, total volume.
 - Cardio: duration, distance, intensity, HR (if available later).
 - HIIT: rounds, work/rest compliance.
@@ -74,6 +81,7 @@ A mobile‑first AI training companion that generates and adapts training plans 
 - Rehab: pain ceiling adherence, sets/reps completed.
 
 ## 8. Acceptance Criteria (selected)
+
 - Auth: user can sign in/out with Google; RLS restricts data to owner.
 - Onboarding: profile created with units metric (kg/cm) and English; editable later.
 - AI Session Generation: POST endpoint returns valid strict JSON schema; UI renders per-exercise steps.
@@ -82,13 +90,68 @@ A mobile‑first AI training companion that generates and adapts training plans 
 - Reports: session report available immediately; weekly report aggregates last 7 days correctly.
 
 ## 9. Risks & Constraints
+
 - AI variability: enforce strict schemas and retries/fallbacks.
 - Safety: conservative progression; caps on weekly increases; respect injury flags.
 - Cost: model choice tuned for quality vs cost; audit logs for monitoring.
 
 ## 10. Outbound APIs & Secrets
+
 - Cloudflare AI via OpenAI-compatible base URL; API token server-only.
 - Supabase service role used server-side only; client uses anon key.
 
-## 11. Future (Post‑MVP)
-- Offline-first PWA; localization; unit switching; advanced progression aggressiveness setting; coach mode; wearable integrations.
+## 11. Delivery Roadmap
+
+### Phase 1: MVP Foundation (Months 1-4)
+
+**Goal:** Launch functional MVP for early adopters.
+
+- **M1.1:** User Auth & Profile (Supabase).
+- **M1.2:** AI Training Plan Generation.
+- **M1.3:** Session Runner & Logging.
+- **M1.4:** Basic Analytics (Session/Weekly).
+- **M1.5:** Beta Launch.
+
+### Phase 2: Market Validation (Months 4-6)
+
+**Goal:** Validate fit and expand compatibility.
+
+- **M2.1:** Integrations (Google Fit / Apple Health).
+- **M2.2:** UX Refinement from feedback.
+- **M2.3:** Public Launch.
+
+### Phase 3: Premium Tier (Months 6-9)
+
+**Goal:** Monetization via subscription.
+
+- **M3.1:** Advanced Analytics (Heatmaps, Trends).
+- **M3.2:** Training Intelligence ("Why this exercise?", Recovery).
+- **M3.3:** Subscription System (Stripe/RevenueCat).
+
+### Phase 4: Ecosystem (Months 9-15)
+
+**Goal:** Premium experiences and add-ons.
+
+- **M4.1:** Real-Time Video Form Check (WebRTC).
+- **M4.2:** Generative AI Music.
+- **M4.3:** Persona-based AI Trainers.
+- **M4.4:** Add-on Marketplace.
+
+### Phase 5: Scale (Ongoing)
+
+- **M5.1:** Marketplace Expansion.
+- **M5.2:** Internationalization.
+- **M5.3:** Offline-first & Wearables.
+
+## 12. Monetization Strategy
+
+- **Free Tier (Phases 1-2):**
+  - Full access to core training features (Plan Gen, Session Runner, Basic Logs).
+  - Focus on user acquisition and retention.
+
+- **Tier 1 Subscription (Phase 3+):**
+  - **Price:** ~$5-10/month (TBD).
+  - **Features:** Advanced analytics, deep insights, recovery tracking, unlimited plan generations (if capped on free).
+
+- **Add-ons / Marketplace (Phase 4+):**
+  - One-time or sub-add-ons for specific AI trainers, specialized programs, or advanced media features.

@@ -43,6 +43,7 @@ export interface Session {
   week: number
   dayKey: string
   modality: string
+  reasons: string | null
   exercises: SessionExercise[]
   status: 'generated' | 'in_progress' | 'completed' | 'cancelled'
   startedAt: string | null
@@ -66,29 +67,38 @@ export const useSessionStore = defineStore('session', () => {
     modality: string,
     sessionLengthMin: number = 45
   ) {
-    console.log('[Session Store] generateSession called with:', { planId, week, dayKey, modality, sessionLengthMin })
+    console.log('[Session Store] generateSession called with:', {
+      planId,
+      week,
+      dayKey,
+      modality,
+      sessionLengthMin,
+    })
     generating.value = true
     error.value = null
 
     try {
       // Generate session via AI (profile will be fetched on backend)
       console.log('[Session Store] Calling AI session generation...')
-      const sessionData = await $fetch<{ exercises: SessionExercise[] }>('/api/ai/session.generate', {
-        method: 'POST',
-        body: {
-          modality: modality.toLowerCase(),
-          sessionLengthMin,
-          day: week,
-          constraints: {}
+      const sessionData = await $fetch<{ exercises: SessionExercise[]; reasons: string | null }>(
+        '/api/ai/session.generate',
+        {
+          method: 'POST',
+          body: {
+            modality: modality.toLowerCase(),
+            sessionLengthMin,
+            day: week,
+            constraints: {},
+          },
         }
-      }).catch((err) => {
+      ).catch((err) => {
         console.error('[Session Store] AI generation failed:', err)
         throw new Error(`AI session generation failed: ${err.message || 'Unknown error'}`)
       })
-      
+
       console.log('[Session Store] AI session generated:', sessionData)
       console.log('[Session Store] Exercises count:', sessionData.exercises?.length || 0)
-      
+
       // Validate exercises exist
       if (!sessionData.exercises || sessionData.exercises.length === 0) {
         throw new Error('AI generated session with no exercises')
@@ -103,9 +113,10 @@ export const useSessionStore = defineStore('session', () => {
           week,
           dayKey,
           modality,
+          reasons: sessionData.reasons,
           exercises: sessionData.exercises,
-          status: 'generated'
-        }
+          status: 'generated',
+        },
       })
       console.log('[Session Store] Session saved:', savedSession)
 
@@ -124,13 +135,16 @@ export const useSessionStore = defineStore('session', () => {
 
   async function startSession(sessionId: string) {
     try {
-      const response = await $fetch<{ success: boolean; session: Session }>(`/api/sessions/${sessionId}`, {
-        method: 'PATCH',
-        body: {
-          status: 'in_progress',
-          startedAt: new Date().toISOString()
+      const response = await $fetch<{ success: boolean; session: Session }>(
+        `/api/sessions/${sessionId}`,
+        {
+          method: 'PATCH',
+          body: {
+            status: 'in_progress',
+            startedAt: new Date().toISOString(),
+          },
         }
-      })
+      )
 
       if (currentSession.value && currentSession.value.id === sessionId) {
         currentSession.value = response.session
@@ -150,8 +164,8 @@ export const useSessionStore = defineStore('session', () => {
         body: {
           status: 'completed',
           completedAt: new Date().toISOString(),
-          feedback
-        }
+          feedback,
+        },
       })
 
       clearSession()
@@ -166,8 +180,8 @@ export const useSessionStore = defineStore('session', () => {
       await $fetch(`/api/sessions/${sessionId}`, {
         method: 'PATCH',
         body: {
-          status: 'cancelled'
-        }
+          status: 'cancelled',
+        },
       })
 
       clearSession()
@@ -179,7 +193,9 @@ export const useSessionStore = defineStore('session', () => {
 
   async function loadSession(sessionId: string) {
     try {
-      const response = await $fetch<{ success: boolean; session: Session }>(`/api/sessions/${sessionId}`)
+      const response = await $fetch<{ success: boolean; session: Session }>(
+        `/api/sessions/${sessionId}`
+      )
       currentSession.value = response.session
       return response.session
     } catch (err: any) {
@@ -190,12 +206,15 @@ export const useSessionStore = defineStore('session', () => {
 
   async function swapExercise(sessionId: string, exerciseIndex: number) {
     try {
-      const response = await $fetch<{ success: boolean; exercise: SessionExercise }>(`/api/sessions/${sessionId}/swap-exercise`, {
-        method: 'POST',
-        body: {
-          exerciseIndex
+      const response = await $fetch<{ success: boolean; exercise: SessionExercise }>(
+        `/api/sessions/${sessionId}/swap-exercise`,
+        {
+          method: 'POST',
+          body: {
+            exerciseIndex,
+          },
         }
-      })
+      )
 
       // Update the exercise in current session
       if (currentSession.value && response.exercise) {
@@ -226,6 +245,6 @@ export const useSessionStore = defineStore('session', () => {
     cancelSession,
     loadSession,
     swapExercise,
-    clearSession
+    clearSession,
   }
 })

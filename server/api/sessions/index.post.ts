@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
   console.log('[Session API] Validation passed')
 
-  const { planId, week, dayKey, modality, focus, exercises, status } = validation.data
+  const { planId, week, dayKey, modality, focus, exercises, reasons, status } = validation.data
 
   // Connect to database
   const connectionString = process.env.DATABASE_URL
@@ -71,6 +71,7 @@ export default defineEventHandler(async (event) => {
         week,
         dayKey,
         modality,
+        reasons,
         exercises,
         status: status || 'generated',
       })

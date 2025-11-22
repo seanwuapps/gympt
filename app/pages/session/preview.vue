@@ -21,12 +21,27 @@
             <div class="preview-info">
               <h1>Review Your Workout</h1>
               <p class="preview-meta">
-                {{ sessionStore.currentSession.modality }} • Week {{ sessionStore.currentSession.week }} • {{ formatDayKey(sessionStore.currentSession.dayKey) }}
+                {{ sessionStore.currentSession.modality }} • Week
+                {{ sessionStore.currentSession.week }} •
+                {{ formatDayKey(sessionStore.currentSession.dayKey) }}
               </p>
               <p class="preview-description">
                 Review your exercises below. You can swap any exercise before starting your session.
               </p>
             </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- AI Reasoning -->
+      <Card v-if="sessionStore.currentSession.reasons" class="reasons-card">
+        <template #content>
+          <div class="reasons-content">
+            <div class="reasons-header">
+              <i class="pi pi-sparkles text-primary"></i>
+              <h3>AI Insights</h3>
+            </div>
+            <p>{{ sessionStore.currentSession.reasons }}</p>
           </div>
         </template>
       </Card>
@@ -129,10 +144,15 @@
                     <span class="target-label">Duration</span>
                     <span class="target-value">{{ exercise.durationMin }} min</span>
                   </div>
-                  <div v-if="exercise.components && exercise.components.length" class="target-item full-width">
+                  <div
+                    v-if="exercise.components && exercise.components.length"
+                    class="target-item full-width"
+                  >
                     <span class="target-label">Components</span>
                     <ul class="components-list">
-                      <li v-for="(component, i) in exercise.components" :key="i">{{ component }}</li>
+                      <li v-for="(component, i) in exercise.components" :key="i">
+                        {{ component }}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -174,13 +194,7 @@
               size="large"
               :loading="starting"
             />
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              @click="handleCancel"
-              text
-              size="large"
-            />
+            <Button label="Cancel" icon="pi pi-times" @click="handleCancel" text size="large" />
           </div>
         </template>
       </Card>
@@ -209,7 +223,7 @@ onMounted(() => {
       severity: 'warn',
       summary: 'No Session',
       detail: 'Please generate a session first',
-      life: 3000
+      life: 3000,
     })
     router.push('/')
   }
@@ -223,7 +237,7 @@ function formatDayKey(dayKey: string): string {
     Thu: 'Thursday',
     Fri: 'Friday',
     Sat: 'Saturday',
-    Sun: 'Sunday'
+    Sun: 'Sunday',
   }
   return days[dayKey] || dayKey
 }
@@ -238,24 +252,24 @@ function formatReps(reps: number | [number, number] | null): string {
 
 async function handleSwapExercise(index: number) {
   if (!sessionStore.currentSession) return
-  
+
   swappingIndex.value = index
-  
+
   try {
     await sessionStore.swapExercise(sessionStore.currentSession.id, index)
-    
+
     toast.add({
       severity: 'success',
       summary: 'Exercise Swapped',
       detail: 'A new exercise has been generated',
-      life: 3000
+      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Swap Failed',
       detail: error.message || 'Failed to swap exercise',
-      life: 5000
+      life: 5000,
     })
   } finally {
     swappingIndex.value = null
@@ -264,9 +278,9 @@ async function handleSwapExercise(index: number) {
 
 async function handleStartWorkout() {
   if (!sessionStore.currentSession) return
-  
+
   starting.value = true
-  
+
   try {
     await sessionStore.startSession(sessionStore.currentSession.id)
     router.push('/session')
@@ -275,7 +289,7 @@ async function handleStartWorkout() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to start session',
-      life: 5000
+      life: 5000,
     })
   } finally {
     starting.value = false
@@ -284,7 +298,7 @@ async function handleStartWorkout() {
 
 async function handleCancel() {
   if (!sessionStore.currentSession) return
-  
+
   try {
     await sessionStore.cancelSession(sessionStore.currentSession.id)
     router.push('/')
@@ -293,7 +307,7 @@ async function handleCancel() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to cancel session',
-      life: 5000
+      life: 5000,
     })
   }
 }
@@ -353,6 +367,38 @@ async function handleCancel() {
   color: var(--p-text-color);
   margin: 0;
   line-height: 1.5;
+}
+
+/* AI Reasoning */
+.reasons-card {
+  margin-bottom: var(--spacing-lg);
+  background: var(--surface-ground);
+}
+
+.reasons-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.reasons-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.reasons-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--p-text-color);
+}
+
+.reasons-content p {
+  font-size: 0.9375rem;
+  color: var(--p-text-color);
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Exercises Section */

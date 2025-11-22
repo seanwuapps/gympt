@@ -49,9 +49,6 @@ interface NavItem {
 
 const route = useRoute()
 
-// TODO: Replace with actual session store check
-const hasActiveSession = computed(() => false)
-
 const navItems = computed<NavItem[]>(() => [
   {
     route: '/',
@@ -59,10 +56,9 @@ const navItems = computed<NavItem[]>(() => [
     icon: 'pi pi-home',
   },
   {
-    route: '/session',
-    label: 'Workout',
-    icon: 'pi pi-bolt',
-    badge: hasActiveSession.value,
+    route: '/plans',
+    label: 'Plans',
+    icon: 'pi pi-calendar',
   },
   {
     route: '/progress',

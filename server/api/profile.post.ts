@@ -55,11 +55,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Check if profile exists
-    const existing = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.sub))
-      .limit(1)
+    const existing = await db.select().from(profiles).where(eq(profiles.userId, user.sub)).limit(1)
 
     let result
 

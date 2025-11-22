@@ -35,7 +35,10 @@ const Exercise = z.object({
   modality: z.string().nullable().default(null),
 })
 
-const SessionPlan = z.object({ exercises: z.array(Exercise) })
+const SessionPlan = z.object({
+  exercises: z.array(Exercise),
+  reasons: z.string().nullable().default(null),
+})
 
 const InputSchema = z.object({
   modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab']),
@@ -106,7 +109,8 @@ CRITICAL REQUIREMENTS:
 - Session duration must be within the specified time limit
 - Consider warm-up, work sets, and rest periods when calculating total time
 - For beginners, use fewer exercises with more rest time
-- MUST return valid JSON with an "exercises" array
+- MUST return valid JSON with an "exercises" array and a "reasons" string
+- "reasons": A comprehensive description of how you came up with the exercises, considering the user's profile, goals, and focus.
 - Set unused fields to null (not undefined or omitted)
 - For strength sessions, use the provided focus to guide exercise selection
 - For cardio sessions, use the provided focus to guide cardio type selection
@@ -127,7 +131,8 @@ OUTPUT FORMAT:
 {
   "exercises": [
     { exercise objects here }
-  ]
+  ],
+  "reasons": "I selected these exercises because..."
 }
 `
 
@@ -170,7 +175,8 @@ Goals: ${userProfile.goals}.
     // Handle case where AI might return array directly instead of wrapped in object
     if (Array.isArray(sessionData)) {
       console.log('[AI Session] AI returned array, wrapping in object')
-      sessionData = { exercises: sessionData }
+      console.log('[AI Session] AI returned array, wrapping in object')
+      sessionData = { exercises: sessionData, reasons: null }
     }
 
     // Validate AI response
