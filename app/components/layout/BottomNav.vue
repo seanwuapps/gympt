@@ -97,13 +97,9 @@ const activeRoute = computed(() => {
 
 const supabase = useSupabaseClient()
 const router = useRouter()
-const { clearFakeAuth } = useFakeAuth()
 
 async function signOut() {
-  // Clear fake auth if present
-  clearFakeAuth()
-
-  // Also sign out from Supabase if real user
+  // Sign out from Supabase
   try {
     await supabase.auth.signOut()
   } catch (e) {

@@ -47,7 +47,11 @@
         <i class="pi pi-calendar-times" />
       </div>
       <h2>No Active Plan</h2>
-      <p>You have {{ plansStore.plans.length }} saved plan{{ plansStore.plans.length > 1 ? 's' : '' }}. Set one as active or generate a new one.</p>
+      <p>
+        You have {{ plansStore.plans.length }} saved plan{{
+          plansStore.plans.length > 1 ? 's' : ''
+        }}. Set one as active or generate a new one.
+      </p>
       <div class="empty-actions">
         <Button
           label="Browse Saved Plans"
@@ -122,7 +126,12 @@
         <Divider />
 
         <PlanWeekView
-          :weekly-schedule="selectedPlan.weeklySchedule as Record<string, Record<string, string>>"
+          :weekly-schedule="
+            selectedPlan.weeklySchedule as Record<
+              string,
+              Record<string, string | { modality: string }>
+            >
+          "
           :total-weeks="selectedPlan.durationWeeks"
           :plan-id="selectedPlan.id"
           :editable="true"
@@ -138,11 +147,7 @@
             icon="pi pi-check"
             @click="handleActivatePlan(selectedPlan!.id)"
           />
-          <Button
-            label="Close"
-            @click="showDetails = false"
-            outlined
-          />
+          <Button label="Close" @click="showDetails = false" outlined />
         </div>
       </template>
     </Dialog>
@@ -160,11 +165,7 @@
       </div>
 
       <template #footer>
-        <Button
-          label="Cancel"
-          @click="showDeleteConfirm = false"
-          outlined
-        />
+        <Button label="Cancel" @click="showDeleteConfirm = false" outlined />
         <Button
           label="Delete"
           severity="danger"
@@ -180,10 +181,10 @@
 
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
-import type { TrainingPlan } from '~/db/schema'
+import type { TrainingPlan } from '../../../db/schema'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
 })
 
 const plansStore = usePlansStore()
@@ -206,7 +207,7 @@ function handlePlanGenerated(plan: TrainingPlan) {
     severity: 'success',
     summary: 'Plan Generated!',
     detail: 'Your training plan has been created successfully.',
-    life: 3000
+    life: 3000,
   })
 }
 
@@ -218,14 +219,14 @@ async function handleActivatePlan(planId: string) {
       severity: 'success',
       summary: 'Plan Activated',
       detail: 'This plan is now your active training plan.',
-      life: 3000
+      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
       detail: error.message || 'Failed to activate plan',
-      life: 5000
+      life: 5000,
     })
   }
 }
@@ -238,19 +239,19 @@ function handleViewPlan(plan: TrainingPlan) {
 async function handleDeactivatePlan(planId: string) {
   try {
     await plansStore.deactivatePlan(planId)
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deactivated',
       detail: 'Training plan has been set to inactive.',
-      life: 3000
+      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deactivation Failed',
       detail: error.message || 'Failed to deactivate plan',
-      life: 5000
+      life: 5000,
     })
   }
 }
@@ -267,19 +268,19 @@ async function confirmDelete() {
     await plansStore.deletePlan(planToDelete.value)
     showDeleteConfirm.value = false
     planToDelete.value = null
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deleted',
       detail: 'Training plan has been removed.',
-      life: 3000
+      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deletion Failed',
       detail: error.message || 'Failed to delete plan',
-      life: 5000
+      life: 5000,
     })
   }
 }
@@ -288,7 +289,7 @@ function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 </script>

@@ -4,7 +4,7 @@
 
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import type { z } from 'zod'
+import { z } from 'zod'
 
 export interface AIRequestOptions {
   systemPrompt: string
@@ -25,7 +25,14 @@ export interface AIResponse {
  * Call Cloudflare Workers AI using OpenAI SDK with retry logic
  */
 export async function callCloudflareAI(options: AIRequestOptions): Promise<AIResponse> {
-  const { systemPrompt, userPrompt, temperature = 0.7, maxRetries = 3, responseSchema, schemaName } = options
+  const {
+    systemPrompt,
+    userPrompt,
+    temperature = 0.7,
+    maxRetries = 3,
+    responseSchema,
+    schemaName,
+  } = options
 
   const config = useRuntimeConfig()
   const apiKey = config.openaiApiKey
@@ -51,7 +58,7 @@ export async function callCloudflareAI(options: AIRequestOptions): Promise<AIRes
       console.log(`[AI] Attempt ${attempt}/${maxRetries}`)
       console.log(`[AI] Model: ${model}`)
       console.log(`[AI] Using schema: ${responseSchema ? schemaName : 'none (basic JSON mode)'}`)
-      
+
       // Build completion options
       const completionOptions: OpenAI.Chat.ChatCompletionCreateParams = {
         model,
@@ -87,12 +94,31 @@ export async function callCloudflareAI(options: AIRequestOptions): Promise<AIRes
       }
 
       console.log('[AI] Content type:', typeof content)
-      console.log('[AI] Raw response content:', typeof content === 'string' ? content.substring(0, 200) + '...' : JSON.stringify(content).substring(0, 200) + '...')
+      console.log(
+        '[AI] Raw response content:',
+        typeof content === 'string'
+          ? content.substring(0, 200) + '...'
+          : JSON.stringify(content).substring(0, 200) + '...'
+      )
 
       // Parse JSON response - content might already be an object with structured outputs
       const parsedData = typeof content === 'string' ? JSON.parse(content) : content
       console.log('[AI] Successfully parsed JSON response')
       console.log('[AI] Response keys:', Object.keys(parsedData))
+
+      // Validate against schema if provided
+      if (responseSchema) {
+        const validationResult = responseSchema.safeParse(parsedData)
+        if (!validationResult.success) {
+          console.error('[AI] Schema validation failed:', validationResult.error)
+          throw new Error(`Schema validation failed: ${validationResult.error.message}`)
+        }
+        console.log('[AI] Schema validation successful')
+        return {
+          success: true,
+          data: validationResult.data,
+        }
+      }
 
       return {
         success: true,

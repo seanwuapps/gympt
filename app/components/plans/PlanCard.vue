@@ -23,9 +23,13 @@
       <div class="plan-schedule">
         <h4>Training Schedule</h4>
         <PlanWeekViewCards
-          :weekly-schedule="plan.weeklySchedule as Record<string, Record<string, string>>"
+          :weekly-schedule="
+            plan.weeklySchedule as Record<string, Record<string, string | { modality: string }>>
+          "
           :total-weeks="plan.durationWeeks"
           :initial-week="1"
+          :plan-id="plan.id"
+          :editable="plan.isActive"
         />
       </div>
     </template>
@@ -71,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TrainingPlan } from '~/db/schema'
+import type { TrainingPlan } from '../../../db/schema'
 import PlanWeekViewCards from './PlanWeekViewCards.vue'
 
 interface Props {
@@ -82,16 +86,16 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'set-active': [planId: string]
-  'deactivate': [planId: string]
-  'view': [plan: TrainingPlan]
-  'delete': [planId: string]
+  deactivate: [planId: string]
+  view: [plan: TrainingPlan]
+  delete: [planId: string]
 }>()
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 </script>

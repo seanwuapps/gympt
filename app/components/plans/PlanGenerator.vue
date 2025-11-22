@@ -7,13 +7,41 @@
       </div>
       <h3>Generate Your Training Plan</h3>
       <p class="description">
-        Our AI will create a personalized training plan based on your goals, experience level, and schedule.
+        Our AI will create a personalized training plan based on your goals, experience level, and
+        schedule.
       </p>
+
+      <!-- Dual Buttons for Rehab Goal -->
+      <div v-if="hasRehabGoal" class="dual-actions">
+        <Button
+          label="Generate Training Plan"
+          icon="pi pi-bolt"
+          :loading="generating"
+          @click="handleGenerate('normal')"
+          severity="secondary"
+          class="action-button"
+        />
+        <Button
+          label="Generate Rehab Plan"
+          icon="pi pi-heart"
+          :loading="generating"
+          @click="handleGenerate('rehab')"
+          class="action-button"
+        />
+        <small class="help-hint">
+          <i class="pi pi-info-circle" />
+          Rehabilitation plan detected. You can change your goals in
+          <NuxtLink to="/profile/edit" class="hint-link">profile settings</NuxtLink>.
+        </small>
+      </div>
+
+      <!-- Single Button for Normal Goal -->
       <Button
+        v-else
         label="Generate Plan"
         icon="pi pi-sparkles"
         :loading="generating"
-        @click="handleGenerate"
+        @click="() => handleGenerate('normal')"
         size="large"
         class="generate-button"
       />
@@ -47,19 +75,15 @@
             </div>
             <div class="detail-item">
               <span class="label">Created:</span>
-              <span class="value">{{ formatDate(generatedPlan.createdAt) }}</span>
+              <span class="value">{{ formatDate(generatedPlan.createdAt || new Date()) }}</span>
             </div>
           </div>
-          
+
           <!-- Week 1 Preview -->
           <div class="week-preview">
             <h4>Week 1 Schedule:</h4>
             <div class="schedule-grid">
-              <div
-                v-for="(modality, day) in getWeekSchedule(1)"
-                :key="day"
-                class="schedule-day"
-              >
+              <div v-for="(modality, day) in getWeekSchedule(1)" :key="day" class="schedule-day">
                 <span class="day-label">{{ day }}</span>
                 <span class="day-modality">{{ modality }}</span>
               </div>
@@ -92,12 +116,7 @@
       <h3>Generation Failed</h3>
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
-        <Button
-          label="Try Again"
-          icon="pi pi-refresh"
-          @click="handleGenerate"
-          outlined
-        />
+        <Button label="Try Again" icon="pi pi-refresh" @click="() => handleGenerate()" outlined />
         <Button
           label="Cancel"
           icon="pi pi-times"
@@ -112,33 +131,45 @@
 
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
-import type { TrainingPlan } from '~/db/schema'
+import type { TrainingPlan } from '../../../db/schema'
 
 const emit = defineEmits<{
   'plan-generated': [plan: TrainingPlan]
   'view-plan': [plan: TrainingPlan]
   'activate-plan': [planId: string]
-  'cancel': []
+  cancel: []
 }>()
 
 const plansStore = usePlansStore()
 const toast = useToast()
+const { profile, fetchProfile } = useProfile()
 
 const generating = ref(false)
 const generatedPlan = ref<TrainingPlan | null>(null)
 const error = ref<string | null>(null)
 const loadingMessage = ref('Analyzing your profile...')
+const planType = ref<'normal' | 'rehab'>('normal')
+
+// Check if user has rehab as a goal
+const hasRehabGoal = computed(() => {
+  if (!profile.value?.goals) return false
+  const goals = profile.value.goals.toLowerCase()
+  return goals.includes('rehab')
+})
 
 const loadingMessages = [
   'Analyzing your profile...',
   'Designing your program...',
   'Optimizing training schedule...',
-  'Finalizing your plan...'
+  'Finalizing your plan...',
 ]
 
 let messageInterval: NodeJS.Timeout | null = null
 
-async function handleGenerate() {
+async function handleGenerate(type?: 'normal' | 'rehab') {
+  if (type) {
+    planType.value = type
+  }
   generating.value = true
   error.value = null
   generatedPlan.value = null
@@ -152,27 +183,27 @@ async function handleGenerate() {
   }, 2000)
 
   try {
-    const plan = await plansStore.generatePlan()
-    
+    const plan = await plansStore.generatePlan(planType.value)
+
     if (plan) {
       generatedPlan.value = plan
       emit('plan-generated', plan)
-      
+
       toast.add({
         severity: 'success',
         summary: 'Plan Generated!',
         detail: 'Your personalized training plan is ready.',
-        life: 3000
+        life: 3000,
       })
     }
   } catch (err: any) {
     error.value = err.message || 'Failed to generate plan. Please try again.'
-    
+
     toast.add({
       severity: 'error',
       summary: 'Generation Failed',
       detail: error.value,
-      life: 5000
+      life: 5000,
     })
   } finally {
     generating.value = false
@@ -185,7 +216,7 @@ async function handleGenerate() {
 
 function getWeekSchedule(weekNumber: number) {
   if (!generatedPlan.value) return {}
-  
+
   const schedule = generatedPlan.value.weeklySchedule as Record<string, Record<string, string>>
   return schedule[`week${weekNumber}`] || {}
 }
@@ -194,9 +225,15 @@ function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
+
+onMounted(async () => {
+  if (!profile.value) {
+    await fetchProfile()
+  }
+})
 
 onUnmounted(() => {
   if (messageInterval) {
@@ -253,6 +290,40 @@ h3 {
   color: var(--p-text-muted-color);
   max-width: 30rem;
   margin: 0;
+  line-height: 1.5;
+}
+
+.dual-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+  max-width: 24rem;
+}
+
+.action-button {
+  width: 100%;
+  height: 3.5rem;
+  font-size: 1.125rem;
+}
+
+.help-hint {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  line-height: 1.4;
+}
+
+.hint-link {
+  color: var(--p-primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.hint-link:hover {
+  text-decoration: underline;
 }
 
 .generate-button {

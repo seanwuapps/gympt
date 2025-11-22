@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient()
-const user = useCurrentUser() // Supports both real and fake auth
+const user = useSupabaseUser()
 const plansStore = usePlansStore()
 const sessionStore = useSessionStore()
 const router = useRouter()
@@ -31,14 +31,7 @@ onMounted(async () => {
 })
 
 const signOut = async () => {
-  const { clearFakeAuth } = useFakeAuth()
-
-  // Clear fake auth if present
-  clearFakeAuth()
-
-  // Also sign out from Supabase if real user
   await supabase.auth.signOut()
-
   await navigateTo('/login')
 }
 
@@ -53,33 +46,43 @@ function getTodayDayKey(): string {
   return days[new Date().getDay()] || 'Mon'
 }
 
-function getTodayModality(): string | null {
+function getTodayPlan(): { modality: string; focus?: string } | null {
   if (!plansStore.activePlan) return null
 
   const week = `week${getCurrentWeek()}`
   const day = getTodayDayKey()
-  const schedule = plansStore.activePlan.weeklySchedule as Record<string, Record<string, string>>
+  const schedule = plansStore.activePlan.weeklySchedule as Record<
+    string,
+    Record<string, string | { modality: string; focus?: string }>
+  >
+  const dayPlan = schedule[week]?.[day]
 
-  return schedule[week]?.[day] || null
+  if (!dayPlan) return null
+  if (typeof dayPlan === 'string') {
+    return { modality: dayPlan }
+  }
+  return dayPlan
 }
 
 function isTodayRestDay(): boolean {
-  const modality = getTodayModality()
-  return modality?.toLowerCase() === 'rest'
+  const plan = getTodayPlan()
+  return plan?.modality.toLowerCase() === 'rest'
 }
 
 function getTodayLabel(): string {
-  const modality = getTodayModality()
-  if (!modality) return 'No workout scheduled'
+  const plan = getTodayPlan()
+  if (!plan) return 'No workout scheduled'
   if (isTodayRestDay()) return 'Rest Day'
-  return `Today: ${modality}`
+
+  const label = `Today: ${plan.modality}`
+  return plan.focus ? `${label} - ${plan.focus}` : label
 }
 
 function getTodayDescription(): string {
-  const modality = getTodayModality()
-  if (!modality) return 'Check your plan for details'
+  const plan = getTodayPlan()
+  if (!plan) return 'Check your plan for details'
 
-  const normalized = modality.toLowerCase()
+  const normalized = plan.modality.toLowerCase()
   const descriptions: Record<string, string> = {
     strength: 'Resistance training session',
     cardio: 'Cardiovascular endurance training',
@@ -100,9 +103,9 @@ function handleStartTraining() {
     return
   }
 
-  const modality = getTodayModality()
+  const plan = getTodayPlan()
 
-  if (!modality || isTodayRestDay()) {
+  if (!plan || isTodayRestDay()) {
     console.error('No modality or rest day')
     return
   }
@@ -116,9 +119,9 @@ async function confirmSessionLength() {
 
   const week = getCurrentWeek()
   const day = getTodayDayKey()
-  const modality = getTodayModality()
+  const plan = getTodayPlan()
 
-  if (!modality) return
+  if (!plan) return
 
   try {
     console.log('Generating session...', { sessionLength: selectedSessionLength.value })
@@ -126,7 +129,7 @@ async function confirmSessionLength() {
       plansStore.activePlan.id,
       week,
       day,
-      modality,
+      plan.modality,
       selectedSessionLength.value
     )
 
@@ -250,8 +253,20 @@ function handleViewPlan() {
       </Card>
     </section>
 
+    <!-- Loading State -->
+    <section v-else-if="plansStore.loading" class="loading-section">
+      <Card>
+        <template #content>
+          <div class="loading-content">
+            <ProgressSpinner />
+            <p>Loading your training plan...</p>
+          </div>
+        </template>
+      </Card>
+    </section>
+
     <!-- No Plan Section -->
-    <section v-else-if="!plansStore.loading" class="no-plan-section">
+    <section v-else class="no-plan-section">
       <Card>
         <template #content>
           <div class="no-plan-content">
@@ -274,18 +289,6 @@ function handleViewPlan() {
                 outlined
               />
             </div>
-          </div>
-        </template>
-      </Card>
-    </section>
-
-    <!-- Loading State -->
-    <section v-if="plansStore.loading" class="loading-section">
-      <Card>
-        <template #content>
-          <div class="loading-content">
-            <ProgressSpinner />
-            <p>Loading your training plan...</p>
           </div>
         </template>
       </Card>

@@ -1,11 +1,11 @@
 import { z } from 'zod'
 
 /**
- * Day plan with modality and optional focus
+ * Day plan with modality and required focus
  */
 export const DayPlanSchema = z.object({
   modality: z.enum(['strength', 'cardio', 'hiit', 'crossfit', 'rehab', 'rest']),
-  focus: z.string().max(150).optional().nullable(), // e.g., "chest", "back", "legs" for strength; "running", "cycling" for cardio
+  focus: z.string().min(1).max(150), // REQUIRED non-empty string - e.g., "chest", "back" for strength; "running", "cycling" for cardio; "NA" for rest/hiit/rehab
 })
 
 /**

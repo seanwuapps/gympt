@@ -3,8 +3,16 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { eq } from 'drizzle-orm'
 import { profiles, trainingPlans } from '../../../db/schema'
-import { TrainingPlanAIResponseSchema } from '../../shared/schemas/training-plan'
-import { getTrainingPlanSystemPrompt, getTrainingPlanUserPrompt } from '../../shared/prompts/plans'
+import {
+  TrainingPlanAIResponseSchema,
+  type TrainingPlanAIResponse,
+} from '../../shared/schemas/training-plan'
+import {
+  getTrainingPlanSystemPrompt,
+  getTrainingPlanUserPrompt,
+  getRehabPlanSystemPrompt,
+  getRehabPlanUserPrompt,
+} from '../../shared/prompts/plans'
 
 export default defineEventHandler(async (event) => {
   // Get authenticated user
@@ -42,10 +50,19 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Generate AI prompts
-    const systemPrompt = getTrainingPlanSystemPrompt()
-    console.log({ systemPrompt })
-    const userPrompt = getTrainingPlanUserPrompt({ profile })
+    // Get plan type from request body (default to normal)
+    const body = await readBody(event)
+    const planType: 'normal' | 'rehab' = body?.planType || 'normal'
+
+    // Generate AI prompts based on plan type
+    const systemPrompt =
+      planType === 'rehab' ? getRehabPlanSystemPrompt() : getTrainingPlanSystemPrompt()
+    console.log({ planType, systemPrompt })
+
+    const userPrompt =
+      planType === 'rehab'
+        ? getRehabPlanUserPrompt({ profile })
+        : getTrainingPlanUserPrompt({ profile })
     console.log({ userPrompt })
 
     // Call AI service with structured outputs
@@ -65,19 +82,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Validate AI response with Zod
-    const validationResult = TrainingPlanAIResponseSchema.safeParse(aiResponse.data)
-
-    if (!validationResult.success) {
-      console.error('AI response validation failed:', validationResult.error)
-      console.error('AI response data:', JSON.stringify(aiResponse.data, null, 2))
-      throw createError({
-        statusCode: 500,
-        message: 'Invalid training plan generated. Please try again.',
-      })
-    }
-
-    const planData = validationResult.data
+    // AI service now handles validation and retries
+    const planData = aiResponse.data as TrainingPlanAIResponse
 
     // Convert string modalities to DayPlan objects for backward compatibility
     const weeklySchedule = Object.entries(planData.weekly_schedule).reduce(

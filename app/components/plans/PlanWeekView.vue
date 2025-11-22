@@ -23,38 +23,39 @@
       </div>
     </div>
 
-    <div class="week-schedule">
-      <div
+    <ul class="week-schedule">
+      <li
         v-for="item in currentWeekSchedule"
         :key="item.day"
         class="schedule-item"
-        :class="{ 
+        :class="{
           'is-rest': item.modality.toLowerCase() === 'rest',
-          'is-today': item.isToday
+          'is-today': item.isToday,
         }"
       >
-        <div class="day-header">
+        <div class="day-column">
           <span class="day-name">{{ item.day }}</span>
-          <Tag
-            v-if="item.modality.toLowerCase() === 'rest'"
-            value="Rest"
-            severity="secondary"
-          />
         </div>
-        <div class="day-content">
+        <div class="modality-column">
           <span class="modality-text">{{ item.modality }}</span>
         </div>
-        <Button
-          v-if="editable"
-          label="Change Day Plan"
-          icon="pi pi-pencil"
-          @click="openEditDialog(item.day, item.modality)"
-          text
-          size="small"
-          class="edit-button"
-        />
-      </div>
-    </div>
+        <div class="focus-column">
+          <span v-if="item.focus" class="focus-text">{{ item.focus }}</span>
+          <span v-else class="focus-text empty">-</span>
+        </div>
+        <div class="actions-column">
+          <Button
+            v-if="editable"
+            label="Change Day Plan"
+            icon="pi pi-pencil"
+            @click="openEditDialog(item.day, item.modality)"
+            text
+            size="small"
+            class="edit-button"
+          />
+        </div>
+      </li>
+    </ul>
 
     <!-- AI Suggestions Dialog -->
     <Dialog
@@ -80,7 +81,10 @@
             @click="selectedSuggestion = index"
           >
             <div class="suggestion-icon">{{ suggestion.icon }}</div>
-            <h4 class="suggestion-modality">{{ suggestion.modality }}</h4>
+            <h4 class="suggestion-modality">
+              {{ suggestion.modality }}
+              <span v-if="suggestion.focus" class="suggestion-focus">- {{ suggestion.focus }}</span>
+            </h4>
             <p class="suggestion-rationale">{{ suggestion.rationale }}</p>
           </div>
         </div>
@@ -98,9 +102,19 @@
           <Select
             v-model="manualModality"
             :options="modalityOptions"
-            placeholder="Select modality"
+            placeholder="Select workout type"
             class="modality-select"
-          />
+          >
+            <template #option="{ option }">
+              {{ option.modality }}<span v-if="option.focus"> - {{ option.focus }}</span>
+            </template>
+            <template #value="{ value, placeholder }">
+              <template v-if="value"
+                >{{ value.modality }}<span v-if="value.focus"> - {{ value.focus }}</span></template
+              >
+              <template v-else>{{ placeholder }}</template>
+            </template>
+          </Select>
         </div>
 
         <!-- Quick Actions -->
@@ -124,12 +138,7 @@
 
       <template #footer>
         <Button label="Keep Current" @click="closeEditDialog" text />
-        <Button
-          label="Save Changes"
-          @click="saveChanges"
-          :disabled="!canSave"
-          :loading="saving"
-        />
+        <Button label="Save Changes" @click="saveChanges" :disabled="!canSave" :loading="saving" />
       </template>
     </Dialog>
 
@@ -143,7 +152,7 @@ import { usePlansStore } from '~/stores/plans'
 import { useToast } from 'primevue/usetoast'
 
 interface Props {
-  weeklySchedule: Record<string, Record<string, string>>
+  weeklySchedule: Record<string, Record<string, string | { modality: string; focus?: string }>>
   totalWeeks: number
   title?: string
   initialWeek?: number
@@ -154,7 +163,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   title: 'Training Schedule',
   initialWeek: 1,
-  editable: false
+  editable: false,
 })
 
 const plansStore = usePlansStore()
@@ -175,18 +184,24 @@ const currentDayOfWeek = computed(() => {
 const currentDayName = computed(() => {
   return dayOrder[currentDayOfWeek.value]
 })
-
 const currentWeekSchedule = computed(() => {
   const schedule = props.weeklySchedule[`week${currentWeek.value}`] || {}
-  
-  // Return ordered array of [day, modality] pairs
+
+  // Return ordered array of day items with modality and focus
   return dayOrder
-    .filter(day => schedule[day] !== undefined)
-    .map(day => ({ 
-      day, 
-      modality: schedule[day] as string,
-      isToday: day === currentDayName.value
-    }))
+    .filter((day) => schedule[day] !== undefined)
+    .map((day) => {
+      const dayPlan = schedule[day]!
+      const modality = typeof dayPlan === 'string' ? dayPlan : dayPlan.modality
+      const focus = typeof dayPlan === 'string' ? undefined : dayPlan.focus
+
+      return {
+        day,
+        modality,
+        focus,
+        isToday: day === currentDayName.value,
+      }
+    })
 })
 
 function nextWeek() {
@@ -202,9 +217,12 @@ function previousWeek() {
 }
 
 // Reset to initial week when prop changes
-watch(() => props.initialWeek, (newWeek) => {
-  currentWeek.value = newWeek
-})
+watch(
+  () => props.initialWeek,
+  (newWeek) => {
+    currentWeek.value = newWeek
+  }
+)
 
 // Edit functionality
 const showEditDialog = ref(false)
@@ -212,26 +230,39 @@ const selectedDay = ref('')
 const selectedModality = ref('')
 const loadingSuggestions = ref(false)
 const suggestionError = ref('')
-const suggestions = ref<Array<{ modality: string; rationale: string; icon: string }>>([])
+const suggestions = ref<
+  Array<{
+    modality: string
+    focus?: string
+    rationale: string
+    icon: string
+  }>
+>([])
 const selectedSuggestion = ref<number | null>(null)
 const showManualSelection = ref(false)
-const manualModality = ref('')
+const manualModality = ref<{ modality: string; focus?: string } | null>(null)
 const saving = ref(false)
 
 const modalityOptions = [
-  'Pull',
-  'Push',
-  'Legs',
-  'Upper',
-  'Lower',
-  'Full Body',
-  'Cardio',
-  'Rest'
+  { modality: 'Strength', focus: 'Back' },
+  { modality: 'Strength', focus: 'Biceps' },
+  { modality: 'Strength', focus: 'Chest' },
+  { modality: 'Strength', focus: 'Shoulders' },
+  { modality: 'Strength', focus: 'Triceps' },
+  { modality: 'Strength', focus: 'Quads' },
+  { modality: 'Strength', focus: 'Hamstrings' },
+  { modality: 'Strength', focus: 'Glutes' },
+  { modality: 'Upper' },
+  { modality: 'Lower' },
+  { modality: 'Full Body' },
+  { modality: 'Cardio', focus: 'HIIT' },
+  { modality: 'Cardio', focus: 'Steady State' },
+  { modality: 'Rest' },
 ]
 
 const canSave = computed(() => {
   if (showManualSelection.value || suggestionError.value) {
-    return manualModality.value !== ''
+    return manualModality.value !== null
   }
   return selectedSuggestion.value !== null
 })
@@ -242,7 +273,7 @@ async function openEditDialog(day: string, modality: string) {
       severity: 'error',
       summary: 'Error',
       detail: 'Plan ID is required to edit',
-      life: 3000
+      life: 3000,
     })
     return
   }
@@ -255,7 +286,7 @@ async function openEditDialog(day: string, modality: string) {
   suggestions.value = []
   selectedSuggestion.value = null
   showManualSelection.value = false
-  manualModality.value = ''
+  manualModality.value = null
 
   try {
     const weekKey = `week${currentWeek.value}`
@@ -263,7 +294,8 @@ async function openEditDialog(day: string, modality: string) {
     suggestions.value = result
   } catch (error: any) {
     console.error('Failed to generate suggestions:', error)
-    suggestionError.value = error.message || 'Failed to generate AI suggestions. Please choose manually.'
+    suggestionError.value =
+      error.message || 'Failed to generate AI suggestions. Please choose manually.'
   } finally {
     loadingSuggestions.value = false
   }
@@ -276,21 +308,21 @@ function closeEditDialog() {
   suggestions.value = []
   selectedSuggestion.value = null
   showManualSelection.value = false
-  manualModality.value = ''
+  manualModality.value = null
   suggestionError.value = ''
 }
 
 function quickSetRest() {
   if (showManualSelection.value || suggestionError.value) {
-    manualModality.value = 'Rest'
+    manualModality.value = { modality: 'Rest' }
   } else {
     // Find Rest suggestion or set manual
-    const restIndex = suggestions.value.findIndex(s => s.modality.toLowerCase() === 'rest')
+    const restIndex = suggestions.value.findIndex((s) => s.modality.toLowerCase() === 'rest')
     if (restIndex !== -1) {
       selectedSuggestion.value = restIndex
     } else {
       showManualSelection.value = true
-      manualModality.value = 'Rest'
+      manualModality.value = { modality: 'Rest' }
     }
   }
 }
@@ -302,21 +334,27 @@ async function saveChanges() {
 
   try {
     let newModality = ''
-    
+    let newFocus: string | undefined = undefined
+
     if (showManualSelection.value || suggestionError.value) {
-      newModality = manualModality.value
+      if (manualModality.value) {
+        newModality = manualModality.value.modality
+        newFocus = manualModality.value.focus
+      }
     } else if (selectedSuggestion.value !== null && suggestions.value[selectedSuggestion.value]) {
-      newModality = suggestions.value[selectedSuggestion.value].modality
+      const suggestion = suggestions.value[selectedSuggestion.value]!
+      newModality = suggestion.modality
+      newFocus = suggestion.focus
     }
 
     const weekKey = `week${currentWeek.value}`
-    await plansStore.updatePlanDay(props.planId, weekKey, selectedDay.value, newModality)
+    await plansStore.updatePlanDay(props.planId, weekKey, selectedDay.value, newModality, newFocus)
 
     toast.add({
       severity: 'success',
       summary: 'Success',
       detail: `${selectedDay.value} updated to ${newModality}`,
-      life: 3000
+      life: 3000,
     })
 
     closeEditDialog()
@@ -326,7 +364,7 @@ async function saveChanges() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to update plan',
-      life: 5000
+      life: 5000,
     })
   } finally {
     saving.value = false
@@ -371,14 +409,19 @@ async function saveChanges() {
 }
 
 .week-schedule {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  gap: var(--spacing-md);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .schedule-item {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 4rem 1fr 1fr auto;
+  gap: var(--spacing-md);
+  align-items: center;
   padding: var(--spacing-md);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -388,8 +431,8 @@ async function saveChanges() {
 
 .schedule-item:hover {
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .schedule-item.is-rest {
@@ -408,13 +451,9 @@ async function saveChanges() {
   font-weight: 700;
 }
 
-.day-header {
+.day-column {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .day-name {
@@ -425,25 +464,37 @@ async function saveChanges() {
   letter-spacing: 0.05em;
 }
 
-.day-content {
-  flex: 1;
+.modality-column {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-sm) 0;
 }
 
 .modality-text {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.95);
-  text-align: center;
-  word-break: break-word;
+  text-transform: capitalize;
 }
 
-.edit-button {
-  margin-top: var(--spacing-sm);
-  width: 100%;
+.focus-column {
+  display: flex;
+  align-items: center;
+}
+
+.focus-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: capitalize;
+}
+
+.focus-text.empty {
+  opacity: 0.4;
+}
+
+.actions-column {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /* Edit Dialog Styles */
@@ -491,6 +542,12 @@ async function saveChanges() {
 .suggestion-card.selected {
   border-color: var(--p-primary-color);
   background: rgba(212, 255, 0, 0.1);
+}
+
+.suggestion-focus {
+  font-weight: 400;
+  color: var(--p-text-muted-color);
+  margin-left: 0.25rem;
 }
 
 .suggestion-icon {

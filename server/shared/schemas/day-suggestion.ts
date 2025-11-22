@@ -5,6 +5,7 @@ import { z } from 'zod'
  */
 export const DaySuggestionSchema = z.object({
   modality: z.string().min(1).max(50),
+  focus: z.string().max(100).nullable().optional(), // Specific focus (e.g. "Chest", "Running")
   rationale: z.string().min(10).max(200),
   icon: z.string().min(1).max(10), // Emoji or icon identifier
 })

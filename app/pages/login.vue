@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
 })
 
 const supabase = useSupabaseClient()
@@ -8,15 +8,12 @@ const email = ref('')
 const message = ref('')
 const config = useRuntimeConfig()
 
-// Check if we're in development mode
-const isDev = process.dev
-
 const signInWithGoogle = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${config.public.appUrl}/confirm`
-    }
+      redirectTo: `${config.public.appUrl}/confirm`,
+    },
   })
   if (error) {
     message.value = `Error: ${error.message}`
@@ -28,36 +25,13 @@ const signInWithOtp = async () => {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.value,
     options: {
-      emailRedirectTo: `${config.public.appUrl}/confirm`
-    }
+      emailRedirectTo: `${config.public.appUrl}/confirm`,
+    },
   })
   if (error) {
     message.value = `Error: ${error.message}`
   } else {
     message.value = 'Check your email for the login link!'
-  }
-}
-
-// Fake sign-in for development/demo purposes
-const signInFake = async () => {
-  try {
-    // Create a fake session in localStorage to bypass auth
-    const fakeUser = {
-      id: 'fake-user-' + Date.now(),
-      email: 'demo@gympt.app',
-      user_metadata: {
-        full_name: 'Demo User'
-      },
-      created_at: new Date().toISOString()
-    }
-    
-    // Store fake user in localStorage
-    localStorage.setItem('fake-auth-user', JSON.stringify(fakeUser))
-    
-    // Redirect to home
-    await navigateTo('/')
-  } catch (error: any) {
-    message.value = `Error: ${error.message}`
   }
 }
 </script>
@@ -70,28 +44,14 @@ const signInFake = async () => {
           <h2>Sign In</h2>
         </div>
       </template>
-      
+
       <template #content>
         <div class="login-content">
-          <!-- Fake Sign In (Development Only) -->
-          <Button 
-            v-if="isDev"
-            label="🎭 Demo Sign In (No Account Required)" 
-            icon="pi pi-bolt"
-            @click="signInFake" 
-            class="w-full"
-            severity="success"
-          />
-
-          <Divider v-if="isDev" align="center">
-            <span class="divider-text">OR USE REAL AUTH</span>
-          </Divider>
-
           <!-- Google OAuth -->
-          <Button 
-            label="Sign in with Google" 
+          <Button
+            label="Sign in with Google"
             icon="pi pi-google"
-            @click="signInWithGoogle" 
+            @click="signInWithGoogle"
             class="w-full"
           />
 
@@ -109,11 +69,11 @@ const signInFake = async () => {
               @keyup.enter="signInWithOtp"
             />
           </div>
-          
-          <Button 
-            label="Sign in with Email" 
+
+          <Button
+            label="Sign in with Email"
             severity="secondary"
-            @click="signInWithOtp" 
+            @click="signInWithOtp"
             class="w-full"
           />
 
@@ -167,4 +127,3 @@ const signInFake = async () => {
   font-size: 0.875rem;
 }
 </style>
-

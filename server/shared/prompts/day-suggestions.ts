@@ -21,7 +21,7 @@ export function getDaySuggestionSystemPrompt(): string {
 
 CRITICAL REQUIREMENTS:
 - Generate EXACTLY 3 alternative workout options for the specified day
-- Each suggestion must include: modality, rationale (MAX 150 characters), and an emoji icon
+- Each suggestion must include: modality, focus (optional but recommended), rationale (MAX 150 characters), and an emoji icon
 - Rationale MUST be concise - under 150 characters, ideally 1 sentence
 - Suggestions should be contextually appropriate based on the week's schedule
 - Consider recovery, muscle group balance, and training frequency
@@ -49,6 +49,7 @@ Return a JSON object with this exact structure:
   "suggestions": [
     {
       "modality": "Modality name",
+      "focus": "Specific focus (e.g. Chest)",
       "rationale": "Short explanation (max 150 chars)",
       "icon": "🏋️"
     },

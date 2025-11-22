@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { TrainingPlan } from '~/db/schema'
+import type { TrainingPlan } from '../../db/schema'
 
 export const usePlansStore = defineStore('plans', () => {
   // State
@@ -9,11 +9,11 @@ export const usePlansStore = defineStore('plans', () => {
 
   // Computed
   const activePlan = computed(() => {
-    return plans.value.find((plan) => plan.isActive) || null
+    return plans.value.find((plan: TrainingPlan) => plan.isActive) || null
   })
 
   const inactivePlans = computed(() => {
-    return plans.value.filter((plan) => !plan.isActive)
+    return plans.value.filter((plan: TrainingPlan) => !plan.isActive)
   })
 
   const hasActivePlan = computed(() => {
@@ -24,7 +24,10 @@ export const usePlansStore = defineStore('plans', () => {
     if (!activePlan.value) return null
 
     const plan = activePlan.value
-    const schedule = plan.weeklySchedule as Record<string, Record<string, string>>
+    const schedule = plan.weeklySchedule as Record<
+      string,
+      Record<string, { modality: string; focus?: string }>
+    >
 
     return {
       ...plan,
@@ -58,7 +61,7 @@ export const usePlansStore = defineStore('plans', () => {
   async function autoActivateSinglePlan() {
     // Only auto-activate if there's exactly 1 plan and no active plan
     if (plans.value.length === 1 && !hasActivePlan.value) {
-      const singlePlan = plans.value[0]
+      const singlePlan = plans.value[0]!
       try {
         await setActivePlan(singlePlan.id)
         return true
@@ -70,7 +73,7 @@ export const usePlansStore = defineStore('plans', () => {
     return false
   }
 
-  async function generatePlan() {
+  async function generatePlan(planType: 'normal' | 'rehab' = 'normal') {
     loading.value = true
     error.value = null
 
@@ -79,6 +82,7 @@ export const usePlansStore = defineStore('plans', () => {
         '/api/plans/generate',
         {
           method: 'POST',
+          body: { planType },
         }
       )
 
@@ -114,7 +118,7 @@ export const usePlansStore = defineStore('plans', () => {
 
       if (response.success && response.plan) {
         // Update local state
-        plans.value = plans.value.map((plan) => ({
+        plans.value = plans.value.map((plan: TrainingPlan) => ({
           ...plan,
           isActive: plan.id === planId,
         }))
@@ -144,7 +148,7 @@ export const usePlansStore = defineStore('plans', () => {
 
       if (response.success && response.plan) {
         // Update local state - set plan to inactive
-        plans.value = plans.value.map((plan) =>
+        plans.value = plans.value.map((plan: TrainingPlan) =>
           plan.id === planId ? { ...plan, isActive: false } : plan
         )
         return response.plan
@@ -169,7 +173,7 @@ export const usePlansStore = defineStore('plans', () => {
 
       if (response.success) {
         // Remove from local state
-        plans.value = plans.value.filter((plan) => plan.id !== planId)
+        plans.value = plans.value.filter((plan: TrainingPlan) => plan.id !== planId)
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to delete training plan'
@@ -246,7 +250,7 @@ export const usePlansStore = defineStore('plans', () => {
       // Optimistic update
       const planIndex = plans.value.findIndex((p: TrainingPlan) => p.id === planId)
       if (planIndex !== -1) {
-        const plan = plans.value[planIndex]
+        const plan = plans.value[planIndex]!
         const weeklySchedule = JSON.parse(JSON.stringify(plan.weeklySchedule)) as Record<
           string,
           Record<string, any>

@@ -18,11 +18,12 @@ export interface OnboardingProgress {
   timestamp: number
 }
 
-export const useProfile = () => {
-  const profile = ref<Profile | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+// Global state
+const profile = ref<Profile | null>(null)
+const loading = ref(false)
+const error = ref<string | null>(null)
 
+export const useProfile = () => {
   const fetchProfile = async () => {
     loading.value = true
     error.value = null

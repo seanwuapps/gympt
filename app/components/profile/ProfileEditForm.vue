@@ -61,14 +61,23 @@
           Health & Safety
         </h3>
         <div class="field">
-          <label class="field-label">Injury Flags / Limitations</label>
+          <label class="field-label">
+            Injury Flags / Limitations
+            <span v-if="isRehabGoalSelected" class="required-indicator">*</span>
+          </label>
           <Textarea
             v-model="formData.injuryFlags"
             :rows="3"
             :maxlength="300"
             class="w-full"
+            :class="{ 'p-invalid': isRehabGoalSelected && !formData.injuryFlags }"
             placeholder="Describe any injuries or exercises to avoid..."
           />
+          <small v-if="isRehabGoalSelected" class="help-text emphasis">
+            <i class="pi pi-info-circle" />
+            Required when Rehabilitation is selected as a goal. Please describe your injury or
+            limitation.
+          </small>
           <small class="char-count">{{ (formData.injuryFlags || '').length }}/300</small>
         </div>
       </div>
@@ -132,6 +141,15 @@ const emit = defineEmits<{
 // Form Data
 const formData = ref<ProfileFormData>({ ...props.initialData })
 
+// Watch for changes in initialData (e.g. when loaded asynchronously)
+watch(
+  () => props.initialData,
+  (newData) => {
+    formData.value = { ...newData }
+  },
+  { deep: true }
+)
+
 // Options (moved from profile.vue)
 const experienceLevelOptions = [
   { value: 'beginner', label: 'Beginner' },
@@ -176,6 +194,11 @@ const goalOptions = [
 const handleSubmit = () => {
   emit('save', formData.value)
 }
+
+// Check if rehab goal is selected
+const isRehabGoalSelected = computed(() => {
+  return formData.value.goals?.includes('rehab') ?? false
+})
 </script>
 
 <style scoped>
@@ -229,10 +252,23 @@ const handleSubmit = () => {
   font-size: 0.875rem;
 }
 
+.required-indicator {
+  color: var(--p-red-500);
+  margin-left: 0.25rem;
+}
+
 .help-text,
 .char-count {
   font-size: 0.75rem;
   color: var(--p-text-muted-color);
+}
+
+.help-text.emphasis {
+  color: var(--p-primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
 }
 
 .char-count {

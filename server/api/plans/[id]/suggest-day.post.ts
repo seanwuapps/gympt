@@ -4,7 +4,10 @@ import postgres from 'postgres'
 import { eq, and } from 'drizzle-orm'
 import { trainingPlans, profiles } from '../../../../db/schema'
 import { DaySuggestionResponseSchema } from '../../../shared/schemas/day-suggestion'
-import { getDaySuggestionSystemPrompt, getDaySuggestionUserPrompt } from '../../../shared/prompts/day-suggestions'
+import {
+  getDaySuggestionSystemPrompt,
+  getDaySuggestionUserPrompt,
+} from '../../../shared/prompts/day-suggestions'
 
 /**
  * POST /api/plans/:id/suggest-day
@@ -95,15 +98,27 @@ export default defineEventHandler(async (event) => {
     }
 
     // Extract week schedule
-    const weeklySchedule = plan.weeklySchedule as Record<string, Record<string, string>>
-    const weekSchedule = weeklySchedule[week]
+    const weeklySchedule = plan.weeklySchedule as Record<
+      string,
+      Record<string, string | { modality: string }>
+    >
+    const rawWeekSchedule = weeklySchedule[week]
 
-    if (!weekSchedule) {
+    if (!rawWeekSchedule) {
       throw createError({
         statusCode: 404,
         message: `Week ${week} not found in plan`,
       })
     }
+
+    // Normalize week schedule for prompt (convert objects to strings)
+    const weekSchedule: Record<string, string> = Object.entries(rawWeekSchedule).reduce(
+      (acc, [d, val]) => {
+        acc[d] = typeof val === 'string' ? val : val.modality
+        return acc
+      },
+      {} as Record<string, string>
+    )
 
     const currentModality = weekSchedule[day]
 

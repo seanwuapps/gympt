@@ -1,20 +1,8 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser()
-  
-  // Check for fake auth user
-  let isFakeAuth = false
-  if (process.client) {
-    const fakeUser = localStorage.getItem('fake-auth-user')
-    isFakeAuth = !!fakeUser
-  }
 
-  // Only check if user is authenticated (real or fake)
-  if (!user.value && !isFakeAuth) {
-    return
-  }
-  
-  // Skip profile check for fake auth users - they can access everything
-  if (isFakeAuth) {
+  // Only check if user is authenticated
+  if (!user.value) {
     return
   }
 
