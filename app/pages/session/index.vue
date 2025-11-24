@@ -8,12 +8,7 @@
             <i class="pi pi-bolt no-session-icon" />
             <h2>No Active Session</h2>
             <p>Start a training session from the home page</p>
-            <Button
-              label="Go to Home"
-              icon="pi pi-home"
-              @click="router.push('/')"
-              size="large"
-            />
+            <Button label="Go to Home" icon="pi pi-home" @click="router.push('/')" size="large" />
           </div>
         </template>
       </Card>
@@ -28,11 +23,15 @@
             <div class="session-info">
               <h1>{{ sessionStore.currentSession.modality }} Workout</h1>
               <p class="session-meta">
-                Week {{ sessionStore.currentSession.week }} • {{ formatDayKey(sessionStore.currentSession.dayKey) }}
+                Week {{ sessionStore.currentSession.week }} •
+                {{ formatDayKey(sessionStore.currentSession.dayKey) }}
               </p>
             </div>
             <div class="session-status">
-              <Tag :value="sessionStore.currentSession.status" :severity="getStatusSeverity(sessionStore.currentSession.status)" />
+              <Tag
+                :value="sessionStore.currentSession.status"
+                :severity="getStatusSeverity(sessionStore.currentSession.status)"
+              />
             </div>
           </div>
         </template>
@@ -125,10 +124,15 @@
                     <span class="target-label">Duration</span>
                     <span class="target-value">{{ exercise.durationMin }} min</span>
                   </div>
-                  <div v-if="exercise.components && exercise.components.length" class="target-item full-width">
+                  <div
+                    v-if="exercise.components && exercise.components.length"
+                    class="target-item full-width"
+                  >
                     <span class="target-label">Components</span>
                     <ul class="components-list">
-                      <li v-for="(component, i) in exercise.components" :key="i">{{ component }}</li>
+                      <li v-for="(component, i) in exercise.components" :key="i">
+                        {{ component }}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -201,19 +205,6 @@ onMounted(() => {
   }
 })
 
-function formatDayKey(dayKey: string): string {
-  const days: Record<string, string> = {
-    Mon: 'Monday',
-    Tue: 'Tuesday',
-    Wed: 'Wednesday',
-    Thu: 'Thursday',
-    Fri: 'Friday',
-    Sat: 'Saturday',
-    Sun: 'Sunday'
-  }
-  return days[dayKey] || dayKey
-}
-
 function formatReps(reps: number | [number, number] | null): string {
   if (!reps) return '-'
   if (Array.isArray(reps)) {
@@ -222,43 +213,48 @@ function formatReps(reps: number | [number, number] | null): string {
   return String(reps)
 }
 
-function getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
-  const severityMap: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = {
+function getStatusSeverity(
+  status: string
+): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+  const severityMap: Record<
+    string,
+    'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+  > = {
     generated: 'info',
     in_progress: 'warn',
     completed: 'success',
-    cancelled: 'secondary'
+    cancelled: 'secondary',
   }
   return severityMap[status]
 }
 
 async function handleCompleteSession() {
   if (!sessionStore.currentSession) return
-  
+
   try {
     await sessionStore.completeSession(sessionStore.currentSession.id)
-    
+
     toast.add({
       severity: 'success',
       summary: 'Session Complete!',
       detail: 'Great work today!',
-      life: 3000
+      life: 3000,
     })
-    
+
     router.push('/')
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to complete session',
-      life: 5000
+      life: 5000,
     })
   }
 }
 
 async function handleCancelSession() {
   if (!sessionStore.currentSession) return
-  
+
   try {
     await sessionStore.cancelSession(sessionStore.currentSession.id)
     router.push('/')
@@ -267,7 +263,7 @@ async function handleCancelSession() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to cancel session',
-      life: 5000
+      life: 5000,
     })
   }
 }

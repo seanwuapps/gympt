@@ -66,6 +66,8 @@ export const UpdateSessionSchema = z.object({
 export const ListSessionsQuerySchema = z.object({
   status: z.enum(['generated', 'in_progress', 'completed', 'cancelled']).optional(),
   planId: z.string().uuid().optional(),
+  week: z.coerce.number().int().positive().optional(),
+  dayKey: z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']).optional(),
   limit: z.coerce.number().int().positive().max(100).default(50),
   offset: z.coerce.number().int().nonnegative().default(0),
 })

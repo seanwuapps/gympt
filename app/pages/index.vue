@@ -95,7 +95,36 @@ function getTodayDescription(): string {
   return descriptions[normalized] || 'Workout session'
 }
 
-function handleStartTraining() {
+const checkingSession = ref(false)
+const existingSession = ref<any>(null)
+
+async function checkExistingSession() {
+  if (!plansStore.activePlan) return
+
+  try {
+    const session = await sessionStore.fetchSessionByDay(
+      plansStore.activePlan.id,
+      getCurrentWeek(),
+      getTodayDayKey()
+    )
+    existingSession.value = session
+  } catch (error) {
+    console.error('Error checking existing session:', error)
+  }
+}
+
+// Watch for plan changes to re-check session
+watch(
+  () => plansStore.activePlan,
+  async (newPlan) => {
+    if (newPlan) {
+      await checkExistingSession()
+    }
+  },
+  { immediate: true }
+)
+
+async function handleStartTraining() {
   console.log('Start Training clicked')
 
   if (!plansStore.activePlan) {
@@ -108,6 +137,38 @@ function handleStartTraining() {
   if (!plan || isTodayRestDay()) {
     console.error('No modality or rest day')
     return
+  }
+
+  checkingSession.value = true
+  try {
+    // Check for existing session
+    const existingSession = await sessionStore.fetchSessionByDay(
+      plansStore.activePlan.id,
+      getCurrentWeek(),
+      getTodayDayKey()
+    )
+
+    if (existingSession) {
+      console.log('Found existing session:', existingSession)
+      // Set as current session
+      sessionStore.currentSession = existingSession
+
+      if (existingSession.status === 'generated') {
+        // Resume generation flow - go to preview
+        await router.push('/session/preview')
+        return
+      } else if (existingSession.status === 'in_progress') {
+        // Resume training - go to companion
+        await router.push('/session')
+        return
+      }
+      // If completed or cancelled, we allow generating a new one (fall through)
+    }
+  } catch (error) {
+    console.error('Error checking for existing session:', error)
+    // Fall through to generator on error
+  } finally {
+    checkingSession.value = false
   }
 
   // Show session length dialog
@@ -217,11 +278,11 @@ function handleViewPlan() {
             <!-- Start Training Button -->
             <Button
               v-if="!isTodayRestDay()"
-              label="Start Training"
-              icon="pi pi-bolt"
+              :label="existingSession ? 'Continue Session' : 'Start Training'"
+              :icon="existingSession ? 'pi pi-play' : 'pi pi-bolt'"
               @click="handleStartTraining"
-              :loading="sessionStore.generating"
-              :disabled="sessionStore.generating"
+              :loading="sessionStore.generating || checkingSession"
+              :disabled="sessionStore.generating || checkingSession"
               size="large"
               class="start-button"
             />

@@ -12,30 +12,30 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
   // Parse and validate query params
   const query = getQuery(event)
   const validation = ListSessionsQuerySchema.safeParse(query)
-  
+
   if (!validation.success) {
     throw createError({
       statusCode: 400,
       message: 'Invalid query parameters',
-      data: validation.error.flatten()
+      data: validation.error.flatten(),
     })
   }
 
-  const { status, planId, limit, offset } = validation.data
+  const { status, planId, week, dayKey, limit, offset } = validation.data
 
   // Connect to database
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
     throw createError({
       statusCode: 500,
-      message: 'Database connection not configured'
+      message: 'Database connection not configured',
     })
   }
 
@@ -51,6 +51,12 @@ export default defineEventHandler(async (event) => {
     if (planId) {
       conditions.push(eq(sessions.planId, planId))
     }
+    if (week) {
+      conditions.push(eq(sessions.week, week))
+    }
+    if (dayKey) {
+      conditions.push(eq(sessions.dayKey, dayKey))
+    }
 
     // Fetch sessions
     const result = await db
@@ -64,7 +70,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       sessions: result,
-      count: result.length
+      count: result.length,
     }
   } finally {
     await client.end()

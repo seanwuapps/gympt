@@ -208,6 +208,31 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  async function fetchSessionByDay(planId: string, week: number, dayKey: string) {
+    try {
+      const response = await $fetch<{ success: boolean; sessions: Session[]; count: number }>(
+        '/api/sessions',
+        {
+          params: {
+            planId,
+            week,
+            dayKey,
+            limit: 1,
+          },
+        }
+      )
+
+      if (response.sessions && response.sessions.length > 0) {
+        return response.sessions[0]
+      }
+      return null
+    } catch (err: any) {
+      console.error('[Session Store] Failed to fetch session by day:', err)
+      // Don't throw here, just return null so we can proceed with generation if needed
+      return null
+    }
+  }
+
   async function swapExercise(sessionId: string, exerciseIndex: number) {
     try {
       const response = await $fetch<{ success: boolean; exercise: SessionExercise }>(
@@ -248,6 +273,7 @@ export const useSessionStore = defineStore('session', () => {
     completeSession,
     cancelSession,
     loadSession,
+    fetchSessionByDay,
     swapExercise,
     clearSession,
   }
