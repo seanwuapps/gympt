@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError, getRouterParam } from 'h3'
+import { defineEventHandler, readBody, createError, getRouterParam, getRequestHeaders } from 'h3'
 import { serverSupabaseUser } from '#supabase/server'
 import { sessions } from '../../../../db/schema'
 import { drizzle } from 'drizzle-orm/postgres-js'
@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { SessionExerciseSchema } from '../../../shared/schemas/session'
 
 const SwapExerciseSchema = z.object({
-  exerciseIndex: z.number().int().nonnegative()
+  exerciseIndex: z.number().int().nonnegative(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
@@ -26,19 +26,19 @@ export default defineEventHandler(async (event) => {
   if (!sessionId) {
     throw createError({
       statusCode: 400,
-      message: 'Session ID is required'
+      message: 'Session ID is required',
     })
   }
 
   // Parse and validate request body
   const body = await readBody(event)
   const validation = SwapExerciseSchema.safeParse(body)
-  
+
   if (!validation.success) {
     throw createError({
       statusCode: 400,
       message: 'Invalid request body',
-      data: validation.error.flatten()
+      data: validation.error.flatten(),
     })
   }
 
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
   if (!connectionString) {
     throw createError({
       statusCode: 500,
-      message: 'Database connection not configured'
+      message: 'Database connection not configured',
     })
   }
 
@@ -61,16 +61,13 @@ export default defineEventHandler(async (event) => {
     const [session] = await db
       .select()
       .from(sessions)
-      .where(and(
-        eq(sessions.id, sessionId),
-        eq(sessions.userId, user.sub)
-      ))
+      .where(and(eq(sessions.id, sessionId), eq(sessions.userId, user.sub)))
       .limit(1)
 
     if (!session) {
       throw createError({
         statusCode: 404,
-        message: 'Session not found'
+        message: 'Session not found',
       })
     }
 
@@ -79,7 +76,7 @@ export default defineEventHandler(async (event) => {
     if (exerciseIndex < 0 || exerciseIndex >= exercises.length) {
       throw createError({
         statusCode: 400,
-        message: 'Invalid exercise index'
+        message: 'Invalid exercise index',
       })
     }
 
@@ -88,20 +85,21 @@ export default defineEventHandler(async (event) => {
     // Generate a new exercise using AI
     const newExerciseData = await $fetch<{ exercises: any[] }>('/api/ai/session.generate', {
       method: 'POST',
+      headers: getRequestHeaders(event) as HeadersInit,
       body: {
         modality: currentExercise.type,
         sessionLengthMin: 10, // Short session to get just one exercise
         constraints: {
           exerciseCount: 1,
-          excludeExercises: exercises.map(e => e.name) // Avoid duplicates
-        }
-      }
+          excludeExercises: exercises.map((e) => e.name), // Avoid duplicates
+        },
+      },
     })
 
     if (!newExerciseData.exercises || newExerciseData.exercises.length === 0) {
       throw createError({
         statusCode: 500,
-        message: 'Failed to generate replacement exercise'
+        message: 'Failed to generate replacement exercise',
       })
     }
 
@@ -113,7 +111,7 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 500,
         message: 'Generated exercise is invalid',
-        data: exerciseValidation.error.flatten()
+        data: exerciseValidation.error.flatten(),
       })
     }
 
@@ -125,13 +123,13 @@ export default defineEventHandler(async (event) => {
       .update(sessions)
       .set({
         exercises: exercises,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(sessions.id, sessionId))
 
     return {
       success: true,
-      exercise: newExercise
+      exercise: newExercise,
     }
   } finally {
     await client.end()

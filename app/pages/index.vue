@@ -130,6 +130,7 @@ async function confirmSessionLength() {
       week,
       day,
       plan.modality,
+      plan.focus,
       selectedSessionLength.value
     )
 
@@ -243,7 +244,7 @@ function handleViewPlan() {
               <Button
                 label="Manage Plans"
                 icon="pi pi-cog"
-                @click="router.push('/plans')"
+                @click="router.push('/plans/library')"
                 text
                 size="small"
               />

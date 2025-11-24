@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ProfileFormData } from '~/composables/useProfile'
+import type { ProfileFormData } from '~/stores/profile.store'
 
 definePageMeta({
   middleware: 'auth',
@@ -54,7 +54,7 @@ definePageMeta({
 
 const router = useRouter()
 const toast = useToast()
-const { saveProfile } = useProfile()
+const profileStore = useProfileStore()
 const onboardingStore = useOnboardingStore()
 
 const saving = ref(false)
@@ -92,7 +92,7 @@ const handleSaveAndContinue = async () => {
   saving.value = true
 
   try {
-    await saveProfile(onboardingStore.formData as ProfileFormData)
+    await profileStore.saveProfile(onboardingStore.formData as ProfileFormData)
 
     // Clear the profile check cache so middleware knows profile exists
     const hasProfile = useState<boolean | null>('user-has-profile')

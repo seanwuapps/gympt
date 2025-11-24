@@ -14,16 +14,16 @@
       </template>
 
       <template #content>
-        <div v-if="loading" class="loading-state">
+        <div v-if="profileStore.loading" class="loading-state">
           <ProgressSpinner />
           <p>Loading your profile...</p>
         </div>
 
-        <Message v-else-if="error" severity="error" :closable="false">
-          {{ error }}
+        <Message v-else-if="profileStore.error" severity="error" :closable="false">
+          {{ profileStore.error }}
         </Message>
 
-        <div v-else-if="profile" class="profile-edit">
+        <div v-else-if="profileStore.profile" class="profile-edit">
           <ProfileEditForm
             :initial-data="editForm"
             :loading="saving"
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ProfileFormData } from '~/composables/useProfile'
+import type { ProfileFormData } from '~/stores/profile.store'
 import type { Profile } from '../../../db/schema'
 import { detectSignificantProfileChanges, getChangeSummary } from '~/utils/profile-changes'
 import { usePlansStore } from '~/stores/plans'
@@ -59,7 +59,7 @@ definePageMeta({
 
 const toast = useToast()
 const router = useRouter()
-const { profile, loading, error, fetchProfile, saveProfile } = useProfile()
+const profileStore = useProfileStore()
 const plansStore = usePlansStore()
 
 const saving = ref(false)
@@ -84,19 +84,19 @@ const editForm = ref<ProfileFormData>({
 })
 
 onMounted(async () => {
-  await fetchProfile()
+  await profileStore.fetchProfile()
   await plansStore.fetchPlans()
 
   // Initialize form with current profile data
-  if (profile.value) {
+  if (profileStore.profile) {
     editForm.value = {
-      goals: parseGoals(profile.value.goals),
-      experienceLevel: profile.value.experienceLevel,
-      preferredTrainingDays: [...profile.value.preferredTrainingDays],
-      injuryFlags: profile.value.injuryFlags || undefined,
-      units: profile.value.units,
-      language: profile.value.language,
-      aggressiveness: profile.value.aggressiveness,
+      goals: parseGoals(profileStore.profile.goals),
+      experienceLevel: profileStore.profile.experienceLevel,
+      preferredTrainingDays: [...profileStore.profile.preferredTrainingDays],
+      injuryFlags: profileStore.profile.injuryFlags || undefined,
+      units: profileStore.profile.units,
+      language: profileStore.profile.language,
+      aggressiveness: profileStore.profile.aggressiveness,
     }
   }
 })
@@ -134,10 +134,10 @@ const saveChanges = async (formData: ProfileFormData) => {
   saving.value = true
 
   // Capture old profile before saving
-  oldProfileSnapshot.value = profile.value ? { ...profile.value } : null
+  oldProfileSnapshot.value = profileStore.profile ? { ...profileStore.profile } : null
 
   try {
-    const updatedProfile = await saveProfile(formData)
+    const updatedProfile = await profileStore.saveProfile(formData)
 
     toast.add({
       severity: 'success',

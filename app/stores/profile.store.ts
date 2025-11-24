@@ -1,3 +1,4 @@
+import { defineStore } from 'pinia'
 import type { Profile } from '../../db/schema'
 
 const STORAGE_KEY = 'gympt_onboarding_progress'
@@ -18,12 +19,13 @@ export interface OnboardingProgress {
   timestamp: number
 }
 
-// Global state
-const profile = ref<Profile | null>(null)
-const loading = ref(false)
-const error = ref<string | null>(null)
+export const useProfileStore = defineStore('profile', () => {
+  // State
+  const profile = ref<Profile | null>(null)
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
-export const useProfile = () => {
+  // Actions
   const fetchProfile = async () => {
     loading.value = true
     error.value = null
@@ -108,13 +110,15 @@ export const useProfile = () => {
   }
 
   return {
+    // State
     profile,
     loading,
     error,
+    // Actions
     fetchProfile,
     saveProfile,
     saveProgressToLocalStorage,
     loadProgressFromLocalStorage,
     clearProgress,
   }
-}
+})

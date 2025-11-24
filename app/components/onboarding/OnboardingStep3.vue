@@ -3,35 +3,27 @@
     <h2 class="step-title">Any injuries or limitations?</h2>
 
     <form>
-      <div class="field">
-        <label class="field-label">
-          <i class="pi pi-exclamation-triangle" style="color: var(--p-orange-500); margin-right: 0.5rem;"></i>
-          Injury Flags (Optional)
-        </label>
-        <Textarea
-          v-model="injuryFlags"
-          :rows="3"
-          :maxlength="300"
-          placeholder="e.g., Lower back pain, right knee issues, shoulder mobility..."
-          class="w-full"
-        />
-        <small class="char-count">{{ injuryFlags.length }}/300</small>
-        <div class="help-text">
-          <i class="pi pi-info-circle" style="margin-right: 0.25rem;"></i>
-          <small>This helps the AI avoid exercises that may aggravate your condition</small>
-        </div>
+      <ProfileFormHealthSafety v-model="injuryFlags" :goals="goals" :showTitle="false" />
+
+      <div class="help-text">
+        <i class="pi pi-info-circle" style="margin-right: 0.25rem"></i>
+        <small>This helps the AI avoid exercises that may aggravate your condition</small>
       </div>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
+import ProfileFormHealthSafety from '~/components/profile/ProfileFormHealthSafety.vue'
+
 const onboardingStore = useOnboardingStore()
 
 const injuryFlags = computed({
   get: () => onboardingStore.formData.injuryFlags || '',
   set: (value) => onboardingStore.updateFormData({ injuryFlags: value }),
 })
+
+const goals = computed(() => onboardingStore.formData.goals || [])
 </script>
 
 <style scoped>
@@ -46,31 +38,6 @@ const injuryFlags = computed({
   font-weight: 600;
   margin-bottom: 2rem;
   text-align: center;
-}
-
-.field {
-  margin-bottom: 2rem;
-}
-
-.field-label {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.char-count {
-  display: block;
-  text-align: right;
-  color: var(--p-text-muted-color);
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
 }
 
 .help-text {

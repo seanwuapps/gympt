@@ -5,6 +5,7 @@ import { $fetch } from 'ofetch'
 export interface SessionExercise {
   type: 'strength' | 'cardio' | 'hiit' | 'crossfit' | 'rehab'
   name: string
+  section?: 'warmup' | 'working' | 'cardio' | 'cooldown'
   // Strength fields
   sets?: number | null
   reps?: number | [number, number] | null
@@ -65,6 +66,7 @@ export const useSessionStore = defineStore('session', () => {
     week: number,
     dayKey: string,
     modality: string,
+    focus?: string,
     sessionLengthMin: number = 45
   ) {
     console.log('[Session Store] generateSession called with:', {
@@ -72,6 +74,7 @@ export const useSessionStore = defineStore('session', () => {
       week,
       dayKey,
       modality,
+      focus,
       sessionLengthMin,
     })
     generating.value = true
@@ -86,6 +89,7 @@ export const useSessionStore = defineStore('session', () => {
           method: 'POST',
           body: {
             modality: modality.toLowerCase(),
+            focus,
             sessionLengthMin,
             day: week,
             constraints: {},

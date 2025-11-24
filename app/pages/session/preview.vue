@@ -48,137 +48,145 @@
 
       <!-- Exercises List -->
       <div class="exercises-section">
-        <h2>{{ sessionStore.currentSession.exercises.length }} Exercises</h2>
-        <div class="exercises-list">
-          <Card
-            v-for="(exercise, index) in sessionStore.currentSession.exercises"
-            :key="index"
-            class="exercise-card"
-          >
-            <template #header>
-              <div class="exercise-header">
-                <div class="exercise-title">
-                  <span class="exercise-number">{{ index + 1 }}</span>
-                  <h3>{{ exercise.name }}</h3>
-                </div>
-                <Button
-                  icon="pi pi-refresh"
-                  text
-                  rounded
-                  severity="secondary"
-                  @click="handleSwapExercise(index)"
-                  :loading="swappingIndex === index"
-                  v-tooltip.top="'Swap exercise'"
-                />
-              </div>
-            </template>
-            <template #content>
-              <div class="exercise-targets">
-                <!-- Strength Exercise -->
-                <div v-if="exercise.type === 'strength'" class="targets-grid">
-                  <div v-if="exercise.sets" class="target-item">
-                    <span class="target-label">Sets</span>
-                    <span class="target-value">{{ exercise.sets }}</span>
-                  </div>
-                  <div v-if="exercise.reps" class="target-item">
-                    <span class="target-label">Reps</span>
-                    <span class="target-value">{{ formatReps(exercise.reps) }}</span>
-                  </div>
-                  <div v-if="exercise.loadKg" class="target-item">
-                    <span class="target-label">Load</span>
-                    <span class="target-value">{{ exercise.loadKg }} kg</span>
-                  </div>
-                  <div v-if="exercise.rir" class="target-item">
-                    <span class="target-label">RIR</span>
-                    <span class="target-value">{{ exercise.rir }}</span>
-                  </div>
-                  <div v-if="exercise.restSec" class="target-item">
-                    <span class="target-label">Rest</span>
-                    <span class="target-value">{{ exercise.restSec }}s</span>
-                  </div>
-                </div>
+        <div v-for="section in groupedExercises" :key="section.key" class="section-container">
+          <div v-if="section.exercises.length > 0" class="section-wrapper">
+            <div class="section-header">
+              <i :class="section.icon"></i>
+              <h2>{{ section.title }}</h2>
+            </div>
 
-                <!-- Cardio Exercise -->
-                <div v-else-if="exercise.type === 'cardio'" class="targets-grid">
-                  <div v-if="exercise.durationMin" class="target-item">
-                    <span class="target-label">Duration</span>
-                    <span class="target-value">{{ exercise.durationMin }} min</span>
+            <div class="exercises-list">
+              <Card
+                v-for="(exercise, index) in section.exercises"
+                :key="exercise.originalIndex"
+                class="exercise-card"
+              >
+                <template #header>
+                  <div class="exercise-header">
+                    <div class="exercise-title">
+                      <span class="exercise-number">{{ index + 1 }}</span>
+                      <h3>{{ exercise.name }}</h3>
+                    </div>
+                    <Button
+                      icon="pi pi-refresh"
+                      text
+                      rounded
+                      severity="secondary"
+                      @click="handleSwapExercise(exercise.originalIndex)"
+                      :loading="swappingIndex === exercise.originalIndex"
+                      v-tooltip.top="'Swap exercise'"
+                    />
                   </div>
-                  <div v-if="exercise.intensity" class="target-item">
-                    <span class="target-label">Intensity</span>
-                    <span class="target-value">{{ exercise.intensity }}</span>
-                  </div>
-                  <div v-if="exercise.distanceKm" class="target-item">
-                    <span class="target-label">Distance</span>
-                    <span class="target-value">{{ exercise.distanceKm }} km</span>
-                  </div>
-                </div>
+                </template>
+                <template #content>
+                  <div class="exercise-targets">
+                    <!-- Strength Exercise -->
+                    <div v-if="exercise.type === 'strength'" class="targets-grid">
+                      <div v-if="exercise.sets" class="target-item">
+                        <span class="target-label">Sets</span>
+                        <span class="target-value">{{ exercise.sets }}</span>
+                      </div>
+                      <div v-if="exercise.reps" class="target-item">
+                        <span class="target-label">Reps</span>
+                        <span class="target-value">{{ formatReps(exercise.reps) }}</span>
+                      </div>
+                      <div v-if="exercise.loadKg" class="target-item">
+                        <span class="target-label">Load</span>
+                        <span class="target-value">{{ exercise.loadKg }} kg</span>
+                      </div>
+                      <div v-if="exercise.rir" class="target-item">
+                        <span class="target-label">RIR</span>
+                        <span class="target-value">{{ exercise.rir }}</span>
+                      </div>
+                      <div v-if="exercise.restSec" class="target-item">
+                        <span class="target-label">Rest</span>
+                        <span class="target-value">{{ exercise.restSec }}s</span>
+                      </div>
+                    </div>
 
-                <!-- HIIT Exercise -->
-                <div v-else-if="exercise.type === 'hiit'" class="targets-grid">
-                  <div v-if="exercise.rounds" class="target-item">
-                    <span class="target-label">Rounds</span>
-                    <span class="target-value">{{ exercise.rounds }}</span>
-                  </div>
-                  <div v-if="exercise.workSec" class="target-item">
-                    <span class="target-label">Work</span>
-                    <span class="target-value">{{ exercise.workSec }}s</span>
-                  </div>
-                  <div v-if="exercise.restSec" class="target-item">
-                    <span class="target-label">Rest</span>
-                    <span class="target-value">{{ exercise.restSec }}s</span>
-                  </div>
-                  <div v-if="exercise.modality" class="target-item">
-                    <span class="target-label">Modality</span>
-                    <span class="target-value">{{ exercise.modality }}</span>
-                  </div>
-                </div>
+                    <!-- Cardio Exercise -->
+                    <div v-else-if="exercise.type === 'cardio'" class="targets-grid">
+                      <div v-if="exercise.durationMin" class="target-item">
+                        <span class="target-label">Duration</span>
+                        <span class="target-value">{{ exercise.durationMin }} min</span>
+                      </div>
+                      <div v-if="exercise.intensity" class="target-item">
+                        <span class="target-label">Intensity</span>
+                        <span class="target-value">{{ exercise.intensity }}</span>
+                      </div>
+                      <div v-if="exercise.distanceKm" class="target-item">
+                        <span class="target-label">Distance</span>
+                        <span class="target-value">{{ exercise.distanceKm }} km</span>
+                      </div>
+                    </div>
 
-                <!-- Crossfit Exercise -->
-                <div v-else-if="exercise.type === 'crossfit'" class="targets-grid">
-                  <div v-if="exercise.format" class="target-item">
-                    <span class="target-label">Format</span>
-                    <span class="target-value">{{ exercise.format }}</span>
-                  </div>
-                  <div v-if="exercise.durationMin" class="target-item">
-                    <span class="target-label">Duration</span>
-                    <span class="target-value">{{ exercise.durationMin }} min</span>
-                  </div>
-                  <div
-                    v-if="exercise.components && exercise.components.length"
-                    class="target-item full-width"
-                  >
-                    <span class="target-label">Components</span>
-                    <ul class="components-list">
-                      <li v-for="(component, i) in exercise.components" :key="i">
-                        {{ component }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                    <!-- HIIT Exercise -->
+                    <div v-else-if="exercise.type === 'hiit'" class="targets-grid">
+                      <div v-if="exercise.rounds" class="target-item">
+                        <span class="target-label">Rounds</span>
+                        <span class="target-value">{{ exercise.rounds }}</span>
+                      </div>
+                      <div v-if="exercise.workSec" class="target-item">
+                        <span class="target-label">Work</span>
+                        <span class="target-value">{{ exercise.workSec }}s</span>
+                      </div>
+                      <div v-if="exercise.restSec" class="target-item">
+                        <span class="target-label">Rest</span>
+                        <span class="target-value">{{ exercise.restSec }}s</span>
+                      </div>
+                      <div v-if="exercise.modality" class="target-item">
+                        <span class="target-label">Modality</span>
+                        <span class="target-value">{{ exercise.modality }}</span>
+                      </div>
+                    </div>
 
-                <!-- Rehab Exercise -->
-                <div v-else-if="exercise.type === 'rehab'" class="targets-grid">
-                  <div v-if="exercise.sets" class="target-item">
-                    <span class="target-label">Sets</span>
-                    <span class="target-value">{{ exercise.sets }}</span>
+                    <!-- Crossfit Exercise -->
+                    <div v-else-if="exercise.type === 'crossfit'" class="targets-grid">
+                      <div v-if="exercise.format" class="target-item">
+                        <span class="target-label">Format</span>
+                        <span class="target-value">{{ exercise.format }}</span>
+                      </div>
+                      <div v-if="exercise.durationMin" class="target-item">
+                        <span class="target-label">Duration</span>
+                        <span class="target-value">{{ exercise.durationMin }} min</span>
+                      </div>
+                      <div
+                        v-if="exercise.components && exercise.components.length"
+                        class="target-item full-width"
+                      >
+                        <span class="target-label">Components</span>
+                        <ul class="components-list">
+                          <li v-for="(component, i) in exercise.components" :key="i">
+                            {{ component }}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- Rehab Exercise -->
+                    <div v-else-if="exercise.type === 'rehab'" class="targets-grid">
+                      <div v-if="exercise.sets" class="target-item">
+                        <span class="target-label">Sets</span>
+                        <span class="target-value">{{ exercise.sets }}</span>
+                      </div>
+                      <div v-if="exercise.reps" class="target-item">
+                        <span class="target-label">Reps</span>
+                        <span class="target-value">{{ formatReps(exercise.reps) }}</span>
+                      </div>
+                      <div v-if="exercise.painCeiling" class="target-item">
+                        <span class="target-label">Pain Ceiling</span>
+                        <span class="target-value">{{ exercise.painCeiling }}/3</span>
+                      </div>
+                      <div v-if="exercise.tempo" class="target-item">
+                        <span class="target-label">Tempo</span>
+                        <span class="target-value">{{ exercise.tempo }}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div v-if="exercise.reps" class="target-item">
-                    <span class="target-label">Reps</span>
-                    <span class="target-value">{{ formatReps(exercise.reps) }}</span>
-                  </div>
-                  <div v-if="exercise.painCeiling" class="target-item">
-                    <span class="target-label">Pain Ceiling</span>
-                    <span class="target-value">{{ exercise.painCeiling }}/3</span>
-                  </div>
-                  <div v-if="exercise.tempo" class="target-item">
-                    <span class="target-label">Tempo</span>
-                    <span class="target-value">{{ exercise.tempo }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </Card>
+                </template>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -215,6 +223,39 @@ const toast = useToast()
 
 const swappingIndex = ref<number | null>(null)
 const starting = ref(false)
+
+const groupedExercises = computed(() => {
+  if (!sessionStore.currentSession?.exercises) return []
+
+  const exercises = sessionStore.currentSession.exercises.map((ex, index) => ({
+    ...ex,
+    originalIndex: index,
+  }))
+
+  const sections = [
+    { key: 'warmup', title: 'Warm Up', icon: 'pi pi-sun', exercises: [] as typeof exercises },
+    {
+      key: 'working',
+      title: 'Working Sets',
+      icon: 'pi pi-bolt',
+      exercises: [] as typeof exercises,
+    },
+    { key: 'cardio', title: 'Cardio', icon: 'pi pi-heart', exercises: [] as typeof exercises },
+    { key: 'cooldown', title: 'Cool Down', icon: 'pi pi-moon', exercises: [] as typeof exercises },
+  ]
+
+  exercises.forEach((ex) => {
+    const section = sections.find((s) => s.key === ex.section)
+    if (section) {
+      section.exercises.push(ex)
+    } else {
+      // Fallback for exercises without section or unknown section
+      sections.find((s) => s.key === 'working')?.exercises.push(ex)
+    }
+  })
+
+  return sections.filter((s) => s.exercises.length > 0)
+})
 
 // Redirect if no session
 onMounted(() => {
@@ -409,8 +450,26 @@ async function handleCancel() {
 .exercises-section h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin: 0 0 var(--spacing-md) 0;
+  margin: 0;
   color: var(--p-text-color);
+}
+
+.section-container {
+  margin-bottom: var(--spacing-xl);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.section-header i {
+  font-size: 1.25rem;
+  color: var(--p-primary-color);
 }
 
 .exercises-list {

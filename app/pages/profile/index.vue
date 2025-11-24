@@ -14,7 +14,7 @@
       </template>
 
       <template #content>
-        <div v-if="loading" class="loading-state">
+        <div v-if="profileStore.loading" class="loading-state">
           <Skeleton height="2rem" class="mb-3" />
           <Skeleton height="2rem" class="mb-3" />
           <Skeleton height="2rem" class="mb-3" />
@@ -22,11 +22,11 @@
           <Skeleton height="2rem" />
         </div>
 
-        <Message v-else-if="error" severity="error" :closable="false">
-          {{ error }}
+        <Message v-else-if="profileStore.error" severity="error" :closable="false">
+          {{ profileStore.error }}
         </Message>
 
-        <div v-else-if="profile" class="profile-view">
+        <div v-else-if="profileStore.profile" class="profile-view">
           <DetailsList :details="profileDetails" />
         </div>
 
@@ -51,48 +51,48 @@ definePageMeta({
   middleware: 'auth',
 })
 
-const { profile, loading, error, fetchProfile } = useProfile()
+const profileStore = useProfileStore()
 
 // Data-driven profile details for view mode
 const profileDetails = computed(() => {
-  if (!profile.value) return []
+  if (!profileStore.profile) return []
 
   return [
     {
       label: 'Experience Level',
-      value: profile.value.experienceLevel,
+      value: profileStore.profile.experienceLevel,
     },
     {
       label: 'Preferred Training Days',
-      value: profile.value.preferredTrainingDays.join(', '),
+      value: profileStore.profile.preferredTrainingDays.join(', '),
     },
     {
       label: 'Goals',
-      value: formatGoals(profile.value.goals),
+      value: formatGoals(profileStore.profile.goals),
       defaultValue: 'Not specified',
     },
     {
       label: 'Progression Pace',
-      value: profile.value.aggressiveness,
+      value: profileStore.profile.aggressiveness,
     },
     {
       label: 'Injury Flags',
-      value: profile.value.injuryFlags,
+      value: profileStore.profile.injuryFlags,
       defaultValue: 'None',
     },
     {
       label: 'Units',
-      value: profile.value.units,
+      value: profileStore.profile.units,
     },
     {
       label: 'Language',
-      value: profile.value.language,
+      value: profileStore.profile.language,
     },
   ]
 })
 
 onMounted(async () => {
-  await fetchProfile()
+  await profileStore.fetchProfile()
 })
 
 // Format goals array for display

@@ -33,6 +33,8 @@ const Exercise = z.object({
   tempo: z.string().nullable().default(null),
   // HIIT modality
   modality: z.string().nullable().default(null),
+  // Section
+  section: z.enum(['warmup', 'working', 'cooldown']).default('working'),
 })
 
 const SessionPlan = z.object({
@@ -103,44 +105,92 @@ export default defineEventHandler(async (event) => {
 
     // Build AI prompts
     // TODO: take previous workout history (similar session performed before that user reviewed positively) into consideration
-    const systemPrompt = `You are an expert fitness coach and workout session designer.
+    const systemPrompt = `You are an Expert Fitness Coach possessing a profound, dual-layered understanding of human physiology and practical application. Your expertise is rooted in academic knowledge (e.g., exercise science, biomechanics, nutrition) and proven through extensive hands-on experience in the field. Your primary function is to serve as a scientific authority and a personalized guide, capable of devising training programs to meet diverse goals, including weight loss, muscle hypertrophy, and performance enhancement. When developing a training session, you must scientifically justify all decisions by integrating the user's specific goals, their current training plan (to ensure progressive overload and minimize overtraining), and the targeted focus of the session (e.g., strength, endurance, mobility). Your responses must be structured, precise, and actionable, providing clear parameters (sets, reps, rest, intensity, exercise selection) that are safe, effective, and evidence-based.
 
 CRITICAL REQUIREMENTS:
 - Session duration must be within the specified time limit
 - Consider warm-up, work sets, and rest periods when calculating total time
 - For beginners, use fewer exercises with more rest time
-- MUST return valid JSON with an "exercises" array and a "reasons" string
-- "reasons": A comprehensive description of how you came up with the exercises, considering the user's profile, goals, and focus.
 - Set unused fields to null (not undefined or omitted)
-- For strength sessions, use the provided focus to guide exercise selection
-- For cardio sessions, use the provided focus to guide cardio type selection
+- When choosing exercises, take the user's goals into consideration (ie. "build muscle" vs "improve endurance" use very different excercises and training methods)
+- For strength sessions, use the provided focus to guide exercise selection. ie. if focus is "chest", suggest chest exercises
+- At the end of a session, appropriately suggest cool-down and stretching exercises
+- **CRITICAL: Cardio exercises (including warm-up cardio) MUST have either durationMin OR distanceKm specified. NEVER leave both null.**
+- Include a "reasons" field in the response: A comprehensive description of how you came up with the exercises, what you took into consideration, and why the chosen exercises are recommended.
 
-EXERCISE TYPES (all include "type" and "name" fields):
-- "strength": { type: "strength", name, sets, reps, loadKg, rir, restSec }
-  Example: { "type": "strength", "name": "Bench Press", "sets": 4, "reps": 8, "loadKg": 60, "rir": 2, "restSec": 120 }
-- "cardio": { type: "cardio", name, durationMin, intensity: "easy"|"moderate"|"hard", distanceKm }
-  Example: { "type": "cardio", "name": "Running", "durationMin": 20, "intensity": "moderate", "distanceKm": 3 }
-- "hiit": { type: "hiit", name, rounds, workSec, restSec, modality }
-  Example: { "type": "hiit", "name": "Burpees", "rounds": 5, "workSec": 30, "restSec": 30, "modality": "bodyweight" }
-- "crossfit": { type: "crossfit", name, format: "AMRAP"|"ForTime"|"EMOM", durationMin, components: [] }
-  Example: { "type": "crossfit", "name": "Cindy", "format": "AMRAP", "durationMin": 20, "components": ["5 Pull-ups", "10 Push-ups", "15 Squats"] }
-- "rehab": { type: "rehab", name, sets, reps, painCeiling, tempo }
-  Example: { "type": "rehab", "name": "Shoulder Rotations", "sets": 3, "reps": 12, "painCeiling": 2, "tempo": "2-0-2-0" }
+STRICT JSON OUTPUT FORMAT:
+You must return a valid JSON object matching this structure exactly. Do not include markdown formatting or comments in the JSON.
 
-OUTPUT FORMAT:
 {
   "exercises": [
-    { exercise objects here }
+    {
+      "section": "warmup", // REQUIRED. Allowed: 'warmup', 'working', 'cooldown'
+      "type": "strength", // REQUIRED. Allowed: 'strength', 'cardio', 'hiit', 'crossfit', 'rehab'
+      "name": "Exercise Name", // REQUIRED
+      "sets": 2, // Optional
+      "reps": 12, // Optional
+      "loadKg": 0, // Optional
+      "restSec": 60, // Optional
+      "intensity": "easy" // Optional. Allowed: 'easy', 'moderate', 'hard'. DO NOT use 'low', 'medium', 'high'.
+    },
+    {
+      "section": "working",
+      "type": "strength",
+      "name": "Bench Press",
+      "sets": 3,
+      "reps": 8,
+      "loadKg": 60,
+      "rir": 2,
+      "restSec": 120
+    },
+    {
+      "section": "cooldown",
+      "type": "rehab",
+      "name": "Static Stretch",
+      "durationMin": 5,
+      "intensity": "easy"
+    }
   ],
   "reasons": "I selected these exercises because..."
 }
+
+ALLOWED ENUMS (Strictly Enforced):
+- section: 'warmup', 'working', 'cooldown'
+- type: 'strength', 'cardio', 'hiit', 'crossfit', 'rehab'
+- intensity: 'easy', 'moderate', 'hard' (Do NOT use 'low', 'medium', 'high')
+- format: 'AMRAP', 'ForTime', 'EMOM'
 `
 
+    // TODO: add more context here to help generate better session:
+    // 1. user profile and goals ✓
+    // 2. user's current plan (need to fetch plan data)
+    // 3. current session focus ✓
+    // 4. (later) previous user sessions (within a week window) and their feedbacks (what's too hard, what's too easy)
     const userPrompt = `Generate a ${parsed.data.modality} workout session for ${parsed.data.sessionLengthMin} minutes.
-${parsed.data.focus ? `Focus: ${parsed.data.focus}` : ''}
-User: ${userProfile.experience} level, ${userProfile.units} units.
-Goals: ${userProfile.goals}.
-`
+
+USER PROFILE:
+- Experience Level: ${userProfile.experience}
+- Units: ${userProfile.units}
+- Goals: ${userProfile.goals}
+${profile.injuryFlags ? `- Injury/Limitations: ${profile.injuryFlags}` : ''}
+${profile.preferredTrainingDays ? `- Preferred Training Days: ${(profile.preferredTrainingDays as string[]).join(', ')}` : ''}
+
+SESSION REQUIREMENTS:
+- Modality: ${parsed.data.modality}
+${parsed.data.focus ? `- **FOCUS: ${parsed.data.focus}** - This is the PRIMARY focus area. All exercises MUST target this specific focus.` : ''}
+- Duration: ${parsed.data.sessionLengthMin} minutes (including warm-up, work sets, rest, and cool-down)
+${parsed.data.day ? `- Training Day: Day ${parsed.data.day}` : ''}
+
+INSTRUCTIONS:
+1. Select exercises that align with the user's experience level and goals
+2. ${parsed.data.focus ? `CRITICALLY IMPORTANT: If focus is "${parsed.data.focus}", you must ONLY include exercises for that specific area. For example:\n   - If focus is "chest", "upper body", or "shoulders": NO leg exercises (no squats, leg press, lunges)\n   - If focus is "legs", "lower body", or "glutes": NO upper body exercises (no bench press, rows, pull-ups)\n   - If focus is a cardio type like "running": prioritize that specific cardio modality` : 'Select appropriate exercises for this modality'}
+3. ${profile.injuryFlags ? "Consider the user's injuries/limitations when selecting exercises" : 'Ensure exercises are safe and appropriate for the experience level'}
+4. **CRITICAL: You MUST include a 'section' field for every exercise:**
+   - \`warmup\`: For warm-up exercises.
+   - \`working\`: For main working sets AND cardio exercises.
+   - \`cooldown\`: For cool-down exercises.
+5. Provide load/intensity recommendations based on experience level
+6. Generate the workout session now.`
 
     // Call AI service with structured outputs
     const aiResponse = await callCloudflareAI({
@@ -172,11 +222,15 @@ Goals: ${userProfile.goals}.
       sessionData = sessionData.SessionPlan
     }
 
-    // Handle case where AI might return array directly instead of wrapped in object
+    // Handle case where AI might return array directly (legacy/fallback)
     if (Array.isArray(sessionData)) {
       console.log('[AI Session] AI returned array, wrapping in object')
-      console.log('[AI Session] AI returned array, wrapping in object')
-      sessionData = { exercises: sessionData, reasons: null }
+      // Fallback logic if AI returns array (unlikely with new schema but good for safety)
+      // We assume they are working sets if not specified, but this path is deprecated
+      sessionData = {
+        exercises: sessionData.map((e) => ({ ...e, section: e.section || 'working' })),
+        reasons: null,
+      }
     }
 
     // Validate AI response
@@ -191,7 +245,10 @@ Goals: ${userProfile.goals}.
       })
     }
 
-    return result.data
+    return {
+      exercises: result.data.exercises,
+      reasons: result.data.reasons,
+    }
   } catch (error: any) {
     console.error('Session generation error:', error)
 

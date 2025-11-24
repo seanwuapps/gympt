@@ -25,6 +25,7 @@ export const sessions = pgTable('sessions', {
 export interface SessionExercise {
   type: 'strength' | 'cardio' | 'hiit' | 'crossfit' | 'rehab'
   name: string
+  section?: 'warmup' | 'working' | 'cardio' | 'cooldown'
   // Strength fields
   sets?: number | null
   reps?: number | [number, number] | null

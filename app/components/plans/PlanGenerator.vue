@@ -142,7 +142,7 @@ const emit = defineEmits<{
 
 const plansStore = usePlansStore()
 const toast = useToast()
-const { profile, fetchProfile } = useProfile()
+const profileStore = useProfileStore()
 
 const generating = ref(false)
 const generatedPlan = ref<TrainingPlan | null>(null)
@@ -152,8 +152,8 @@ const planType = ref<'normal' | 'rehab'>('normal')
 
 // Check if user has rehab as a goal
 const hasRehabGoal = computed(() => {
-  if (!profile.value?.goals) return false
-  const goals = profile.value.goals.toLowerCase()
+  if (!profileStore.profile?.goals) return false
+  const goals = profileStore.profile.goals.toLowerCase()
   return goals.includes('rehab')
 })
 
@@ -230,8 +230,8 @@ function formatDate(date: Date | string) {
 }
 
 onMounted(async () => {
-  if (!profile.value) {
-    await fetchProfile()
+  if (!profileStore.profile) {
+    await profileStore.fetchProfile()
   }
 })
 

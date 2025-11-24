@@ -29,6 +29,8 @@ export const SessionExerciseSchema = z.object({
   tempo: z.string().nullable().default(null),
   // HIIT modality
   modality: z.string().nullable().default(null),
+  // Section (added for flat structure)
+  section: z.enum(['warmup', 'working', 'cooldown']).optional(),
 })
 
 // Session feedback schema

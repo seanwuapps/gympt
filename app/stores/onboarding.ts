@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { ProfileFormData } from '~/composables/useProfile'
+import type { ProfileFormData } from '~/stores/profile.store'
 
 const STORAGE_KEY = 'gympt_onboarding_progress'
 
@@ -29,7 +29,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   }
 
   function nextStep() {
-    if (currentStep.value < 2) {
+    if (currentStep.value < 3) {
       currentStep.value++
       saveProgress()
     }
