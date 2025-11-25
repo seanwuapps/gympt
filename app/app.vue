@@ -1,7 +1,7 @@
 <template>
   <div class="dark">
     <ClientOnly>
-      <Toast />
+      <BasePageMessages />
       <NuxtRouteAnnouncer />
       <NuxtLayout>
         <NuxtPage />
@@ -9,3 +9,5 @@
     </ClientOnly>
   </div>
 </template>
+
+

@@ -208,7 +208,6 @@ async function confirmSessionLength() {
       severity: 'error',
       summary: 'Generation Failed',
       detail: error.message || 'Failed to generate workout session',
-      life: 5000,
     })
   }
 }
@@ -221,7 +220,6 @@ async function handlePlanGenerated() {
     severity: 'success',
     summary: 'Plan Generated!',
     detail: 'Your training plan is ready.',
-    life: 3000,
   })
 }
 
@@ -234,14 +232,12 @@ async function handleActivatePlan(planId: string) {
       severity: 'success',
       summary: 'Plan Activated',
       detail: 'This plan is now your active training plan.',
-      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
       detail: error.message || 'Failed to activate plan',
-      life: 5000,
     })
   }
 }
@@ -262,7 +258,7 @@ function handleViewPlan() {
 
     <!-- Active Plan Section -->
     <section v-if="plansStore.activePlan" class="start-training-section">
-      <Card class="training-card">
+      <BaseCard class="training-card">
         <template #content>
           <div class="training-content">
             <!-- Week Badge -->
@@ -276,7 +272,7 @@ function handleViewPlan() {
             <p class="today-description">{{ getTodayDescription() }}</p>
 
             <!-- Start Training Button -->
-            <Button
+            <BaseButton
               v-if="!isTodayRestDay()"
               :label="existingSession ? 'Continue Session' : 'Start Training'"
               :icon="existingSession ? 'pi pi-play' : 'pi pi-bolt'"
@@ -295,16 +291,16 @@ function handleViewPlan() {
 
             <!-- Secondary Actions -->
             <div class="secondary-actions">
-              <Button
+              <BaseButton
                 label="View Full Plan"
-                icon="pi pi-calendar"
+                icon="📅"
                 @click="router.push('/plans')"
                 text
                 size="small"
               />
-              <Button
+              <BaseButton
                 label="Manage Plans"
-                icon="pi pi-cog"
+                icon=""
                 @click="router.push('/plans/library')"
                 text
                 size="small"
@@ -312,24 +308,24 @@ function handleViewPlan() {
             </div>
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </section>
 
     <!-- Loading State -->
     <section v-else-if="plansStore.loading" class="loading-section">
-      <Card>
+      <BaseCard>
         <template #content>
           <div class="loading-content">
-            <ProgressSpinner />
+            <BaseProgressSpinner />
             <p>Loading your training plan...</p>
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </section>
 
     <!-- No Plan Section -->
     <section v-else class="no-plan-section">
-      <Card>
+      <BaseCard>
         <template #content>
           <div class="no-plan-content">
             <div class="no-plan-icon">
@@ -338,26 +334,26 @@ function handleViewPlan() {
             <h2>No Active Training Plan</h2>
             <p>Generate an AI-powered training plan to get started with your fitness journey.</p>
             <div class="no-plan-actions">
-              <Button
+              <BaseButton
                 label="Generate Plan"
-                icon="pi pi-sparkles"
+                icon=""
                 @click="showGenerator = true"
                 size="large"
               />
-              <Button
+              <BaseButton
                 label="View Saved Plans"
-                icon="pi pi-list"
+                icon=""
                 @click="router.push('/plans')"
                 outlined
               />
             </div>
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </section>
 
     <!-- Session Length Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showSessionLengthDialog"
       modal
       header="How long do you have?"
@@ -389,53 +385,23 @@ function handleViewPlan() {
       </div>
 
       <template #footer>
-        <Button
+        <BaseButton
           label="Cancel"
           @click="showSessionLengthDialog = false"
           text
           :disabled="sessionStore.generating"
         />
-        <Button
+        <BaseButton
           label="Generate Workout"
-          icon="pi pi-bolt"
+          icon=""
           @click="confirmSessionLength"
           :loading="sessionStore.generating"
         />
       </template>
-    </Dialog>
-
-    <!-- Quick Actions -->
-    <section class="quick-actions">
-      <h2>Quick Actions</h2>
-      <div class="actions-grid">
-        <Card class="action-card" @click="router.push('/profile')">
-          <template #content>
-            <i class="pi pi-user action-icon" />
-            <h3>My Profile</h3>
-            <p>View and edit your training profile</p>
-          </template>
-        </Card>
-
-        <Card class="action-card" @click="router.push('/plans')">
-          <template #content>
-            <i class="pi pi-calendar action-icon" />
-            <h3>Manage Plans</h3>
-            <p>View and manage your training plans</p>
-          </template>
-        </Card>
-
-        <Card class="action-card" @click="signOut">
-          <template #content>
-            <i class="pi pi-sign-out action-icon" />
-            <h3>Sign Out</h3>
-            <p>Log out of your account</p>
-          </template>
-        </Card>
-      </div>
-    </section>
+    </BaseDialog>
 
     <!-- Plan Generator Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showGenerator"
       modal
       header="Generate Training Plan"
@@ -447,9 +413,9 @@ function handleViewPlan() {
         @view-plan="handleViewPlan"
         @cancel="showGenerator = false"
       />
-    </Dialog>
+    </BaseDialog>
 
-    <Toast />
+    <BasePageMessages />
   </div>
 </template>
 
@@ -591,136 +557,5 @@ function handleViewPlan() {
   gap: var(--spacing-md);
   flex-wrap: wrap;
   justify-content: center;
-}
-
-.quick-actions h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 var(--spacing-md) 0;
-  color: var(--p-text-color);
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--spacing-md);
-}
-
-.action-card {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.action-card :deep(.p-card-content) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
-}
-
-.action-icon {
-  font-size: 2.5rem;
-  color: var(--p-primary-color);
-}
-
-.action-card h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--p-text-color);
-}
-
-.action-card p {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-
-/* Session Length Dialog */
-.session-length-content {
-  padding: var(--spacing-md) 0;
-}
-
-.dialog-description {
-  color: var(--p-text-muted-color);
-  margin-bottom: var(--spacing-lg);
-  text-align: center;
-}
-
-.length-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.length-option {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: 2px solid var(--p-surface-border);
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.length-option:hover {
-  border-color: var(--p-primary-color);
-  background: var(--p-surface-700);
-}
-
-.length-option.selected {
-  border-color: var(--p-primary-color);
-  background: var(--p-primary-800);
-  font-weight: 600;
-}
-
-.length-option i {
-  font-size: 1.25rem;
-  color: var(--p-primary-color);
-}
-
-.length-option span {
-  flex: 1;
-  font-size: 1rem;
-}
-
-:deep(.generator-dialog) {
-  max-width: 90vw;
-  width: 40rem;
-}
-
-@media (max-width: 768px) {
-  .home-container {
-    padding: var(--spacing-md);
-  }
-
-  .welcome-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .no-plan-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .no-plan-actions :deep(.p-button) {
-    width: 100%;
-  }
-
-  :deep(.generator-dialog) {
-    width: 95vw;
-  }
 }
 </style>

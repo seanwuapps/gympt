@@ -38,7 +38,7 @@ const signInWithOtp = async () => {
 
 <template>
   <div class="login-container">
-    <Card class="login-card">
+    <BaseCard class="login-card">
       <template #header>
         <div class="card-header">
           <h2>Sign In</h2>
@@ -48,9 +48,9 @@ const signInWithOtp = async () => {
       <template #content>
         <div class="login-content">
           <!-- Google OAuth -->
-          <Button
+          <BaseButton
             label="Sign in with Google"
-            icon="pi pi-google"
+            icon=""
             @click="signInWithGoogle"
             class="w-full"
           />
@@ -70,7 +70,7 @@ const signInWithOtp = async () => {
             />
           </div>
 
-          <Button
+          <BaseButton
             label="Sign in with Email"
             severity="secondary"
             @click="signInWithOtp"
@@ -82,7 +82,7 @@ const signInWithOtp = async () => {
           </Message>
         </div>
       </template>
-    </Card>
+    </BaseCard>
   </div>
 </template>
 
@@ -127,3 +127,7 @@ const signInWithOtp = async () => {
   font-size: 0.875rem;
 }
 </style>
+
+
+
+

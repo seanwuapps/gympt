@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <Card title="My Profile">
-      <template #title>
+    <BaseCard>
+      <template #header>
         <div class="header">
           <h2>My Profile</h2>
-          <Button
+          <BaseButton
             label="Edit Profile"
-            icon="pi pi-pencil"
+            icon="✏️"
             @click="navigateTo('/profile/edit')"
             outlined
           />
@@ -15,16 +15,16 @@
 
       <template #content>
         <div v-if="profileStore.loading" class="loading-state">
-          <Skeleton height="2rem" class="mb-3" />
-          <Skeleton height="2rem" class="mb-3" />
-          <Skeleton height="2rem" class="mb-3" />
-          <Skeleton height="2rem" class="mb-3" />
-          <Skeleton height="2rem" />
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
         </div>
 
-        <Message v-else-if="profileStore.error" severity="error" :closable="false">
+        <BaseMessage v-else-if="profileStore.error" severity="error" :closable="false">
           {{ profileStore.error }}
-        </Message>
+        </BaseMessage>
 
         <div v-else-if="profileStore.profile" class="profile-view">
           <DetailsList :details="profileDetails" />
@@ -32,15 +32,15 @@
 
         <div v-else class="no-profile">
           <div class="empty-state">
-            <i class="pi pi-user" style="font-size: 3rem; color: var(--p-text-muted-color)"></i>
+            <span style="font-size: 3rem">👤</span>
             <p>No profile found</p>
-            <Button label="Create Profile" @click="$router.push('/onboarding')" />
+            <BaseButton label="Create Profile" @click="$router.push('/onboarding')" />
           </div>
         </div>
       </template>
-    </Card>
+    </BaseCard>
 
-    <Toast />
+    <BasePageMessages />
   </div>
 </template>
 
@@ -119,20 +119,36 @@ const formatGoals = (goals: string | null | undefined): string => {
 .loading-state {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 0.5rem;
 }
 
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-xl);
+  gap: 1rem;
+  padding: 2rem;
   text-align: center;
 }
 
 .empty-state p {
-  color: var(--p-text-muted-color);
   margin: 0;
+}
+
+.skeleton-line {
+  height: 2rem;
+  background: linear-gradient(90deg, #444 25%, #555 50%, #444 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>

@@ -1,51 +1,13 @@
 /* Global styles for AI Training Companion */
 :root {
   --font-family: 'Inter', sans-serif;
-
-  /* Bottom Navigation Design Tokens */
-  --bottom-nav-height: 4rem; /* 64px - thumb-friendly */
-  --bottom-nav-item-size: 3rem; /* 48px tap target */
-  --bottom-nav-icon-size: 1.5rem; /* 24px icons */
-  --bottom-nav-font-size: 0.75rem; /* 12px labels */
-  --nav-gap: 0.25rem; /* 4px icon-label gap */
-
-  /* Spacing Scale */
-  --spacing-xs: 0.25rem; /* 4px */
-  --spacing-sm: 0.5rem; /* 8px */
-  --spacing-md: 1rem; /* 16px */
-  --spacing-lg: 1.5rem; /* 24px */
-  --spacing-xl: 2rem; /* 32px */
-
-  /* Z-index Scale */
-  --z-bottom-nav: 1000;
-  --z-modal: 2000;
-  --z-toast: 3000;
-
-  /* Accessibility: Enhanced Contrast Colors for WCAG AA Compliance */
-  /* These override PrimeVue defaults to ensure minimum 4.5:1 contrast ratio */
-  --text-primary-contrast: rgba(255, 255, 255, 0.95); /* ~19:1 on dark bg */
-  --text-secondary-contrast: rgba(255, 255, 255, 0.78); /* ~11:1 on dark bg */
-  --text-muted-contrast: rgba(255, 255, 255, 0.65); /* ~7:1 on dark bg */
-  --text-disabled-contrast: rgba(255, 255, 255, 0.45); /* ~4.5:1 on dark bg */
-
-  /* Primary color with enhanced contrast for text buttons */
-  --primary-text-contrast: #d4ff00; /* Brighter lime for better contrast */
-  --primary-hover-contrast: #e5ff33; /* Even brighter on hover */
 }
 
 html {
+  color-scheme: dark;
   font-family: var(--font-family);
 }
 
-/* Global layout adjustment for bottom nav */
 body {
-  padding-bottom: var(--bottom-nav-height);
-  background-color: var(--p-surface-950); /* Ensure dark background by default */
-  color: var(--p-text-color); /* Ensure light text by default */
-}
-
-/* Global Component Overrides */
-/* Fix Select dropdown label contrast to ensure visibility in dark mode */
-.p-select-label {
-  color: var(--p-text-color) !important;
+  padding-bottom: 5rem; /* Space for fixed bottom nav */
 }

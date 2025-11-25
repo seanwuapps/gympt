@@ -1,43 +1,45 @@
 <template>
   <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
-    <Tabs :value="activeRoute">
-      <TabList>
-        <Tab v-for="item in navItems" :key="item.route + item.action" :value="item.route" as-child>
+    <BaseTabs :value="activeRoute">
+      <BaseTabList>
+        <BaseTab
+          v-for="item in navItems"
+          :key="item.route + item.action"
+          :value="item.route"
+          as-child
+        >
           <template v-if="item.action">
-            <button
+            <BaseButton
               type="button"
               class="nav-item"
               :aria-label="item.label"
               @click="handleAction(item.action)"
             >
               <span class="nav-item__icon-wrapper">
-                <i :class="item.icon" class="nav-item__icon" />
+                <span class="nav-item__icon">{{ item.icon }}</span>
                 <span v-if="item.badge" class="nav-item__badge" aria-hidden="true"></span>
               </span>
               <span class="nav-item__label">{{ item.label }}</span>
-            </button>
+            </BaseButton>
           </template>
           <template v-else>
             <NuxtLink :to="item.route" class="nav-item" :aria-label="item.label">
               <span class="nav-item__icon-wrapper">
-                <i :class="item.icon" class="nav-item__icon" />
+                <span class="nav-item__icon">{{ item.icon }}</span>
                 <span v-if="item.badge" class="nav-item__badge" aria-hidden="true"></span>
               </span>
               <span class="nav-item__label">{{ item.label }}</span>
             </NuxtLink>
           </template>
-        </Tab>
-      </TabList>
-    </Tabs>
+        </BaseTab>
+      </BaseTabList>
+    </BaseTabs>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
 
 interface NavItem {
   route: string
@@ -53,28 +55,28 @@ const navItems = computed<NavItem[]>(() => [
   {
     route: '/',
     label: 'Home',
-    icon: 'pi pi-home',
+    icon: '🏠',
   },
   {
     route: '/plans',
     label: 'Plans',
-    icon: 'pi pi-calendar',
+    icon: '📅',
   },
   {
     route: '/progress',
     label: 'Progress',
-    icon: 'pi pi-chart-line',
+    icon: '📈',
   },
   {
     route: '/profile',
     label: 'Profile',
-    icon: 'pi pi-user',
+    icon: '👤',
   },
   {
     // Rendered as an action button instead of a link
     route: '/',
     label: 'Sign Out',
-    icon: 'pi pi-sign-out',
+    icon: '🚪',
     action: 'signOut',
   },
 ])
@@ -118,82 +120,14 @@ function handleAction(action?: string) {
 /* Navigation - horizontal bottom on mobile, vertical right on desktop */
 .bottom-nav {
   position: fixed;
-  z-index: var(--z-bottom-nav, 1000);
-}
-
-/* Mobile: bottom horizontal dock */
-@media (max-width: 768px) {
-  .bottom-nav {
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 1.5rem);
-    width: fit-content;
-    max-width: calc(100vw - 2rem);
-  }
-}
-
-/* Desktop: right vertical sidebar */
-@media (min-width: 769px) {
-  .bottom-nav {
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
-    height: fit-content;
-    max-height: calc(100vh - 2rem);
-  }
-}
-
-/* Override PrimeVue Tabs default styles for dock layout */
-.bottom-nav :deep(.p-tablist-tab-list) {
-  display: flex;
-  align-items: center;
-  border: none;
-
-  /* Frosted glass effect - macOS style (Dark Mode) */
-  background: rgba(15, 23, 42, 0.7); /* Slate-900 with opacity */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-  /* Dock styling */
-  border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border for definition */
-  box-shadow:
-    0 0.5rem 2rem rgba(0, 0, 0, 0.3),
-    0 0.25rem 0.5rem rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Mobile: horizontal layout */
-@media (max-width: 768px) {
-  .bottom-nav :deep(.p-tablist-tab-list) {
-    flex-direction: row;
-    justify-content: space-evenly;
-    gap: 1rem;
-    padding: 0.75rem 1.5rem;
-  }
-}
-
-/* Desktop: vertical layout */
-@media (min-width: 769px) {
-  .bottom-nav :deep(.p-tablist-tab-list) {
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 0.75rem;
-  }
-}
-
-.bottom-nav :deep(.p-tab) {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-}
-
-.bottom-nav :deep(.p-tab[data-p-active='true']) {
-  background: transparent;
-  border: none;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: #1a1a1a;
+  border-top: 1px solid #333;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom); /* For iOS notch */
 }
 
 /* Dock item styling */

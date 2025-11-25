@@ -2,20 +2,20 @@
   <div class="session-preview-page">
     <!-- Loading State -->
     <div v-if="!sessionStore.currentSession" class="loading-state">
-      <Card>
+      <BaseCard>
         <template #content>
           <div class="loading-content">
-            <ProgressSpinner />
+            <BaseProgressSpinner />
             <p>Loading session...</p>
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
 
     <!-- Preview State -->
     <div v-else class="preview-active">
       <!-- Preview Header -->
-      <Card class="preview-header-card">
+      <BaseCard class="preview-header-card">
         <template #content>
           <div class="preview-header">
             <div class="preview-info">
@@ -31,10 +31,10 @@
             </div>
           </div>
         </template>
-      </Card>
+      </BaseCard>
 
       <!-- AI Reasoning -->
-      <Card v-if="sessionStore.currentSession.reasons" class="reasons-card">
+      <BaseCard v-if="sessionStore.currentSession.reasons" class="reasons-card">
         <template #content>
           <div class="reasons-content">
             <div class="reasons-header">
@@ -44,7 +44,7 @@
             <p>{{ sessionStore.currentSession.reasons }}</p>
           </div>
         </template>
-      </Card>
+      </BaseCard>
 
       <!-- Exercises List -->
       <div class="exercises-section">
@@ -56,7 +56,7 @@
             </div>
 
             <div class="exercises-list">
-              <Card
+              <BaseCard
                 v-for="(exercise, index) in section.exercises"
                 :key="exercise.originalIndex"
                 class="exercise-card"
@@ -67,8 +67,8 @@
                       <span class="exercise-number">{{ index + 1 }}</span>
                       <h3>{{ exercise.name }}</h3>
                     </div>
-                    <Button
-                      icon="pi pi-refresh"
+                    <BaseButton
+                      icon=""
                       text
                       rounded
                       severity="secondary"
@@ -184,28 +184,28 @@
                     </div>
                   </div>
                 </template>
-              </Card>
+              </BaseCard>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Preview Actions -->
-      <Card class="preview-actions-card">
+      <BaseCard class="preview-actions-card">
         <template #content>
           <div class="preview-actions">
-            <Button
+            <BaseButton
               label="Confirm & Start"
-              icon="pi pi-check"
+              icon=""
               @click="handleStartWorkout"
               severity="success"
               size="large"
               :loading="starting"
             />
-            <Button label="Cancel" icon="pi pi-times" @click="handleCancel" text size="large" />
+            <BaseButton label="Cancel" icon="" @click="handleCancel" text size="large" />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -263,8 +263,7 @@ onMounted(() => {
     toast.add({
       severity: 'warn',
       summary: 'No Session',
-      detail: 'Please generate a session first',
-      life: 3000,
+      detail: 'Please generate a session first'
     })
     router.push('/')
   }
@@ -302,15 +301,13 @@ async function handleSwapExercise(index: number) {
     toast.add({
       severity: 'success',
       summary: 'Exercise Swapped',
-      detail: 'A new exercise has been generated',
-      life: 3000,
+      detail: 'A new exercise has been generated'
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Swap Failed',
-      detail: error.message || 'Failed to swap exercise',
-      life: 5000,
+      detail: error.message || 'Failed to swap exercise'
     })
   } finally {
     swappingIndex.value = null
@@ -329,8 +326,7 @@ async function handleStartWorkout() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to start session',
-      life: 5000,
+      detail: error.message || 'Failed to start session'
     })
   } finally {
     starting.value = false
@@ -347,8 +343,7 @@ async function handleCancel() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to cancel session',
-      life: 5000,
+      detail: error.message || 'Failed to cancel session'
     })
   }
 }
@@ -609,3 +604,7 @@ async function handleCancel() {
   }
 }
 </style>
+
+
+
+

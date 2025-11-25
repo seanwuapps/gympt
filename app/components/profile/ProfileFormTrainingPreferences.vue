@@ -148,3 +148,7 @@ function updateField(field: keyof TrainingPreferencesData, value: any) {
   width: 100%;
 }
 </style>
+
+
+
+

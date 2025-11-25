@@ -4,17 +4,17 @@
       <!-- Section: Training Preferences -->
       <ProfileFormTrainingPreferences v-model="trainingPreferences" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: Goals -->
       <ProfileFormGoals v-model="formData.goals" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: Health & Safety -->
       <ProfileFormHealthSafety v-model="formData.injuryFlags" :goals="formData.goals" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: App Preferences -->
       <div class="form-section">
@@ -49,8 +49,8 @@
 
       <!-- Actions -->
       <div class="form-actions">
-        <Button label="Cancel" severity="secondary" @click="$emit('cancel')" type="button" />
-        <Button label="Save Changes" :loading="loading" type="submit" />
+        <BaseButton label="Cancel" severity="secondary" @click="$emit('cancel')" type="button" />
+        <BaseButton label="Save Changes" :loading="loading" type="submit" />
       </div>
     </form>
   </div>
@@ -195,3 +195,7 @@ const handleSubmit = () => {
   border-top: 1px solid var(--p-surface-border);
 }
 </style>
+
+
+
+

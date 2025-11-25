@@ -57,3 +57,7 @@ const goals = computed(() => onboardingStore.formData.goals || [])
   }
 }
 </style>
+
+
+
+

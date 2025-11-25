@@ -2,22 +2,22 @@
   <div class="session-page">
     <!-- No Session State -->
     <div v-if="!sessionStore.currentSession" class="no-session">
-      <Card>
+      <BaseCard>
         <template #content>
           <div class="no-session-content">
             <i class="pi pi-bolt no-session-icon" />
             <h2>No Active Session</h2>
             <p>Start a training session from the home page</p>
-            <Button label="Go to Home" icon="pi pi-home" @click="router.push('/')" size="large" />
+            <BaseButton label="Go to Home" icon="" @click="router.push('/')" size="large" />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
 
     <!-- Active Session -->
     <div v-else class="session-active">
       <!-- Session Header -->
-      <Card class="session-header-card">
+      <BaseCard class="session-header-card">
         <template #content>
           <div class="session-header">
             <div class="session-info">
@@ -35,13 +35,13 @@
             </div>
           </div>
         </template>
-      </Card>
+      </BaseCard>
 
       <!-- Exercises List -->
       <div class="exercises-section">
         <h2>Exercises</h2>
         <div class="exercises-list">
-          <Card
+          <BaseCard
             v-for="(exercise, index) in sessionStore.currentSession.exercises"
             :key="index"
             class="exercise-card"
@@ -158,31 +158,31 @@
                 </div>
               </div>
             </template>
-          </Card>
+          </BaseCard>
         </div>
       </div>
 
       <!-- Session Actions -->
-      <Card class="session-actions-card">
+      <BaseCard class="session-actions-card">
         <template #content>
           <div class="session-actions">
-            <Button
+            <BaseButton
               label="Complete Session"
-              icon="pi pi-check"
+              icon=""
               @click="handleCompleteSession"
               severity="success"
               size="large"
             />
-            <Button
+            <BaseButton
               label="Cancel"
-              icon="pi pi-times"
+              icon=""
               @click="handleCancelSession"
               text
               size="large"
             />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -237,8 +237,7 @@ async function handleCompleteSession() {
     toast.add({
       severity: 'success',
       summary: 'Session Complete!',
-      detail: 'Great work today!',
-      life: 3000,
+      detail: 'Great work today!'
     })
 
     router.push('/')
@@ -246,8 +245,7 @@ async function handleCompleteSession() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to complete session',
-      life: 5000,
+      detail: error.message || 'Failed to complete session'
     })
   }
 }
@@ -262,8 +260,7 @@ async function handleCancelSession() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to cancel session',
-      life: 5000,
+      detail: error.message || 'Failed to cancel session'
     })
   }
 }
@@ -473,3 +470,7 @@ async function handleCancelSession() {
   }
 }
 </style>
+
+
+
+
