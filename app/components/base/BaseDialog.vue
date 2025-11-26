@@ -89,10 +89,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Native dialog element with minimal custom styling */
 dialog {
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid;
+  border-radius: 0.5rem;
   padding: 0;
   max-width: 90vw;
   max-height: 90vh;
@@ -113,18 +112,16 @@ dialog::backdrop {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid;
 }
 
 .dialog-header h2 {
   margin: 0;
-  font-size: 1.25rem;
 }
 
 .close-button {
   background: none;
   border: none;
-  font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   line-height: 1;
@@ -137,7 +134,7 @@ dialog::backdrop {
 
 .dialog-footer {
   padding: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid;
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;

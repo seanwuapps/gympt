@@ -19,13 +19,3 @@ provide(
   computed(() => props.value)
 )
 </script>
-
-<style scoped>
-.base-tabs {
-  display: contents;
-}
-</style>
-
-
-
-

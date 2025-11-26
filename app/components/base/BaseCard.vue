@@ -22,14 +22,17 @@
 
 <style scoped>
 .base-card {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
+  border: 1px solid;
+  border-radius: 0.5rem;
+}
+
+.card-header,
+.card-footer {
+  padding: 1rem;
 }
 
 .card-header {
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid;
   font-weight: 600;
 }
 
@@ -38,11 +41,6 @@
 }
 
 .card-footer {
-  padding: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid;
 }
 </style>
-
-
-
-

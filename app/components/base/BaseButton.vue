@@ -53,15 +53,11 @@ const buttonClasses = computed(() => {
 </script>
 
 <style scoped>
-/* Minimal styling - relies mostly on browser defaults */
 .base-button {
-  /* Use browser default button styles */
   cursor: pointer;
-  font-family: inherit;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  white-space: nowrap;
 }
 
 .base-button:disabled {
@@ -69,40 +65,16 @@ const buttonClasses = computed(() => {
   opacity: 0.5;
 }
 
-.base-button.size-small {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-}
-
-.base-button.size-large {
-  padding: 0.75rem 1.5rem;
-  font-size: 1.125rem;
-}
-
-.base-button.rounded {
-  border-radius: 50%;
-  padding: 0.5rem;
-}
-
-.base-button.text {
-  background: none;
-  border: none;
-  text-decoration: underline;
-}
-
-.base-button.outlined {
-  background: transparent;
+.base-button.severity-primary {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .loading-indicator {
-  display: inline-block;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
   to {
     transform: rotate(360deg);
   }

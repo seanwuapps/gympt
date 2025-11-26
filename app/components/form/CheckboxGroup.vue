@@ -42,10 +42,6 @@ const toggleOption = (value: string) => {
 </script>
 
 <style scoped>
-input[type='checkbox'] {
-  width: 1rem;
-  height: 1rem;
-}
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
