@@ -202,7 +202,7 @@
               size="large"
               :loading="starting"
             />
-            <BaseButton label="Cancel" icon="" @click="handleCancel" text size="large" />
+            <BaseButton label="Cancel" icon="" to="/" text size="large" />
           </div>
         </template>
       </BaseCard>
@@ -263,7 +263,7 @@ onMounted(() => {
     toast.add({
       severity: 'warn',
       summary: 'No Session',
-      detail: 'Please generate a session first'
+      detail: 'Please generate a session first',
     })
     router.push('/')
   }
@@ -301,13 +301,13 @@ async function handleSwapExercise(index: number) {
     toast.add({
       severity: 'success',
       summary: 'Exercise Swapped',
-      detail: 'A new exercise has been generated'
+      detail: 'A new exercise has been generated',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Swap Failed',
-      detail: error.message || 'Failed to swap exercise'
+      detail: error.message || 'Failed to swap exercise',
     })
   } finally {
     swappingIndex.value = null
@@ -326,7 +326,7 @@ async function handleStartWorkout() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to start session'
+      detail: error.message || 'Failed to start session',
     })
   } finally {
     starting.value = false
@@ -343,7 +343,7 @@ async function handleCancel() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to cancel session'
+      detail: error.message || 'Failed to cancel session',
     })
   }
 }
@@ -604,7 +604,3 @@ async function handleCancel() {
   }
 }
 </style>
-
-
-
-

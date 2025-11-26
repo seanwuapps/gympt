@@ -2,13 +2,7 @@
   <div class="library-page">
     <div class="page-header">
       <div class="header-left">
-        <BaseButton
-          icon=""
-          @click="navigateTo('/plans')"
-          text
-          rounded
-          aria-label="Back to My Plan"
-        />
+        <BaseButton icon="" to="/plans" text rounded aria-label="Back to My Plan" />
         <h1>Plan Library</h1>
       </div>
       <BaseButton
@@ -143,11 +137,7 @@
             icon=""
             @click="handleActivatePlan(selectedPlan!.id)"
           />
-          <BaseButton
-            label="Close"
-            @click="showDetails = false"
-            outlined
-          />
+          <BaseButton label="Close" @click="showDetails = false" outlined />
         </div>
       </template>
     </BaseDialog>
@@ -165,11 +155,7 @@
       </div>
 
       <template #footer>
-        <BaseButton
-          label="Cancel"
-          @click="showDeleteConfirm = false"
-          outlined
-        />
+        <BaseButton label="Cancel" @click="showDeleteConfirm = false" outlined />
         <BaseButton
           label="Delete"
           severity="danger"
@@ -188,7 +174,7 @@ import { usePlansStore } from '~/stores/plans'
 import type { TrainingPlan } from '~/db/schema'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
 })
 
 const plansStore = usePlansStore()
@@ -210,7 +196,7 @@ function handlePlanGenerated(plan: TrainingPlan) {
   toast.add({
     severity: 'success',
     summary: 'Plan Generated!',
-    detail: 'Your training plan has been created successfully.'
+    detail: 'Your training plan has been created successfully.',
   })
 }
 
@@ -221,13 +207,13 @@ async function handleActivatePlan(planId: string) {
     toast.add({
       severity: 'success',
       summary: 'Plan Activated',
-      detail: 'This plan is now your active training plan.'
+      detail: 'This plan is now your active training plan.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
-      detail: error.message || 'Failed to activate plan'
+      detail: error.message || 'Failed to activate plan',
     })
   }
 }
@@ -240,17 +226,17 @@ function handleViewPlan(plan: TrainingPlan) {
 async function handleDeactivatePlan(planId: string) {
   try {
     await plansStore.deactivatePlan(planId)
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deactivated',
-      detail: 'Training plan has been set to inactive.'
+      detail: 'Training plan has been set to inactive.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deactivation Failed',
-      detail: error.message || 'Failed to deactivate plan'
+      detail: error.message || 'Failed to deactivate plan',
     })
   }
 }
@@ -267,17 +253,17 @@ async function confirmDelete() {
     await plansStore.deletePlan(planToDelete.value)
     showDeleteConfirm.value = false
     planToDelete.value = null
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deleted',
-      detail: 'Training plan has been removed.'
+      detail: 'Training plan has been removed.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deletion Failed',
-      detail: error.message || 'Failed to delete plan'
+      detail: error.message || 'Failed to delete plan',
     })
   }
 }
@@ -286,7 +272,7 @@ function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 </script>
@@ -491,8 +477,3 @@ function formatDate(date: Date | string) {
   }
 }
 </style>
-
-
-
-
-

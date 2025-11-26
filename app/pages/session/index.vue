@@ -8,7 +8,7 @@
             <i class="pi pi-bolt no-session-icon" />
             <h2>No Active Session</h2>
             <p>Start a training session from the home page</p>
-            <BaseButton label="Go to Home" icon="" @click="router.push('/')" size="large" />
+            <BaseButton label="Go to Home" icon="" to="/" size="large" />
           </div>
         </template>
       </BaseCard>
@@ -173,13 +173,7 @@
               severity="success"
               size="large"
             />
-            <BaseButton
-              label="Cancel"
-              icon=""
-              @click="handleCancelSession"
-              text
-              size="large"
-            />
+            <BaseButton label="Cancel" icon="" @click="handleCancelSession" text size="large" />
           </div>
         </template>
       </BaseCard>
@@ -237,7 +231,7 @@ async function handleCompleteSession() {
     toast.add({
       severity: 'success',
       summary: 'Session Complete!',
-      detail: 'Great work today!'
+      detail: 'Great work today!',
     })
 
     router.push('/')
@@ -245,7 +239,7 @@ async function handleCompleteSession() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to complete session'
+      detail: error.message || 'Failed to complete session',
     })
   }
 }
@@ -260,7 +254,7 @@ async function handleCancelSession() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to cancel session'
+      detail: error.message || 'Failed to cancel session',
     })
   }
 }
@@ -470,7 +464,3 @@ async function handleCancelSession() {
   }
 }
 </style>
-
-
-
-

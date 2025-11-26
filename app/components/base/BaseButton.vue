@@ -1,6 +1,8 @@
 <template>
-  <button
-    :type="type"
+  <component
+    :is="to ? 'NuxtLink' : 'button'"
+    :to="to"
+    :type="to ? undefined : type"
     :disabled="disabled || loading"
     :class="buttonClasses"
     @click="$emit('click', $event)"
@@ -9,7 +11,7 @@
     <span v-else-if="icon" class="icon">{{ icon }}</span>
     <span v-if="label" class="label">{{ label }}</span>
     <slot />
-  </button>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +27,7 @@ interface Props {
   size?: 'small' | 'medium' | 'large'
   rounded?: boolean
   badge?: string
+  to?: string | object
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -34,6 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
   severity: 'primary',
   size: 'medium',
   rounded: false,
+  to: undefined,
 })
 
 defineEmits(['click'])
@@ -58,6 +62,9 @@ const buttonClasses = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
+  border: none;
+  font-family: inherit;
 }
 
 .base-button:disabled {

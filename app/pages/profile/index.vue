@@ -1,21 +1,3 @@
-<template>
-  <div class="container">
-    <BaseCard>
-      <template #header>
-        <div class="header">
-          <h2>My Profile</h2>
-          <BaseButton
-            label="Edit Profile"
-            icon="✏️"
-            @click="navigateTo('/profile/edit')"
-            outlined
-          />
-        </div>
-      </template>
-
-      <template #content>
-        <div v-if="profileStore.loading" class="loading-state">
-          <div class="skeleton-line"></div>
           <div class="skeleton-line"></div>
           <div class="skeleton-line"></div>
           <div class="skeleton-line"></div>
@@ -34,7 +16,7 @@
           <div class="empty-state">
             <span style="font-size: 3rem">👤</span>
             <p>No profile found</p>
-            <BaseButton label="Create Profile" @click="$router.push('/onboarding')" />
+            <BaseButton label="Create Profile" to="/onboarding" />
           </div>
         </div>
       </template>

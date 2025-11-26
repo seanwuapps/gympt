@@ -291,20 +291,8 @@ function handleViewPlan() {
 
             <!-- Secondary Actions -->
             <div class="secondary-actions">
-              <BaseButton
-                label="View Full Plan"
-                icon="📅"
-                @click="router.push('/plans')"
-                text
-                size="small"
-              />
-              <BaseButton
-                label="Manage Plans"
-                icon=""
-                @click="router.push('/plans/library')"
-                text
-                size="small"
-              />
+              <BaseButton label="View Full Plan" icon="📅" to="/plans" text size="small" />
+              <BaseButton label="Manage Plans" icon="" to="/plans/library" text size="small" />
             </div>
           </div>
         </template>
@@ -340,12 +328,7 @@ function handleViewPlan() {
                 @click="showGenerator = true"
                 size="large"
               />
-              <BaseButton
-                label="View Saved Plans"
-                icon=""
-                @click="router.push('/plans')"
-                outlined
-              />
+              <BaseButton label="View Saved Plans" icon="" to="/plans" outlined />
             </div>
           </div>
         </template>

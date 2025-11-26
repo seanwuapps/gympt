@@ -31,7 +31,7 @@
           <div class="empty-state">
             <span style="font-size: 3rem">👤</span>
             <p>No profile found</p>
-            <BaseButton label="Create Profile" @click="$router.push('/onboarding')" />
+            <BaseButton label="Create Profile" to="/onboarding" />
           </div>
         </div>
       </template>
@@ -103,7 +103,7 @@ const cancelEdit = () => {
 const saveChanges = async (formData: ProfileFormData) => {
   // Validate: if rehab goal is selected, injury description must be filled
   if (
-    formData.goals.includes('rehab') &&
+    formData.goals?.includes('rehab') &&
     (!formData.injuryFlags || formData.injuryFlags.trim() === '')
   ) {
     toast.add({

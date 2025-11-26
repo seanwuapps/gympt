@@ -6,7 +6,7 @@
         <BaseButton
           label="Browse Plans"
           icon=""
-          @click="navigateTo('/plans/library')"
+          to="/plans/library"
           outlined
           :badge="plansStore.inactivePlans.length.toString()"
           v-if="plansStore.inactivePlans.length > 0"
@@ -53,12 +53,7 @@
         }}. Set one as active or generate a new one.
       </p>
       <div class="empty-actions">
-        <BaseButton
-          label="Browse Saved Plans"
-          icon=""
-          @click="navigateTo('/plans/library')"
-          size="large"
-        />
+        <BaseButton label="Browse Saved Plans" icon="" to="/plans/library" size="large" />
         <BaseButton
           label="Generate New Plan"
           icon=""
@@ -206,7 +201,7 @@ function handlePlanGenerated(plan: TrainingPlan) {
   toast.add({
     severity: 'success',
     summary: 'Plan Generated!',
-    detail: 'Your training plan has been created successfully.'
+    detail: 'Your training plan has been created successfully.',
   })
 }
 
@@ -217,13 +212,13 @@ async function handleActivatePlan(planId: string) {
     toast.add({
       severity: 'success',
       summary: 'Plan Activated',
-      detail: 'This plan is now your active training plan.'
+      detail: 'This plan is now your active training plan.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
-      detail: error.message || 'Failed to activate plan'
+      detail: error.message || 'Failed to activate plan',
     })
   }
 }
@@ -240,13 +235,13 @@ async function handleDeactivatePlan(planId: string) {
     toast.add({
       severity: 'success',
       summary: 'Plan Deactivated',
-      detail: 'Training plan has been set to inactive.'
+      detail: 'Training plan has been set to inactive.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deactivation Failed',
-      detail: error.message || 'Failed to deactivate plan'
+      detail: error.message || 'Failed to deactivate plan',
     })
   }
 }
@@ -267,13 +262,13 @@ async function confirmDelete() {
     toast.add({
       severity: 'success',
       summary: 'Plan Deleted',
-      detail: 'Training plan has been removed.'
+      detail: 'Training plan has been removed.',
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deletion Failed',
-      detail: error.message || 'Failed to delete plan'
+      detail: error.message || 'Failed to delete plan',
     })
   }
 }
@@ -459,8 +454,3 @@ function formatDate(date: Date | string) {
   }
 }
 </style>
-
-
-
-
-
