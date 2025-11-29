@@ -8,7 +8,7 @@
     <div class="form-grid">
       <div class="field">
         <label class="field-label">Experience Level</label>
-        <Select
+        <BaseSelect
           :modelValue="modelValue.experienceLevel"
           @update:modelValue="updateField('experienceLevel', $event)"
           :options="experienceLevelOptions"
@@ -20,7 +20,7 @@
 
       <div class="field">
         <label class="field-label">Progression Pace</label>
-        <Select
+        <BaseSelect
           :modelValue="modelValue.aggressiveness"
           @update:modelValue="updateField('aggressiveness', $event)"
           :options="aggressivenessOptions"
@@ -148,7 +148,3 @@ function updateField(field: keyof TrainingPreferencesData, value: any) {
   width: 100%;
 }
 </style>
-
-
-
-

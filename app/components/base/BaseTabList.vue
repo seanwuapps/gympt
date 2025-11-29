@@ -11,9 +11,6 @@
 <style scoped>
 .base-tab-list {
   display: flex;
+  justify-content: center;
 }
 </style>
-
-
-
-

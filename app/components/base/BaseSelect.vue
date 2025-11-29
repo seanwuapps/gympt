@@ -1,6 +1,7 @@
 <template>
-  <select :value="modelValue" @change="handleChange" class="base-select">
-    <option v-if="placeholder" value="" disabled selected>{{ placeholder }}</option>
+  <pre>{{ modelValue }}</pre>
+  <select v-model="modelValue" class="base-select">
+    <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
     <option v-for="(option, index) in options" :key="index" :value="option">
       <slot name="option" :option="option">
         {{ getOptionLabel(option) }}
@@ -11,31 +12,16 @@
 
 <script setup lang="ts">
 interface Props {
-  modelValue?: any
   options: any[]
   placeholder?: string
   optionLabel?: string
 }
 
+const modelValue = defineModel<any>()
+
 const props = withDefaults(defineProps<Props>(), {
   optionLabel: 'label',
 })
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: any): void
-}>()
-
-function handleChange(event: Event) {
-  const target = event.target as HTMLSelectElement
-  const selectedIndex = target.selectedIndex
-
-  // Adjust for placeholder option if present
-  const optionIndex = props.placeholder ? selectedIndex - 1 : selectedIndex
-
-  if (optionIndex >= 0 && optionIndex < props.options.length) {
-    emit('update:modelValue', props.options[optionIndex])
-  }
-}
 
 function getOptionLabel(option: any): string {
   if (typeof option === 'string') return option
@@ -59,7 +45,3 @@ function getOptionLabel(option: any): string {
   width: 100%;
 }
 </style>
-
-
-
-

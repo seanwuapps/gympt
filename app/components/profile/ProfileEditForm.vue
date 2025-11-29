@@ -25,7 +25,7 @@
         <div class="form-grid">
           <div class="field">
             <label class="field-label">Units</label>
-            <Select
+            <BaseSelect
               v-model="formData.units"
               :options="unitsOptions"
               optionLabel="label"
@@ -36,7 +36,7 @@
 
           <div class="field">
             <label class="field-label">Language</label>
-            <Select
+            <BaseSelect
               v-model="formData.language"
               :options="languageOptions"
               optionLabel="label"
@@ -195,7 +195,3 @@ const handleSubmit = () => {
   border-top: 1px solid var(--p-surface-border);
 }
 </style>
-
-
-
-

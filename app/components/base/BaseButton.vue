@@ -1,6 +1,6 @@
 <template>
   <component
-    :is="to ? 'NuxtLink' : 'button'"
+    :is="buttonComponent"
     :to="to"
     :type="to ? undefined : type"
     :disabled="disabled || loading"
@@ -54,10 +54,15 @@ const buttonClasses = computed(() => {
 
   return classes.join(' ')
 })
+
+const buttonComponent = computed(() => {
+  return props.to ? resolveComponent('NuxtLink') : 'button'
+})
 </script>
 
 <style scoped>
 .base-button {
+  border-radius: 99999px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -65,16 +70,8 @@ const buttonClasses = computed(() => {
   text-decoration: none;
   border: none;
   font-family: inherit;
-}
-
-.base-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.base-button.severity-primary {
-  background-color: var(--primary-color);
-  color: white;
+  padding: 0.5rem 1rem;
+  border: 1px solid currentColor;
 }
 
 .loading-indicator {

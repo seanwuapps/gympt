@@ -2,7 +2,7 @@
   <div class="library-page">
     <div class="page-header">
       <div class="header-left">
-        <BaseButton icon="" to="/plans" text rounded aria-label="Back to My Plan" />
+        <BaseButton to="/plans" text rounded aria-label="Back to My Plan"> ⬅️ </BaseButton>
         <h1>Plan Library</h1>
       </div>
       <BaseButton

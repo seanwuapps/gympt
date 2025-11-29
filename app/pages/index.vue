@@ -340,7 +340,6 @@ function handleViewPlan() {
       v-model:visible="showSessionLengthDialog"
       modal
       header="How long do you have?"
-      :style="{ width: '90vw', maxWidth: '28rem' }"
       :closable="!sessionStore.generating"
       :dismissableMask="!sessionStore.generating"
     >
@@ -350,20 +349,10 @@ function handleViewPlan() {
         </p>
 
         <div class="length-options">
-          <div
-            v-for="option in sessionLengthOptions"
-            :key="option.value"
-            class="length-option"
-            :class="{ selected: selectedSessionLength === option.value }"
-            @click="selectedSessionLength = option.value"
-            :style="{
-              pointerEvents: sessionStore.generating ? 'none' : 'auto',
-              opacity: sessionStore.generating ? 0.6 : 1,
-            }"
-          >
-            <i :class="`pi ${option.icon}`" />
+          <label :key="option.value" v-for="option in sessionLengthOptions">
+            <input type="radio" v-model="selectedSessionLength" :value="option.value" />
             <span>{{ option.label }}</span>
-          </div>
+          </label>
         </div>
       </div>
 

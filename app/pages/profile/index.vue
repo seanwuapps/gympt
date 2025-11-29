@@ -1,7 +1,21 @@
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
+<template>
+  <div class="container">
+    <BaseCard>
+      <template #header>
+        <div class="header">
+          <h2>My Profile</h2>
+          <BaseButton
+            label="Edit Profile"
+            icon="✏️"
+            @click="navigateTo('/profile/edit')"
+            outlined
+          />
+        </div>
+      </template>
+
+      <template #content>
+        <div v-if="profileStore.loading" class="loading-state">
+          <BaseProgressSpinner />
         </div>
 
         <BaseMessage v-else-if="profileStore.error" severity="error" :closable="false">
