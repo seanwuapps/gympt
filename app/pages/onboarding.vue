@@ -1,6 +1,6 @@
 <template>
   <div class="onboarding-container">
-    <Card class="onboarding-card">
+    <BaseCard class="onboarding-card">
       <template #header>
         <Steps :model="stepItems" :activeStep="onboardingStore.currentStep" />
       </template>
@@ -18,20 +18,20 @@
         </div>
 
         <div class="step-actions" v-if="onboardingStore.currentStep < 3">
-          <Button
+          <BaseButton
             v-if="onboardingStore.currentStep > 0"
             label="Back"
             severity="secondary"
             @click="handleBack"
           />
           <div class="spacer" />
-          <Button
+          <BaseButton
             v-if="onboardingStore.currentStep < 2"
             label="Next"
             :disabled="!canProceed"
             @click="handleNext"
           />
-          <Button
+          <BaseButton
             v-if="onboardingStore.currentStep === 2"
             label="Next: Generate Plan"
             :loading="saving"
@@ -41,7 +41,7 @@
 
         <div class="step-indicator">Step {{ onboardingStore.currentStep + 1 }} of 4</div>
       </template>
-    </Card>
+    </BaseCard>
   </div>
 </template>
 
@@ -101,8 +101,7 @@ const handleSaveAndContinue = async () => {
     toast.add({
       severity: 'success',
       summary: 'Profile Saved!',
-      detail: "Now let's create your training plan.",
-      life: 3000,
+      detail: "Now let's create your training plan."
     })
 
     // Move to plan generation step
@@ -111,8 +110,7 @@ const handleSaveAndContinue = async () => {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to save profile. Please try again.',
-      life: 5000,
+      detail: error.message || 'Failed to save profile. Please try again.'
     })
   } finally {
     saving.value = false
@@ -125,8 +123,7 @@ const handlePlanGenerated = async () => {
   toast.add({
     severity: 'success',
     summary: 'Setup Complete!',
-    detail: 'Your profile and training plan are ready.',
-    life: 3000,
+    detail: 'Your profile and training plan are ready.'
   })
 
   // Redirect to home
@@ -139,8 +136,7 @@ const handleSkipPlan = async () => {
   toast.add({
     severity: 'info',
     summary: 'Setup Complete!',
-    detail: 'You can generate a training plan anytime from the home page.',
-    life: 3000,
+    detail: 'You can generate a training plan anytime from the home page.'
   })
 
   // Redirect to home
@@ -198,3 +194,7 @@ const handleSkipPlan = async () => {
   }
 }
 </style>
+
+
+
+

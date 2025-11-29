@@ -2,18 +2,12 @@
   <div class="library-page">
     <div class="page-header">
       <div class="header-left">
-        <Button
-          icon="pi pi-arrow-left"
-          @click="navigateTo('/plans')"
-          text
-          rounded
-          aria-label="Back to My Plan"
-        />
+        <BaseButton to="/plans" text rounded aria-label="Back to My Plan"> ⬅️ </BaseButton>
         <h1>Plan Library</h1>
       </div>
-      <Button
+      <BaseButton
         label="Generate New Plan"
-        icon="pi pi-sparkles"
+        icon=""
         @click="showGenerator = true"
         :disabled="plansStore.loading"
       />
@@ -21,7 +15,7 @@
 
     <!-- Loading State -->
     <div v-if="plansStore.loading && !plansStore.plans.length" class="loading-state">
-      <ProgressSpinner />
+      <BaseProgressSpinner />
       <p>Loading your plans...</p>
     </div>
 
@@ -32,9 +26,9 @@
       </div>
       <h2>No Saved Plans</h2>
       <p>Your plan library is empty. Generate your first training plan to get started.</p>
-      <Button
+      <BaseButton
         label="Generate Your First Plan"
-        icon="pi pi-sparkles"
+        icon=""
         @click="showGenerator = true"
         size="large"
       />
@@ -46,7 +40,7 @@
       <section v-if="plansStore.activePlan" class="active-section">
         <div class="section-header">
           <h2>Active Plan</h2>
-          <Badge value="Active" severity="success" />
+          <BaseBadge value="Active" severity="success" />
         </div>
         <PlanCard
           :plan="plansStore.activePlan"
@@ -60,7 +54,7 @@
       <section v-if="plansStore.inactivePlans.length" class="saved-section">
         <div class="section-header">
           <h2>Saved Plans</h2>
-          <Badge :value="plansStore.inactivePlans.length.toString()" />
+          <BaseBadge :value="plansStore.inactivePlans.length.toString()" />
         </div>
         <div class="plans-grid">
           <PlanCard
@@ -81,7 +75,7 @@
     </div>
 
     <!-- Plan Generator Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showGenerator"
       modal
       :closable="true"
@@ -95,10 +89,10 @@
         @view-plan="handleViewPlan"
         @cancel="showGenerator = false"
       />
-    </Dialog>
+    </BaseDialog>
 
     <!-- Plan Details Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showDetails"
       modal
       :closable="true"
@@ -117,14 +111,14 @@
           </div>
           <div class="meta-row">
             <span class="label">Status:</span>
-            <Badge
+            <BaseBadge
               :value="selectedPlan.isActive ? 'Active' : 'Inactive'"
               :severity="selectedPlan.isActive ? 'success' : 'secondary'"
             />
           </div>
         </div>
 
-        <Divider />
+        <BaseDivider />
 
         <PlanWeekView
           :weekly-schedule="selectedPlan.weeklySchedule as Record<string, Record<string, string>>"
@@ -137,23 +131,19 @@
 
       <template #footer>
         <div class="dialog-actions">
-          <Button
+          <BaseButton
             v-if="!selectedPlan?.isActive"
             label="Set as Active"
-            icon="pi pi-check"
+            icon=""
             @click="handleActivatePlan(selectedPlan!.id)"
           />
-          <Button
-            label="Close"
-            @click="showDetails = false"
-            outlined
-          />
+          <BaseButton label="Close" @click="showDetails = false" outlined />
         </div>
       </template>
-    </Dialog>
+    </BaseDialog>
 
     <!-- Delete Confirmation Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showDeleteConfirm"
       modal
       header="Delete Training Plan"
@@ -165,21 +155,17 @@
       </div>
 
       <template #footer>
-        <Button
-          label="Cancel"
-          @click="showDeleteConfirm = false"
-          outlined
-        />
-        <Button
+        <BaseButton label="Cancel" @click="showDeleteConfirm = false" outlined />
+        <BaseButton
           label="Delete"
           severity="danger"
           @click="confirmDelete"
           :loading="plansStore.loading"
         />
       </template>
-    </Dialog>
+    </BaseDialog>
 
-    <Toast />
+    <BasePageMessages />
   </div>
 </template>
 
@@ -188,7 +174,7 @@ import { usePlansStore } from '~/stores/plans'
 import type { TrainingPlan } from '~/db/schema'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
 })
 
 const plansStore = usePlansStore()
@@ -211,7 +197,6 @@ function handlePlanGenerated(plan: TrainingPlan) {
     severity: 'success',
     summary: 'Plan Generated!',
     detail: 'Your training plan has been created successfully.',
-    life: 3000
   })
 }
 
@@ -223,14 +208,12 @@ async function handleActivatePlan(planId: string) {
       severity: 'success',
       summary: 'Plan Activated',
       detail: 'This plan is now your active training plan.',
-      life: 3000
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
       detail: error.message || 'Failed to activate plan',
-      life: 5000
     })
   }
 }
@@ -243,19 +226,17 @@ function handleViewPlan(plan: TrainingPlan) {
 async function handleDeactivatePlan(planId: string) {
   try {
     await plansStore.deactivatePlan(planId)
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deactivated',
       detail: 'Training plan has been set to inactive.',
-      life: 3000
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deactivation Failed',
       detail: error.message || 'Failed to deactivate plan',
-      life: 5000
     })
   }
 }
@@ -272,19 +253,17 @@ async function confirmDelete() {
     await plansStore.deletePlan(planToDelete.value)
     showDeleteConfirm.value = false
     planToDelete.value = null
-    
+
     toast.add({
       severity: 'success',
       summary: 'Plan Deleted',
       detail: 'Training plan has been removed.',
-      life: 3000
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deletion Failed',
       detail: error.message || 'Failed to delete plan',
-      life: 5000
     })
   }
 }
@@ -293,7 +272,7 @@ function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 </script>

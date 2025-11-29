@@ -1,27 +1,22 @@
 <template>
   <div class="container">
-    <Card>
-      <template #title>
+    <BaseCard>
+      <template #header>
         <div class="header">
-          <Button
-            icon="pi pi-arrow-left"
-            text
-            aria-label="Back to Profile"
-            @click="$router.back()"
-          />
+          <BaseButton icon="⬅️" text aria-label="Back to Profile" @click="$router.back()" />
           <h2>Edit Profile</h2>
         </div>
       </template>
 
       <template #content>
         <div v-if="profileStore.loading" class="loading-state">
-          <ProgressSpinner />
+          <BaseProgressSpinner />
           <p>Loading your profile...</p>
         </div>
 
-        <Message v-else-if="profileStore.error" severity="error" :closable="false">
+        <BaseMessage v-else-if="profileStore.error" severity="error" :closable="false">
           {{ profileStore.error }}
-        </Message>
+        </BaseMessage>
 
         <div v-else-if="profileStore.profile" class="profile-edit">
           <ProfileEditForm
@@ -34,15 +29,15 @@
 
         <div v-else class="no-profile">
           <div class="empty-state">
-            <i class="pi pi-user" style="font-size: 3rem; color: var(--p-text-muted-color)"></i>
+            <span style="font-size: 3rem">👤</span>
             <p>No profile found</p>
-            <Button label="Create Profile" @click="$router.push('/onboarding')" />
+            <BaseButton label="Create Profile" to="/onboarding" />
           </div>
         </div>
       </template>
-    </Card>
+    </BaseCard>
 
-    <Toast />
+    <BasePageMessages />
   </div>
 </template>
 
@@ -108,14 +103,13 @@ const cancelEdit = () => {
 const saveChanges = async (formData: ProfileFormData) => {
   // Validate: if rehab goal is selected, injury description must be filled
   if (
-    formData.goals.includes('rehab') &&
+    formData.goals?.includes('rehab') &&
     (!formData.injuryFlags || formData.injuryFlags.trim() === '')
   ) {
     toast.add({
       severity: 'error',
       summary: 'Injury Description Required',
       detail: 'Please describe your injury or limitation when selecting Rehabilitation as a goal.',
-      life: 5000,
     })
     return
   }
@@ -126,7 +120,6 @@ const saveChanges = async (formData: ProfileFormData) => {
       severity: 'error',
       summary: 'Training Days Required',
       detail: 'Please select at least one preferred training day.',
-      life: 5000,
     })
     return
   }
@@ -143,7 +136,6 @@ const saveChanges = async (formData: ProfileFormData) => {
       severity: 'success',
       summary: 'Profile Updated!',
       detail: 'Your changes have been saved successfully.',
-      life: 3000,
     })
 
     // Check if we should prompt for plan regeneration
@@ -166,7 +158,6 @@ const saveChanges = async (formData: ProfileFormData) => {
           summary: 'Profile Updated',
           detail:
             'Your profile has changed significantly. Consider generating a new training plan from the Plans page.',
-          life: 6000,
         })
       }
     }
@@ -183,14 +174,12 @@ const saveChanges = async (formData: ProfileFormData) => {
         severity: 'error',
         summary: 'Validation Error',
         detail: firstError.message || 'Invalid profile data',
-        life: 5000,
       })
     } else {
       toast.add({
         severity: 'error',
         summary: 'Error',
         detail: err.message || 'Failed to save changes. Please try again.',
-        life: 5000,
       })
     }
   } finally {

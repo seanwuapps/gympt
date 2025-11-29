@@ -1,10 +1,10 @@
 <template>
-  <Card class="plan-card" :class="{ 'is-active': plan.isActive }">
+  <BaseCard class="plan-card" :class="{ 'is-active': plan.isActive }">
     <template #header>
       <div class="card-header">
         <div class="plan-info">
           <h3 class="plan-name">{{ plan.name }}</h3>
-          <Badge v-if="plan.isActive" value="Active" severity="success" />
+          <BaseBadge v-if="plan.isActive" value="Active" severity="success" />
         </div>
         <div class="plan-meta">
           <span class="meta-item">
@@ -36,33 +36,27 @@
 
     <template #footer>
       <div class="card-actions">
-        <Button
+        <BaseButton
           v-if="!plan.isActive"
           label="Set Active"
-          icon="pi pi-check"
+          icon=""
           @click="emit('set-active', plan.id)"
           size="small"
           outlined
         />
-        <Button
+        <BaseButton
           v-if="plan.isActive"
           label="Deactivate"
-          icon="pi pi-times"
+          icon=""
           @click="emit('deactivate', plan.id)"
           size="small"
           outlined
           severity="secondary"
         />
-        <Button
-          label="View Details"
-          icon="pi pi-eye"
-          @click="emit('view', plan)"
-          size="small"
-          text
-        />
-        <Button
+        <BaseButton label="View Details" icon="👁️" @click="emit('view', plan)" size="small" text />
+        <BaseButton
           v-if="!plan.isActive"
-          icon="pi pi-trash"
+          icon="🗑️"
           @click="emit('delete', plan.id)"
           size="small"
           severity="danger"
@@ -71,7 +65,7 @@
         />
       </div>
     </template>
-  </Card>
+  </BaseCard>
 </template>
 
 <script setup lang="ts">

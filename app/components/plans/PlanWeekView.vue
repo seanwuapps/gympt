@@ -3,8 +3,8 @@
     <div class="week-header">
       <h3>{{ title }}</h3>
       <div class="week-selector" v-if="totalWeeks > 1">
-        <Button
-          icon="pi pi-chevron-left"
+        <BaseButton
+          icon="◀"
           @click="previousWeek"
           :disabled="currentWeek === 1"
           text
@@ -12,8 +12,8 @@
           size="small"
         />
         <span class="week-label">Week {{ currentWeek }} of {{ totalWeeks }}</span>
-        <Button
-          icon="pi pi-chevron-right"
+        <BaseButton
+          icon="▶"
           @click="nextWeek"
           :disabled="currentWeek === totalWeeks"
           text
@@ -44,10 +44,10 @@
           <span v-else class="focus-text empty">-</span>
         </div>
         <div class="actions-column">
-          <Button
+          <BaseButton
             v-if="editable"
             label="Change Day Plan"
-            icon="pi pi-pencil"
+            icon="✏️"
             @click="openEditDialog(item.day, item.modality)"
             text
             size="small"
@@ -58,16 +58,15 @@
     </ul>
 
     <!-- AI Suggestions Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showEditDialog"
       modal
       :header="`Edit ${selectedDay} - ${selectedModality}`"
-      :style="{ width: '90vw', maxWidth: '40rem' }"
     >
       <div class="edit-dialog-content">
         <!-- Loading State -->
         <div v-if="loadingSuggestions" class="loading-state">
-          <ProgressSpinner style="width: 3rem; height: 3rem" />
+          <BaseProgressSpinner style="width: 3rem; height: 3rem" />
           <p>Analyzing your plan...</p>
         </div>
 
@@ -91,45 +90,35 @@
 
         <!-- Error State with Manual Fallback -->
         <div v-else-if="suggestionError" class="error-state">
-          <Message severity="warn" :closable="false">
+          <BaseMessage severity="warn" :closable="false">
             {{ suggestionError }}
-          </Message>
+          </BaseMessage>
           <p class="fallback-text">Choose manually instead:</p>
         </div>
 
         <!-- Manual Selection Fallback -->
         <div v-if="showManualSelection || suggestionError" class="manual-selection">
-          <Select
+          <BaseSelect
             v-model="manualModality"
             :options="modalityOptions"
             placeholder="Select workout type"
             class="modality-select"
-          >
-            <template #option="{ option }">
-              {{ option.modality }}<span v-if="option.focus"> - {{ option.focus }}</span>
-            </template>
-            <template #value="{ value, placeholder }">
-              <template v-if="value"
-                >{{ value.modality }}<span v-if="value.focus"> - {{ value.focus }}</span></template
-              >
-              <template v-else>{{ placeholder }}</template>
-            </template>
-          </Select>
+          />
         </div>
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-          <Button
+          <BaseButton
             label="Mark as Rest"
-            icon="pi pi-moon"
+            icon="🌙"
             @click="quickSetRest"
             outlined
             severity="secondary"
           />
-          <Button
+          <BaseButton
             v-if="!showManualSelection && !suggestionError"
             label="Choose Manually"
-            icon="pi pi-list"
+            icon="📝"
             @click="showManualSelection = true"
             outlined
           />
@@ -137,19 +126,23 @@
       </div>
 
       <template #footer>
-        <Button label="Keep Current" @click="closeEditDialog" text />
-        <Button label="Save Changes" @click="saveChanges" :disabled="!canSave" :loading="saving" />
+        <BaseButton label="Keep Current" @click="closeEditDialog" text />
+        <BaseButton
+          label="Save Changes"
+          @click="saveChanges"
+          :disabled="!canSave"
+          :loading="saving"
+        />
       </template>
-    </Dialog>
+    </BaseDialog>
 
-    <!-- Toast for notifications -->
-    <Toast />
+    <!-- Page messages for notifications -->
+    <BasePageMessages />
   </div>
 </template>
 
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
-import { useToast } from 'primevue/usetoast'
 
 interface Props {
   weeklySchedule: Record<string, Record<string, string | { modality: string; focus?: string }>>
@@ -272,8 +265,7 @@ async function openEditDialog(day: string, modality: string) {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: 'Plan ID is required to edit',
-      life: 3000,
+      detail: 'Plan ID is required to edit'
     })
     return
   }
@@ -353,8 +345,7 @@ async function saveChanges() {
     toast.add({
       severity: 'success',
       summary: 'Success',
-      detail: `${selectedDay.value} updated to ${newModality}`,
-      life: 3000,
+      detail: `${selectedDay.value} updated to ${newModality}`
     })
 
     closeEditDialog()
@@ -363,8 +354,7 @@ async function saveChanges() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: error.message || 'Failed to update plan',
-      life: 5000,
+      detail: error.message || 'Failed to update plan'
     })
   } finally {
     saving.value = false
@@ -629,3 +619,7 @@ async function saveChanges() {
   }
 }
 </style>
+
+
+
+

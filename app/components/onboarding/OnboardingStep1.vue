@@ -65,3 +65,7 @@ const preferredTrainingDays = computed(() => onboardingStore.formData.preferredT
   }
 }
 </style>
+
+
+
+

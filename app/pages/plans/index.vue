@@ -3,17 +3,17 @@
     <div class="page-header">
       <h1>My Training Plan</h1>
       <div class="header-actions">
-        <Button
+        <BaseButton
           label="Browse Plans"
-          icon="pi pi-list"
-          @click="navigateTo('/plans/library')"
+          icon=""
+          to="/plans/library"
           outlined
           :badge="plansStore.inactivePlans.length.toString()"
           v-if="plansStore.inactivePlans.length > 0"
         />
-        <Button
+        <BaseButton
           label="Generate New Plan"
-          icon="pi pi-sparkles"
+          icon=""
           @click="showGenerator = true"
           :disabled="plansStore.loading"
         />
@@ -22,7 +22,7 @@
 
     <!-- Loading State -->
     <div v-if="plansStore.loading && !plansStore.plans.length" class="loading-state">
-      <ProgressSpinner />
+      <BaseProgressSpinner />
       <p>Loading your plans...</p>
     </div>
 
@@ -33,9 +33,9 @@
       </div>
       <h2>No Training Plans Yet</h2>
       <p>Generate your first AI-powered training plan to get started.</p>
-      <Button
+      <BaseButton
         label="Generate Your First Plan"
-        icon="pi pi-sparkles"
+        icon=""
         @click="showGenerator = true"
         size="large"
       />
@@ -53,15 +53,10 @@
         }}. Set one as active or generate a new one.
       </p>
       <div class="empty-actions">
-        <Button
-          label="Browse Saved Plans"
-          icon="pi pi-list"
-          @click="navigateTo('/plans/library')"
-          size="large"
-        />
-        <Button
+        <BaseButton label="Browse Saved Plans" icon="" to="/plans/library" size="large" />
+        <BaseButton
           label="Generate New Plan"
-          icon="pi pi-sparkles"
+          icon=""
           @click="showGenerator = true"
           size="large"
           outlined
@@ -70,7 +65,7 @@
     </div>
 
     <!-- Plan Generator Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showGenerator"
       modal
       :closable="true"
@@ -84,7 +79,7 @@
         @view-plan="handleViewPlan"
         @cancel="showGenerator = false"
       />
-    </Dialog>
+    </BaseDialog>
 
     <!-- Active Plan Display -->
     <div v-if="plansStore.activePlan" class="active-plan-content">
@@ -97,7 +92,7 @@
     </div>
 
     <!-- Plan Details Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showDetails"
       modal
       :closable="true"
@@ -116,14 +111,14 @@
           </div>
           <div class="meta-row">
             <span class="label">Status:</span>
-            <Badge
+            <BaseBadge
               :value="selectedPlan.isActive ? 'Active' : 'Inactive'"
               :severity="selectedPlan.isActive ? 'success' : 'secondary'"
             />
           </div>
         </div>
 
-        <Divider />
+        <BaseDivider />
 
         <PlanWeekView
           :weekly-schedule="
@@ -141,19 +136,19 @@
 
       <template #footer>
         <div class="dialog-actions">
-          <Button
+          <BaseButton
             v-if="!selectedPlan?.isActive"
             label="Set as Active"
-            icon="pi pi-check"
+            icon=""
             @click="handleActivatePlan(selectedPlan!.id)"
           />
-          <Button label="Close" @click="showDetails = false" outlined />
+          <BaseButton label="Close" @click="showDetails = false" outlined />
         </div>
       </template>
-    </Dialog>
+    </BaseDialog>
 
     <!-- Delete Confirmation Dialog -->
-    <Dialog
+    <BaseDialog
       v-model:visible="showDeleteConfirm"
       modal
       header="Delete Training Plan"
@@ -165,17 +160,17 @@
       </div>
 
       <template #footer>
-        <Button label="Cancel" @click="showDeleteConfirm = false" outlined />
-        <Button
+        <BaseButton label="Cancel" @click="showDeleteConfirm = false" outlined />
+        <BaseButton
           label="Delete"
           severity="danger"
           @click="confirmDelete"
           :loading="plansStore.loading"
         />
       </template>
-    </Dialog>
+    </BaseDialog>
 
-    <Toast />
+    <BasePageMessages />
   </div>
 </template>
 
@@ -207,7 +202,6 @@ function handlePlanGenerated(plan: TrainingPlan) {
     severity: 'success',
     summary: 'Plan Generated!',
     detail: 'Your training plan has been created successfully.',
-    life: 3000,
   })
 }
 
@@ -219,14 +213,12 @@ async function handleActivatePlan(planId: string) {
       severity: 'success',
       summary: 'Plan Activated',
       detail: 'This plan is now your active training plan.',
-      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Activation Failed',
       detail: error.message || 'Failed to activate plan',
-      life: 5000,
     })
   }
 }
@@ -244,14 +236,12 @@ async function handleDeactivatePlan(planId: string) {
       severity: 'success',
       summary: 'Plan Deactivated',
       detail: 'Training plan has been set to inactive.',
-      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deactivation Failed',
       detail: error.message || 'Failed to deactivate plan',
-      life: 5000,
     })
   }
 }
@@ -273,14 +263,12 @@ async function confirmDelete() {
       severity: 'success',
       summary: 'Plan Deleted',
       detail: 'Training plan has been removed.',
-      life: 3000,
     })
   } catch (error: any) {
     toast.add({
       severity: 'error',
       summary: 'Deletion Failed',
       detail: error.message || 'Failed to delete plan',
-      life: 5000,
     })
   }
 }

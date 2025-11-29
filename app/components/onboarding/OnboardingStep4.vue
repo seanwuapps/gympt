@@ -17,7 +17,7 @@
     </div>
 
     <div class="skip-section">
-      <Button
+      <BaseButton
         label="Skip for Now"
         @click="emit('skip')"
         text
@@ -120,3 +120,7 @@ function handleViewPlan(plan: TrainingPlan) {
   }
 }
 </style>
+
+
+
+

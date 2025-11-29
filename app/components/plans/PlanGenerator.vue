@@ -13,17 +13,17 @@
 
       <!-- Dual Buttons for Rehab Goal -->
       <div v-if="hasRehabGoal" class="dual-actions">
-        <Button
+        <BaseButton
           label="Generate Training Plan"
-          icon="pi pi-bolt"
+          icon=""
           :loading="generating"
           @click="handleGenerate('normal')"
           severity="secondary"
           class="action-button"
         />
-        <Button
+        <BaseButton
           label="Generate Rehab Plan"
-          icon="pi pi-heart"
+          icon="❤️"
           :loading="generating"
           @click="handleGenerate('rehab')"
           class="action-button"
@@ -36,10 +36,10 @@
       </div>
 
       <!-- Single Button for Normal Goal -->
-      <Button
+      <BaseButton
         v-else
         label="Generate Plan"
-        icon="pi pi-sparkles"
+        icon=""
         :loading="generating"
         @click="() => handleGenerate('normal')"
         size="large"
@@ -49,7 +49,7 @@
 
     <!-- Loading State -->
     <div v-if="generating" class="generator-loading">
-      <ProgressSpinner />
+      <BaseProgressSpinner />
       <h3>Creating Your Plan...</h3>
       <p class="loading-message">{{ loadingMessage }}</p>
     </div>
@@ -60,7 +60,7 @@
         <i class="pi pi-check-circle" />
       </div>
       <h3>Plan Generated!</h3>
-      <Card class="plan-preview">
+      <BaseCard class="plan-preview">
         <template #title>
           <div class="plan-title">
             <i class="pi pi-calendar" />
@@ -92,20 +92,20 @@
         </template>
         <template #footer>
           <div class="plan-actions">
-            <Button
+            <BaseButton
               label="View Full Plan"
-              icon="pi pi-eye"
+              icon="👁️"
               @click="emit('view-plan', generatedPlan)"
               outlined
             />
-            <Button
+            <BaseButton
               label="Set as Active"
-              icon="pi pi-check"
+              icon=""
               @click="emit('activate-plan', generatedPlan.id)"
             />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
 
     <!-- Error State -->
@@ -116,14 +116,8 @@
       <h3>Generation Failed</h3>
       <p class="error-message">{{ error }}</p>
       <div class="error-actions">
-        <Button label="Try Again" icon="pi pi-refresh" @click="() => handleGenerate()" outlined />
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          @click="emit('cancel')"
-          severity="secondary"
-          text
-        />
+        <BaseButton label="Try Again" icon="" @click="() => handleGenerate()" outlined />
+        <BaseButton label="Cancel" icon="" @click="emit('cancel')" severity="secondary" text />
       </div>
     </div>
   </div>
@@ -193,7 +187,6 @@ async function handleGenerate(type?: 'normal' | 'rehab') {
         severity: 'success',
         summary: 'Plan Generated!',
         detail: 'Your personalized training plan is ready.',
-        life: 3000,
       })
     }
   } catch (err: any) {
@@ -203,7 +196,6 @@ async function handleGenerate(type?: 'normal' | 'rehab') {
       severity: 'error',
       summary: 'Generation Failed',
       detail: error.value,
-      life: 5000,
     })
   } finally {
     generating.value = false

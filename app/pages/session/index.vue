@@ -2,22 +2,22 @@
   <div class="session-page">
     <!-- No Session State -->
     <div v-if="!sessionStore.currentSession" class="no-session">
-      <Card>
+      <BaseCard>
         <template #content>
           <div class="no-session-content">
             <i class="pi pi-bolt no-session-icon" />
             <h2>No Active Session</h2>
             <p>Start a training session from the home page</p>
-            <Button label="Go to Home" icon="pi pi-home" @click="router.push('/')" size="large" />
+            <BaseButton label="Go to Home" icon="" to="/" size="large" />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
 
     <!-- Active Session -->
     <div v-else class="session-active">
       <!-- Session Header -->
-      <Card class="session-header-card">
+      <BaseCard class="session-header-card">
         <template #content>
           <div class="session-header">
             <div class="session-info">
@@ -35,13 +35,13 @@
             </div>
           </div>
         </template>
-      </Card>
+      </BaseCard>
 
       <!-- Exercises List -->
       <div class="exercises-section">
         <h2>Exercises</h2>
         <div class="exercises-list">
-          <Card
+          <BaseCard
             v-for="(exercise, index) in sessionStore.currentSession.exercises"
             :key="index"
             class="exercise-card"
@@ -158,31 +158,25 @@
                 </div>
               </div>
             </template>
-          </Card>
+          </BaseCard>
         </div>
       </div>
 
       <!-- Session Actions -->
-      <Card class="session-actions-card">
+      <BaseCard class="session-actions-card">
         <template #content>
           <div class="session-actions">
-            <Button
+            <BaseButton
               label="Complete Session"
-              icon="pi pi-check"
+              icon=""
               @click="handleCompleteSession"
               severity="success"
               size="large"
             />
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              @click="handleCancelSession"
-              text
-              size="large"
-            />
+            <BaseButton label="Cancel" icon="" @click="handleCancelSession" text size="large" />
           </div>
         </template>
-      </Card>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -238,7 +232,6 @@ async function handleCompleteSession() {
       severity: 'success',
       summary: 'Session Complete!',
       detail: 'Great work today!',
-      life: 3000,
     })
 
     router.push('/')
@@ -247,7 +240,6 @@ async function handleCompleteSession() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to complete session',
-      life: 5000,
     })
   }
 }
@@ -263,213 +255,7 @@ async function handleCancelSession() {
       severity: 'error',
       summary: 'Error',
       detail: error.message || 'Failed to cancel session',
-      life: 5000,
     })
   }
 }
 </script>
-
-<style scoped>
-.session-page {
-  padding: var(--spacing-lg);
-  max-width: 60rem;
-  margin: 0 auto;
-}
-
-/* No Session State */
-.no-session-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: var(--spacing-xl);
-  gap: var(--spacing-lg);
-}
-
-.no-session-icon {
-  font-size: 4rem;
-  color: var(--p-text-muted-color);
-}
-
-.no-session-content h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--p-text-color);
-}
-
-.no-session-content p {
-  font-size: 1rem;
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-
-/* Session Header */
-.session-header-card {
-  margin-bottom: var(--spacing-lg);
-}
-
-.session-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.session-info h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0 0 var(--spacing-xs) 0;
-  color: var(--p-text-color);
-}
-
-.session-meta {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-
-/* Exercises Section */
-.exercises-section {
-  margin-bottom: var(--spacing-lg);
-}
-
-.exercises-section h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 var(--spacing-md) 0;
-  color: var(--p-text-color);
-}
-
-.exercises-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.exercise-card {
-  border-left: 0.25rem solid var(--p-primary-color);
-}
-
-.exercise-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-}
-
-.exercise-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  background: var(--p-primary-color);
-  color: white;
-  border-radius: 50%;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.exercise-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--p-text-color);
-}
-
-.targets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: var(--spacing-md);
-}
-
-.target-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.target-item.full-width {
-  grid-column: 1 / -1;
-}
-
-.components-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.components-list li {
-  font-size: 0.9375rem;
-  color: var(--p-text-color);
-  padding-left: var(--spacing-md);
-  position: relative;
-}
-
-.components-list li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--p-primary-color);
-  font-weight: bold;
-}
-
-.target-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--p-text-muted-color);
-  font-weight: 600;
-}
-
-.target-value {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--p-text-color);
-}
-
-/* Session Actions */
-.session-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.session-actions :deep(.p-button) {
-  min-width: 12rem;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .session-page {
-    padding: var(--spacing-md);
-  }
-
-  .session-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .session-info h1 {
-    font-size: 1.5rem;
-  }
-
-  .targets-grid {
-    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
-  }
-
-  .session-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .session-actions :deep(.p-button) {
-    width: 100%;
-  }
-}
-</style>

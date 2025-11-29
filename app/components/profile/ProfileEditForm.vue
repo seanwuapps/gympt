@@ -4,17 +4,17 @@
       <!-- Section: Training Preferences -->
       <ProfileFormTrainingPreferences v-model="trainingPreferences" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: Goals -->
       <ProfileFormGoals v-model="formData.goals" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: Health & Safety -->
       <ProfileFormHealthSafety v-model="formData.injuryFlags" :goals="formData.goals" />
 
-      <Divider />
+      <BaseDivider />
 
       <!-- Section: App Preferences -->
       <div class="form-section">
@@ -25,7 +25,7 @@
         <div class="form-grid">
           <div class="field">
             <label class="field-label">Units</label>
-            <Select
+            <BaseSelect
               v-model="formData.units"
               :options="unitsOptions"
               optionLabel="label"
@@ -36,7 +36,7 @@
 
           <div class="field">
             <label class="field-label">Language</label>
-            <Select
+            <BaseSelect
               v-model="formData.language"
               :options="languageOptions"
               optionLabel="label"
@@ -49,8 +49,8 @@
 
       <!-- Actions -->
       <div class="form-actions">
-        <Button label="Cancel" severity="secondary" @click="$emit('cancel')" type="button" />
-        <Button label="Save Changes" :loading="loading" type="submit" />
+        <BaseButton label="Cancel" severity="secondary" @click="$emit('cancel')" type="button" />
+        <BaseButton label="Save Changes" :loading="loading" type="submit" />
       </div>
     </form>
   </div>
