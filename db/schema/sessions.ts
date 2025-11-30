@@ -53,11 +53,14 @@ export interface SessionExercise {
 
 // Type definition for session feedback
 export interface SessionFeedback {
-  sessionRPE?: number // 1-10 scale
+  sessionRPE?: number // 6-10 Borg RPE scale
   difficulty?: 'too_easy' | 'just_right' | 'too_hard'
   notes?: string
   soreness?: string[]
   injuries?: string[]
+  // Skip session fields
+  skipReason?: 'rest_day' | 'holiday' | 'sick' | 'injury' | 'busy' | 'other'
+  skipNotes?: string
 }
 
 // ============================================

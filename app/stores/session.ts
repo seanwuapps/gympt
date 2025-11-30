@@ -512,6 +512,30 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  async function skipSession(
+    sessionId: string,
+    skipReason: 'rest_day' | 'holiday' | 'sick' | 'injury' | 'busy' | 'other',
+    skipNotes?: string
+  ) {
+    try {
+      await $fetch(`/api/sessions/${sessionId}`, {
+        method: 'PATCH',
+        body: {
+          status: 'cancelled',
+          feedback: {
+            skipReason,
+            skipNotes,
+          },
+        },
+      })
+
+      clearSession()
+    } catch (err: any) {
+      error.value = err.message || 'Failed to skip session'
+      throw err
+    }
+  }
+
   async function loadSession(sessionId: string) {
     try {
       const response = await $fetch<{ success: boolean; session: Session }>(
@@ -606,6 +630,7 @@ export const useSessionStore = defineStore('session', () => {
     startSession,
     completeSession,
     cancelSession,
+    skipSession,
     loadSession,
     fetchSessionByDay,
     swapExercise,

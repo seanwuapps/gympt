@@ -35,11 +35,14 @@ export const SessionExerciseSchema = z.object({
 
 // Session feedback schema
 export const SessionFeedbackSchema = z.object({
-  sessionRPE: z.number().min(1).max(10).optional(),
+  sessionRPE: z.number().min(6).max(10).optional(),
   difficulty: z.enum(['too_easy', 'just_right', 'too_hard']).optional(),
   notes: z.string().optional(),
   soreness: z.array(z.string()).optional(),
   injuries: z.array(z.string()).optional(),
+  // Skip session fields
+  skipReason: z.enum(['rest_day', 'holiday', 'sick', 'injury', 'busy', 'other']).optional(),
+  skipNotes: z.string().optional(),
 })
 
 // Logged set schemas (per modality)

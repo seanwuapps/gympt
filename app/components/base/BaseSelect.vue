@@ -1,8 +1,7 @@
 <template>
-  <pre>{{ modelValue }}</pre>
-  <select v-model="modelValue" class="base-select">
+  <select v-model="internalValue" class="base-select">
     <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
-    <option v-for="(option, index) in options" :key="index" :value="option">
+    <option v-for="(option, index) in options" :key="index" :value="getOptionValue(option)">
       <slot name="option" :option="option">
         {{ getOptionLabel(option) }}
       </slot>
@@ -15,13 +14,33 @@ interface Props {
   options: any[]
   placeholder?: string
   optionLabel?: string
+  optionValue?: string
 }
 
 const modelValue = defineModel<any>()
 
 const props = withDefaults(defineProps<Props>(), {
   optionLabel: 'label',
+  optionValue: 'value',
 })
+
+// Internal value synced with modelValue
+const internalValue = computed({
+  get() {
+    return modelValue.value
+  },
+  set(val) {
+    modelValue.value = val
+  },
+})
+
+function getOptionValue(option: any): any {
+  if (typeof option === 'string' || typeof option === 'number') return option
+  if (typeof option === 'object' && option !== null) {
+    return option[props.optionValue] ?? option
+  }
+  return option
+}
 
 function getOptionLabel(option: any): string {
   if (typeof option === 'string') return option

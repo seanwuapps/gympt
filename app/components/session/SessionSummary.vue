@@ -34,16 +34,17 @@
           <!-- Session RPE -->
           <div class="feedback-group">
             <label class="feedback-label">Overall Effort (RPE)</label>
-            <div class="rpe-buttons">
+            <div class="rpe-options">
               <button
-                v-for="i in 10"
-                :key="i"
+                v-for="option in rpeOptions"
+                :key="option.score"
                 type="button"
-                class="rpe-btn"
-                :class="{ selected: sessionRpe === i }"
-                @click="sessionRpe = i"
+                class="rpe-option-btn"
+                :class="{ selected: sessionRpe === option.score }"
+                @click="sessionRpe = option.score"
               >
-                {{ i }}
+                <span class="rpe-score">{{ option.score }}</span>
+                <span class="rpe-label">{{ option.label }}</span>
               </button>
             </div>
           </div>
@@ -117,6 +118,14 @@ const difficultyOptions = [
   { value: 'too_easy' as const, label: '😴 Too Easy' },
   { value: 'just_right' as const, label: '👍 Just Right' },
   { value: 'too_hard' as const, label: '😰 Too Hard' },
+]
+
+const rpeOptions = [
+  { score: 6, label: 'Very Easy' },
+  { score: 7, label: 'Easy' },
+  { score: 8, label: 'Moderate' },
+  { score: 9, label: 'Hard' },
+  { score: 10, label: 'Max Effort' },
 ]
 
 const completedExercises = computed(() => {
@@ -250,33 +259,46 @@ function handleFinish() {
   text-align: center;
 }
 
-.rpe-buttons {
+.rpe-options {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
   gap: var(--spacing-xs);
 }
 
-.rpe-btn {
-  width: 2.5rem;
-  height: 2.5rem;
+.rpe-option-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 2px solid var(--surface-border);
   border-radius: var(--border-radius);
   background: var(--surface-card);
   color: var(--p-text-color);
-  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  text-align: left;
 }
 
-.rpe-btn:hover {
+.rpe-option-btn:hover {
   border-color: var(--p-primary-color);
 }
 
-.rpe-btn.selected {
+.rpe-option-btn.selected {
   background: var(--p-primary-color);
   border-color: var(--p-primary-color);
   color: white;
+}
+
+.rpe-option-btn .rpe-score {
+  font-size: 1.25rem;
+  font-weight: 700;
+  width: 2rem;
+  text-align: center;
+}
+
+.rpe-option-btn .rpe-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
 }
 
 .difficulty-buttons {

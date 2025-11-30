@@ -1,83 +1,103 @@
 <template>
   <div class="session-runner">
-    <!-- Progress Bar -->
-    <SessionProgress
-      :current-exercise="currentExerciseIndex + 1"
-      :total-exercises="exercises.length"
-      :current-set="currentSetNumber"
-      :total-sets="currentExercise?.sets || 0"
-      class="runner-progress"
+    <!-- Exercise Countdown (before each new exercise) -->
+    <ExerciseCountdown
+      v-if="showCountdown"
+      :exercise-name="currentExercise?.name || 'Exercise'"
+      :duration="3"
+      @complete="handleCountdownComplete"
     />
 
-    <!-- Session Summary (after all exercises) -->
-    <SessionSummary
-      v-if="showSummary"
-      :logged-sets="loggedSets"
-      :exercise-completions="exerciseCompletions"
-      :started-at="sessionStartedAt"
-      :loading="completing"
-      @finish="handleFinish"
-    />
-
-    <!-- Rest Timer -->
-    <RestTimer
-      v-else-if="isResting"
-      :remaining="restTimeRemaining"
-      :total="currentRestDuration"
-      @skip="handleSkipRest"
-    />
-
-    <!-- RPE Prompt -->
-    <ExerciseRpePrompt
-      v-else-if="showRpePrompt"
-      :exercise-name="currentExercise?.name || ''"
-      @submit="handleRpeSubmit"
-      @skip="handleRpeSkip"
-    />
-
-    <!-- Exercise Logger -->
-    <div v-else class="exercise-view">
-      <!-- Strength Exercise -->
-      <StrengthSetLogger
-        v-if="currentExercise?.type === 'strength'"
-        :exercise="currentExercise"
-        :set-number="currentSetNumber"
-        @complete="handleStrengthSetComplete"
+    <template v-else>
+      <!-- Progress Bar -->
+      <SessionProgress
+        :current-exercise="currentExerciseIndex + 1"
+        :total-exercises="exercises.length"
+        :current-set="currentSetNumber"
+        :total-sets="currentExercise?.sets || 0"
+        class="runner-progress"
       />
 
-      <!-- Cardio Exercise -->
-      <CardioLogger
-        v-else-if="currentExercise?.type === 'cardio'"
-        :exercise="currentExercise"
-        @complete="handleCardioComplete"
+      <!-- Session Summary (after all exercises) -->
+      <SessionSummary
+        v-if="showSummary"
+        :logged-sets="loggedSets"
+        :exercise-completions="exerciseCompletions"
+        :started-at="sessionStartedAt"
+        :loading="completing"
+        @finish="handleFinish"
       />
 
-      <!-- Generic fallback for other types -->
-      <div v-else class="generic-exercise">
-        <BaseCard>
-          <template #content>
-            <div class="generic-content">
-              <h2>{{ currentExercise?.name }}</h2>
-              <p class="exercise-type">{{ currentExercise?.type }}</p>
-              <BaseButton
-                label="Complete Exercise"
-                severity="success"
-                size="large"
-                @click="handleGenericComplete"
-                class="complete-button"
-              />
-            </div>
-          </template>
-        </BaseCard>
-      </div>
+      <!-- Rest Timer -->
+      <RestTimer
+        v-else-if="isResting"
+        :remaining="restTimeRemaining"
+        :total="currentRestDuration"
+        @skip="handleSkipRest"
+      />
 
-      <!-- Skip Exercise Button -->
-      <div class="skip-action">
-        <BaseButton label="Skip Exercise" text severity="secondary" @click="confirmSkipExercise" />
-      </div>
-    </div>
+      <!-- RPE Prompt -->
+      <ExerciseRpePrompt
+        v-else-if="showRpePrompt"
+        :exercise-name="currentExercise?.name || ''"
+        @submit="handleRpeSubmit"
+        @skip="handleRpeSkip"
+      />
 
-    <!-- Skip Confirmation Dialog -->
+      <!-- Exercise Logger -->
+      <div v-else class="exercise-view">
+        <!-- Strength Exercise -->
+        <StrengthSetLogger
+          v-if="currentExercise?.type === 'strength'"
+          :exercise="currentExercise"
+          :set-number="currentSetNumber"
+          @complete="handleStrengthSetComplete"
+        />
+
+        <!-- Cardio Exercise -->
+        <CardioLogger
+          v-else-if="currentExercise?.type === 'cardio'"
+          :exercise="currentExercise"
+          @complete="handleCardioComplete"
+        />
+
+        <!-- Generic fallback for other types -->
+        <div v-else class="generic-exercise">
+          <BaseCard>
+            <template #content>
+              <div class="generic-content">
+                <h2>{{ currentExercise?.name }}</h2>
+                <p class="exercise-type">{{ currentExercise?.type }}</p>
+                <BaseButton
+                  label="Complete Exercise"
+                  severity="success"
+                  size="large"
+                  @click="handleGenericComplete"
+                  class="complete-button"
+                />
+              </div>
+            </template>
+          </BaseCard>
+        </div>
+
+        <!-- Skip Exercise Button -->
+        <div class="skip-actions">
+          <BaseButton
+            label="Skip Exercise"
+            text
+            severity="secondary"
+            @click="confirmSkipExercise"
+          />
+          <BaseButton
+            label="Skip Entire Workout"
+            severity="danger"
+            @click="showSkipSessionDialog = true"
+          />
+        </div>
+      </div>
+    </template>
+
+    <!-- Skip Exercise Confirmation Dialog -->
     <BaseDialog v-model:visible="showSkipDialog" header="Skip Exercise?" class="skip-dialog">
       <p>Are you sure you want to skip {{ currentExercise?.name }}?</p>
       <template #footer>
@@ -85,6 +105,13 @@
         <BaseButton label="Skip" severity="danger" @click="handleSkipExercise" />
       </template>
     </BaseDialog>
+    <!-- Skip Session Dialog -->
+    <SkipSessionDialog
+      v-model:visible="showSkipSessionDialog"
+      :loading="skippingSession"
+      @confirm="handleSkipSession"
+      @cancel="showSkipSessionDialog = false"
+    />
   </div>
 </template>
 
@@ -107,8 +134,12 @@ const isResting = computed(() => sessionStore.restTimerRunning)
 // Local state
 const showRpePrompt = ref(false)
 const showSkipDialog = ref(false)
+const showSkipSessionDialog = ref(false)
+const showCountdown = ref(true) // Show countdown at start
 const completing = ref(false)
+const skippingSession = ref(false)
 const currentRestDuration = ref(90)
+const lastExerciseIndex = ref(-1) // Track exercise changes
 
 // Computed
 const exercises = computed<SessionExercise[]>(() => sessionStore.currentSession?.exercises || [])
@@ -123,6 +154,12 @@ const sessionStartedAt = computed(
 
 const showSummary = computed(() => currentExerciseIndex.value >= exercises.value.length)
 
+// Check if current exercise is a working set (not warmup/cooldown)
+const isWorkingSet = computed(() => {
+  const section = currentExercise.value?.section
+  return section === 'working' || section === undefined
+})
+
 // Initialize runner on mount
 onMounted(() => {
   if (!sessionStore.currentSession) {
@@ -130,6 +167,17 @@ onMounted(() => {
     return
   }
   sessionStore.initRunner()
+  lastExerciseIndex.value = 0
+  showCountdown.value = true // Show countdown for first exercise
+})
+
+// Watch for exercise changes to show countdown
+watch(currentExerciseIndex, (newIndex, oldIndex) => {
+  // Show countdown when moving to a new exercise (not when just starting or at summary)
+  if (newIndex !== oldIndex && newIndex < exercises.value.length && oldIndex >= 0) {
+    lastExerciseIndex.value = newIndex
+    showCountdown.value = true
+  }
 })
 
 // Clean up on unmount
@@ -138,6 +186,10 @@ onUnmounted(() => {
 })
 
 // Handlers
+function handleCountdownComplete() {
+  showCountdown.value = false
+}
+
 function handleStrengthSetComplete(data: { reps: number; loadKg: number }) {
   const exercise = currentExercise.value
   if (!exercise) return
@@ -152,8 +204,13 @@ function handleStrengthSetComplete(data: { reps: number; loadKg: number }) {
 
   // Check if this was the last set
   if (currentSetNumber.value >= totalSets) {
-    // Show RPE prompt after last set
-    showRpePrompt.value = true
+    // Only show RPE prompt for working sets, skip for warmup/cooldown
+    if (isWorkingSet.value) {
+      showRpePrompt.value = true
+    } else {
+      // Auto-complete without RPE for warmup/cooldown
+      sessionStore.completeExercise()
+    }
   } else {
     // Start rest timer
     currentRestDuration.value = exercise.restSec || 90
@@ -173,13 +230,21 @@ function handleCardioComplete(data: {
     intensity: data.intensity,
   })
 
-  // Cardio is single "set", go straight to RPE
-  showRpePrompt.value = true
+  // Only show RPE prompt for working sets
+  if (isWorkingSet.value) {
+    showRpePrompt.value = true
+  } else {
+    sessionStore.completeExercise()
+  }
 }
 
 function handleGenericComplete() {
-  // For unsupported types, just complete the exercise
-  showRpePrompt.value = true
+  // Only show RPE prompt for working sets
+  if (isWorkingSet.value) {
+    showRpePrompt.value = true
+  } else {
+    sessionStore.completeExercise()
+  }
 }
 
 function handleRpeSubmit(rpe: number) {
@@ -204,6 +269,37 @@ function handleSkipExercise() {
   sessionStore.skipExercise()
   showSkipDialog.value = false
   showRpePrompt.value = false
+}
+
+async function handleSkipSession(
+  reason: 'rest_day' | 'holiday' | 'sick' | 'injury' | 'busy' | 'other',
+  notes?: string
+) {
+  if (!sessionStore.currentSession) return
+
+  skippingSession.value = true
+
+  try {
+    await sessionStore.skipSession(sessionStore.currentSession.id, reason, notes)
+
+    toast.add({
+      severity: 'info',
+      summary: 'Workout Skipped',
+      detail:
+        reason === 'rest_day' ? 'Enjoy your rest day! 😴' : "No worries, we'll adjust your plan.",
+    })
+
+    router.push('/')
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to skip session',
+    })
+  } finally {
+    skippingSession.value = false
+    showSkipSessionDialog.value = false
+  }
 }
 
 async function handleFinish(feedback: SessionFeedback) {
@@ -252,10 +348,13 @@ async function handleFinish(feedback: SessionFeedback) {
   flex-direction: column;
 }
 
-.skip-action {
+.skip-actions {
   margin-top: auto;
   padding-top: var(--spacing-xl);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .generic-exercise {

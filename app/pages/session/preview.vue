@@ -68,13 +68,12 @@
                       <h3>{{ exercise.name }}</h3>
                     </div>
                     <BaseButton
-                      icon=""
+                      label="Swap"
                       text
                       rounded
                       severity="secondary"
                       @click="handleSwapExercise(exercise.originalIndex)"
                       :loading="swappingIndex === exercise.originalIndex"
-                      v-tooltip.top="'Swap exercise'"
                     />
                   </div>
                 </template>

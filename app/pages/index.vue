@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePlansStore } from '~/stores/plans'
 import { useSessionStore } from '~/stores/session'
+import SkipSessionDialog from '~/components/session/SkipSessionDialog.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -15,6 +16,8 @@ const toast = useToast()
 
 const showGenerator = ref(false)
 const showSessionLengthDialog = ref(false)
+const showSkipSessionDialog = ref(false)
+const skippingSession = ref(false)
 const selectedSessionLength = ref(45) // Default 45 minutes
 
 const sessionLengthOptions = [
@@ -95,6 +98,18 @@ function getTodayDescription(): string {
   return descriptions[normalized] || 'Workout session'
 }
 
+function getSkipReasonLabel(reason?: string): string {
+  const labels: Record<string, string> = {
+    rest_day: 'Taking a rest day',
+    holiday: 'On holiday',
+    sick: 'Feeling unwell',
+    injury: 'Dealing with injury',
+    busy: 'Too busy today',
+    other: 'Skipped',
+  }
+  return labels[reason || ''] || 'Skipped'
+}
+
 const checkingSession = ref(false)
 const existingSession = ref<any>(null)
 
@@ -123,6 +138,21 @@ watch(
   },
   { immediate: true }
 )
+
+// Check if existing session was skipped
+const isSessionSkipped = computed(() => {
+  return (
+    existingSession.value?.status === 'cancelled' && existingSession.value?.feedback?.skipReason
+  )
+})
+
+// Check if session can be continued (generated or in_progress)
+const canContinueSession = computed(() => {
+  return (
+    existingSession.value &&
+    (existingSession.value.status === 'generated' || existingSession.value.status === 'in_progress')
+  )
+})
 
 async function handleStartTraining() {
   console.log('Start Training clicked')
@@ -246,6 +276,38 @@ function handleViewPlan() {
   showGenerator.value = false
   router.push('/plans')
 }
+
+async function handleSkipSession(
+  reason: 'rest_day' | 'holiday' | 'sick' | 'injury' | 'busy' | 'other',
+  notes?: string
+) {
+  if (!existingSession.value) return
+
+  skippingSession.value = true
+
+  try {
+    await sessionStore.skipSession(existingSession.value.id, reason, notes)
+
+    toast.add({
+      severity: 'info',
+      summary: 'Workout Skipped',
+      detail:
+        reason === 'rest_day' ? 'Enjoy your rest day! 😴' : "No worries, we'll adjust your plan.",
+    })
+
+    // Clear existing session reference
+    existingSession.value = null
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.message || 'Failed to skip session',
+    })
+  } finally {
+    skippingSession.value = false
+    showSkipSessionDialog.value = false
+  }
+}
 </script>
 
 <template>
@@ -271,17 +333,50 @@ function handleViewPlan() {
             <h2 class="today-heading">{{ getTodayLabel() }}</h2>
             <p class="today-description">{{ getTodayDescription() }}</p>
 
+            <!-- Skipped Session State -->
+            <div v-if="isSessionSkipped" class="skipped-state">
+              <div class="skipped-badge">
+                <span class="skipped-icon">⏭️</span>
+                <span>Skipped</span>
+              </div>
+              <p class="skipped-reason">
+                {{ getSkipReasonLabel(existingSession?.feedback?.skipReason) }}
+                <template v-if="existingSession?.feedback?.skipNotes">
+                  — {{ existingSession.feedback.skipNotes }}
+                </template>
+              </p>
+              <BaseButton
+                label="Start Anyway"
+                severity="secondary"
+                @click="handleStartTraining"
+                :loading="sessionStore.generating || checkingSession"
+                :disabled="sessionStore.generating || checkingSession"
+                size="large"
+                outlined
+              />
+            </div>
+
             <!-- Start Training Button -->
-            <BaseButton
-              v-if="!isTodayRestDay()"
-              :label="existingSession ? 'Continue Session' : 'Start Training'"
-              :icon="existingSession ? 'pi pi-play' : 'pi pi-bolt'"
-              @click="handleStartTraining"
-              :loading="sessionStore.generating || checkingSession"
-              :disabled="sessionStore.generating || checkingSession"
-              size="large"
-              class="start-button"
-            />
+            <div v-else-if="!isTodayRestDay()" class="training-actions">
+              <BaseButton
+                :label="canContinueSession ? 'Continue Session' : 'Start Training'"
+                :icon="canContinueSession ? 'pi pi-play' : 'pi pi-bolt'"
+                @click="handleStartTraining"
+                :loading="sessionStore.generating || checkingSession"
+                :disabled="sessionStore.generating || checkingSession"
+                size="large"
+                class="start-button"
+              />
+              <BaseButton
+                v-if="canContinueSession"
+                label="Skip Today"
+                severity="secondary"
+                @click="showSkipSessionDialog = true"
+                :disabled="sessionStore.generating || checkingSession"
+                size="large"
+                outlined
+              />
+            </div>
 
             <!-- Rest Day State -->
             <div v-else class="rest-day-state">
@@ -387,6 +482,14 @@ function handleViewPlan() {
       />
     </BaseDialog>
 
+    <!-- Skip Session Dialog -->
+    <SkipSessionDialog
+      v-model:visible="showSkipSessionDialog"
+      :loading="skippingSession"
+      @confirm="handleSkipSession"
+      @cancel="showSkipSessionDialog = false"
+    />
+
     <BasePageMessages />
   </div>
 </template>
@@ -468,6 +571,13 @@ function handleViewPlan() {
   font-weight: 600;
 }
 
+.training-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .rest-day-state {
   display: flex;
   flex-direction: column;
@@ -485,6 +595,39 @@ function handleViewPlan() {
   font-size: 1rem;
   color: var(--p-text-muted-color);
   margin: 0;
+}
+
+/* Skipped Session State */
+.skipped-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) 0;
+}
+
+.skipped-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--p-yellow-100);
+  color: var(--p-yellow-700);
+  border-radius: var(--p-border-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.skipped-icon {
+  font-size: 1rem;
+}
+
+.skipped-reason {
+  font-size: 0.9375rem;
+  color: var(--p-text-muted-color);
+  margin: 0;
+  text-align: center;
+  max-width: 25rem;
 }
 
 .secondary-actions {
