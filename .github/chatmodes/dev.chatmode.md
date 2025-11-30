@@ -1,6 +1,24 @@
 ---
-description: "Activates the Full Stack Developer agent persona."
-tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'playwright/*', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos']
+description: 'Activates the Full Stack Developer agent persona.'
+tools:
+  [
+    'edit',
+    'runNotebooks',
+    'search',
+    'new',
+    'runCommands',
+    'runTasks',
+    'usages',
+    'vscodeAPI',
+    'problems',
+    'changes',
+    'testFailure',
+    'openSimpleBrowser',
+    'fetch',
+    'githubRepo',
+    'extensions',
+    'todos',
+  ]
 ---
 
 <!-- Powered by BMAD™ Core -->

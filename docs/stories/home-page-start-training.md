@@ -233,19 +233,14 @@ export const useSessionStore = defineStore('session', () => {
   const generating = ref(false)
   const error = ref<string | null>(null)
 
-  async function generateSession(
-    planId: string,
-    week: number,
-    day: string,
-    modality: string
-  ) {
+  async function generateSession(planId: string, week: number, day: string, modality: string) {
     generating.value = true
     error.value = null
 
     try {
       // Fetch user profile
       const profileResponse = await $fetch('/api/profile')
-      
+
       // Generate session via AI
       const sessionData = await $fetch('/api/ai/session.generate', {
         method: 'POST',
@@ -253,8 +248,8 @@ export const useSessionStore = defineStore('session', () => {
           userProfile: profileResponse.profile,
           modality: modality.toLowerCase(),
           day: week,
-          constraints: {}
-        }
+          constraints: {},
+        },
       })
 
       // Save session to database
@@ -266,8 +261,8 @@ export const useSessionStore = defineStore('session', () => {
           dayKey: day,
           modality,
           exercises: sessionData.exercises,
-          status: 'generated'
-        }
+          status: 'generated',
+        },
       })
 
       // Store session in state
@@ -279,7 +274,7 @@ export const useSessionStore = defineStore('session', () => {
         modality,
         exercises: sessionData.exercises,
         status: 'generated',
-        generatedAt: new Date(savedSession.createdAt)
+        generatedAt: new Date(savedSession.createdAt),
       }
 
       return currentSession.value
@@ -298,8 +293,8 @@ export const useSessionStore = defineStore('session', () => {
         method: 'PATCH',
         body: {
           status: 'in_progress',
-          startedAt: new Date().toISOString()
-        }
+          startedAt: new Date().toISOString(),
+        },
       })
 
       if (currentSession.value) {
@@ -318,8 +313,8 @@ export const useSessionStore = defineStore('session', () => {
         body: {
           status: 'completed',
           completedAt: new Date().toISOString(),
-          feedback
-        }
+          feedback,
+        },
       })
 
       clearSession()
@@ -334,8 +329,8 @@ export const useSessionStore = defineStore('session', () => {
       await $fetch(`/api/sessions/${sessionId}`, {
         method: 'PATCH',
         body: {
-          status: 'cancelled'
-        }
+          status: 'cancelled',
+        },
       })
 
       clearSession()
@@ -370,7 +365,7 @@ export const useSessionStore = defineStore('session', () => {
     completeSession,
     cancelSession,
     loadSession,
-    clearSession
+    clearSession,
   }
 })
 ```
@@ -395,11 +390,11 @@ function getTodayDayKey(): string {
 
 function getTodayModality(): string | null {
   if (!plansStore.activePlan) return null
-  
+
   const week = `week${getCurrentWeek()}`
   const day = getTodayDayKey()
   const schedule = plansStore.activePlan.weeklySchedule as Record<string, Record<string, string>>
-  
+
   return schedule[week]?.[day] || null
 }
 
@@ -419,41 +414,36 @@ function getTodayDescription(): string {
   const modality = getTodayModality()
   if (!modality) return 'Check your plan for details'
   if (isTodayRestDay()) return 'Recovery is essential for progress'
-  
+
   // Provide contextual descriptions
   const descriptions: Record<string, string> = {
-    'Push': 'Chest, shoulders, and triceps workout',
-    'Pull': 'Back and biceps workout',
-    'Legs': 'Lower body strength training',
-    'Upper': 'Full upper body workout',
-    'Lower': 'Full lower body workout',
+    Push: 'Chest, shoulders, and triceps workout',
+    Pull: 'Back and biceps workout',
+    Legs: 'Lower body strength training',
+    Upper: 'Full upper body workout',
+    Lower: 'Full lower body workout',
     'Full Body': 'Complete body workout',
-    'Cardio': 'Cardiovascular endurance training',
-    'HIIT': 'High-intensity interval training',
-    'Crossfit': 'Functional fitness workout',
-    'Rehab': 'Recovery and rehabilitation exercises'
+    Cardio: 'Cardiovascular endurance training',
+    HIIT: 'High-intensity interval training',
+    Crossfit: 'Functional fitness workout',
+    Rehab: 'Recovery and rehabilitation exercises',
   }
-  
+
   return descriptions[modality] || 'Workout session'
 }
 
 async function handleStartTraining() {
   if (!plansStore.activePlan) return
-  
+
   const week = getCurrentWeek()
   const day = getTodayDayKey()
   const modality = getTodayModality()
-  
+
   if (!modality || isTodayRestDay()) return
-  
+
   try {
-    await sessionStore.generateSession(
-      plansStore.activePlan.id,
-      week,
-      day,
-      modality
-    )
-    
+    await sessionStore.generateSession(plansStore.activePlan.id, week, day, modality)
+
     // Navigate to session page
     await router.push('/session')
   } catch (error: any) {
@@ -461,7 +451,7 @@ async function handleStartTraining() {
       severity: 'error',
       summary: 'Generation Failed',
       detail: error.message || 'Failed to generate workout session',
-      life: 5000
+      life: 5000,
     })
   }
 }
@@ -482,11 +472,7 @@ Update placeholder to display generated session:
     <div v-if="!sessionStore.currentSession" class="no-session">
       <h2>No Active Session</h2>
       <p>Start a training session from the home page</p>
-      <Button
-        label="Go to Home"
-        icon="pi pi-home"
-        @click="router.push('/')"
-      />
+      <Button label="Go to Home" icon="pi pi-home" @click="router.push('/')" />
     </div>
 
     <div v-else class="session-active">
@@ -520,12 +506,7 @@ Update placeholder to display generated session:
           @click="completeSession"
           severity="success"
         />
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          @click="cancelSession"
-          text
-        />
+        <Button label="Cancel" icon="pi pi-times" @click="cancelSession" text />
       </div>
     </div>
   </div>
@@ -549,7 +530,7 @@ function completeSession() {
     severity: 'success',
     summary: 'Session Complete!',
     detail: 'Great work today!',
-    life: 3000
+    life: 3000,
   })
   router.push('/')
 }
@@ -577,9 +558,7 @@ export const sessions = pgTable('sessions', {
   week: integer('week').notNull(),
   dayKey: text('day_key').notNull(), // MON, TUE, WED, etc.
   modality: text('modality').notNull(), // Push, Pull, Cardio, etc.
-  exercises: jsonb('exercises')
-    .$type<SessionExercise[]>()
-    .notNull(),
+  exercises: jsonb('exercises').$type<SessionExercise[]>().notNull(),
   status: text('status', {
     enum: ['generated', 'in_progress', 'completed', 'cancelled'],
   })
@@ -587,21 +566,21 @@ export const sessions = pgTable('sessions', {
     .default('generated'),
   startedAt: timestamp('started_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
-  feedback: jsonb('feedback')
-    .$type<SessionFeedback | null>()
-    .default(null),
+  feedback: jsonb('feedback').$type<SessionFeedback | null>().default(null),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 ```
 
 **Migration Required**: Generate migration with Drizzle Kit:
+
 ```bash
 pnpm drizzle-kit generate
 pnpm drizzle-kit migrate
 ```
 
 **RLS Policies**: Add Row Level Security policies:
+
 ```sql
 -- Enable RLS
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
@@ -656,23 +635,19 @@ import { defineEventHandler } from 'h3'
 export default defineEventHandler(async (event) => {
   const supabase = useSupabaseClient(event)
   const user = await supabase.auth.getUser()
-  
+
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
   return {
     success: true,
-    profile
+    profile,
   }
 })
 ```
@@ -756,6 +731,7 @@ export default defineEventHandler(async (event) => {
 ## Definition of Done
 
 **Database & Schema**
+
 - [ ] `sessions` table schema created in `db/schema/sessions.ts`
 - [ ] Schema exported from `db/schema/index.ts`
 - [ ] Migration generated with `pnpm drizzle-kit generate`
@@ -764,6 +740,7 @@ export default defineEventHandler(async (event) => {
 - [ ] TypeScript types defined for Session and SessionExercise
 
 **Backend API**
+
 - [ ] `POST /api/sessions` endpoint created (save session)
 - [ ] `GET /api/sessions/[id]` endpoint created (retrieve session)
 - [ ] `PATCH /api/sessions/[id]` endpoint created (update status/feedback)
@@ -772,6 +749,7 @@ export default defineEventHandler(async (event) => {
 - [ ] API validation with Zod schemas
 
 **Session Store**
+
 - [ ] Session store created at `app/stores/session.ts`
 - [ ] `generateSession()` action implemented with DB persistence
 - [ ] `startSession()` action implemented (updates status)
@@ -782,6 +760,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Loading and error state management
 
 **Home Page**
+
 - [ ] Home page shows "Start Training" button when active plan exists
 - [ ] Button displays today's workout focus below it
 - [ ] Button disabled/hidden if today is rest day
@@ -795,6 +774,7 @@ export default defineEventHandler(async (event) => {
 - [ ] No active plan shows "Generate Plan" CTA
 
 **Session Page**
+
 - [ ] Session page displays generated exercises from store
 - [ ] Session data persists during navigation
 - [ ] Complete button saves feedback and updates status
@@ -802,6 +782,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Navigation guard redirects if no session
 
 **Error Handling & UX**
+
 - [ ] Error handling shows user-friendly messages with retry
 - [ ] Timeout after 15 seconds with error message
 - [ ] Network errors handled gracefully
@@ -809,6 +790,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Loading states are clear and not jarring
 
 **Quality & Testing**
+
 - [ ] Existing plan management functionality unchanged
 - [ ] Code follows Vue 3 Composition API patterns
 - [ ] Code follows PrimeVue component patterns
@@ -933,7 +915,7 @@ export default defineEventHandler(async (event) => {
 ## Future Enhancements (Out of Scope)
 
 - Pre-generate tomorrow's session for instant start
-- Show preview of exercises before starting
+- ~~Show preview of exercises before starting~~ ✅ **Implemented** - `/session/preview` page with exercise swap
 - "Quick Start" for last completed workout
 - Schedule notifications for training time
 - Streak tracking ("5 days in a row!")
@@ -965,6 +947,7 @@ export default defineEventHandler(async (event) => {
 ## Implementation Checklist
 
 ### Phase 1: Database Schema & Migration (1 hour)
+
 - [x] Create `db/schema/sessions.ts` with full schema definition
 - [x] Export from `db/schema/index.ts`
 - [x] Generate migration: `pnpm drizzle-kit generate` (created manually)
@@ -975,6 +958,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Verify table and policies in Supabase (requires user to verify)
 
 ### Phase 2: Backend API Endpoints (2-3 hours)
+
 - [x] Create `server/api/sessions/index.post.ts` (create session)
 - [x] Create `server/api/sessions/index.get.ts` (list sessions)
 - [x] Create `server/api/sessions/[id].get.ts` (get single session)
@@ -984,6 +968,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Verify RLS enforcement (users can't access others' sessions) (requires manual testing)
 
 ### Phase 3: Session Store (1-2 hours)
+
 - [x] Create `app/stores/session.ts`
 - [x] Define TypeScript interfaces (Session, SessionExercise, etc.)
 - [x] Implement `generateSession()` with DB persistence
@@ -996,6 +981,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Write unit tests for store actions (deferred)
 
 ### Phase 4: Home Page Redesign (2-3 hours)
+
 - [x] Update `app/pages/index.vue` template
 - [x] Add helper methods (getCurrentWeek, getTodayModality, etc.)
 - [x] Implement `handleStartTraining()` method
@@ -1006,6 +992,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Test on various screen sizes (requires manual testing)
 
 ### Phase 5: Session Page Update (1-2 hours)
+
 - [x] Update `app/pages/session.vue` from placeholder
 - [x] Display session data from store
 - [x] Add basic exercise list rendering
@@ -1015,6 +1002,7 @@ export default defineEventHandler(async (event) => {
 - [ ] Add feedback form (optional for MVP) (deferred to future story)
 
 ### Phase 6: Testing & Polish (1-2 hours)
+
 - [ ] Manual testing on desktop
 - [ ] Manual testing on mobile
 - [ ] Test error scenarios
@@ -1039,14 +1027,17 @@ export default defineEventHandler(async (event) => {
 ## Dev Agent Record
 
 ### Agent Model Used
+
 - Model: Claude 3.5 Sonnet (James - Full Stack Developer)
 - Session Start: 2025-11-08
 - Implementation Status: Complete
 
 ### Debug Log References
+
 - None
 
 ### Completion Notes
+
 - ✅ Phase 1: Database schema and migrations created
 - ✅ Phase 2: Backend API endpoints implemented (POST, GET, PATCH for sessions)
 - ✅ Phase 3: Session store created with full CRUD operations
@@ -1057,7 +1048,9 @@ export default defineEventHandler(async (event) => {
 - ✅ Auto-start session on navigation implemented
 
 ### File List
+
 **Created:**
+
 - `db/schema/sessions.ts` - Sessions table schema with TypeScript types
 - `db/migrations/0004_sessions_table.sql` - Sessions table migration
 - `db/migrations/0005_sessions_rls.sql` - RLS policies for sessions
@@ -1069,11 +1062,13 @@ export default defineEventHandler(async (event) => {
 - `app/stores/session.ts` - Session Pinia store
 
 **Modified:**
+
 - `db/schema/index.ts` - Added sessions export
 - `app/pages/index.vue` - Redesigned with Start Training button
 - `app/pages/session.vue` - Implemented session display and actions
 
 ### Change Log
+
 - **Database**: Created sessions table with full schema (exercises JSONB, status enum, timestamps, feedback)
 - **Database**: Added foreign key constraints to users and training_plans tables
 - **Database**: Created indexes for common queries (user_id, plan_id, status, created_at)

@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "type-check": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:apply-rls": "tsx scripts/apply-rls.ts",
     "pages:deploy": "pnpm run build && wrangler pages deploy",

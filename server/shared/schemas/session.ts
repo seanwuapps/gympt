@@ -42,6 +42,64 @@ export const SessionFeedbackSchema = z.object({
   injuries: z.array(z.string()).optional(),
 })
 
+// Logged set schemas (per modality)
+const LoggedSetBaseSchema = z.object({
+  exerciseIndex: z.number().int().nonnegative(),
+  setNumber: z.number().int().positive(),
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime(),
+  skipped: z.boolean(),
+  restTakenSec: z.number().int().nonnegative().optional(),
+})
+
+const StrengthLoggedSetSchema = LoggedSetBaseSchema.extend({
+  type: z.literal('strength'),
+  reps: z.number().int().nonnegative(),
+  loadKg: z.number().nonnegative(),
+})
+
+const CardioLoggedSetSchema = LoggedSetBaseSchema.extend({
+  type: z.literal('cardio'),
+  durationMin: z.number().nonnegative(),
+  distanceKm: z.number().nonnegative().optional(),
+  intensity: z.enum(['easy', 'moderate', 'hard']),
+})
+
+const HIITLoggedSetSchema = LoggedSetBaseSchema.extend({
+  type: z.literal('hiit'),
+  round: z.number().int().positive(),
+  workSec: z.number().int().nonnegative(),
+  restSec: z.number().int().nonnegative(),
+})
+
+const RehabLoggedSetSchema = LoggedSetBaseSchema.extend({
+  type: z.literal('rehab'),
+  reps: z.number().int().nonnegative(),
+  painLevel: z.number().min(0).max(3).optional(),
+})
+
+const CrossfitLoggedSetSchema = LoggedSetBaseSchema.extend({
+  type: z.literal('crossfit'),
+  completedRounds: z.number().int().nonnegative().optional(),
+  timeSeconds: z.number().int().nonnegative().optional(),
+})
+
+export const LoggedSetSchema = z.discriminatedUnion('type', [
+  StrengthLoggedSetSchema,
+  CardioLoggedSetSchema,
+  HIITLoggedSetSchema,
+  RehabLoggedSetSchema,
+  CrossfitLoggedSetSchema,
+])
+
+// Exercise completion schema
+export const ExerciseCompletionSchema = z.object({
+  exerciseIndex: z.number().int().nonnegative(),
+  status: z.enum(['completed', 'skipped']),
+  rpe: z.number().min(6).max(10).optional(),
+  notes: z.string().optional(),
+})
+
 // Create session request
 export const CreateSessionSchema = z.object({
   planId: z.string().uuid(),
@@ -60,6 +118,8 @@ export const UpdateSessionSchema = z.object({
   startedAt: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),
   feedback: SessionFeedbackSchema.optional(),
+  loggedSets: z.array(LoggedSetSchema).optional(),
+  exerciseCompletions: z.array(ExerciseCompletionSchema).optional(),
 })
 
 // List sessions query params

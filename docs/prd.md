@@ -44,6 +44,8 @@ A mobile‑first AI training companion that generates and adapts training plans 
 - AI Session Generation
   - For a selected day from active training plan, generate detailed session with AI-generated exercises and targets.
   - Session generation uses plan day focus + user profile + recent performance history.
+  - **Session Preview**: Users review generated exercises before starting workout (`/session/preview`).
+  - **Exercise Swap**: Individual exercises can be swapped with AI-generated alternatives (same modality, excludes duplicates).
   - Substitutions available on-demand via AI given constraints.
   - Session targets adapt based on previous session feedback (load/volume progression).
 - Session Runner
@@ -66,11 +68,12 @@ A mobile‑first AI training companion that generates and adapts training plans 
 
 ## 6. Tech Stack & Integrations
 
-- Frontend: Nuxt 4 (Vue 3 + TypeScript), Element Plus UI.
+- Frontend: Nuxt 4 (Vue 3 + TypeScript), custom vanilla component library (`app/components/base/`).
 - Backend/DB: Supabase (Postgres + Auth with Google), Row Level Security.
 - ORM: Drizzle ORM (schema/migrations/types).
-- AI: Cloudflare Workers AI via OpenAI-compatible API; default model `@cf/meta/llama-4-scout-17b-16e-instruct`.
+- AI: Cloudflare Workers AI via OpenAI-compatible API; default model `@cf/meta/llama-3.1-8b-instruct`.
 - Validation: Zod (strict JSON contracts from AI).
+- Hosting: Cloudflare Pages (Nitro preset).
 
 ## 7. Analytics & Metrics
 
@@ -155,3 +158,62 @@ A mobile‑first AI training companion that generates and adapts training plans 
 
 - **Add-ons / Marketplace (Phase 4+):**
   - One-time or sub-add-ons for specific AI trainers, specialized programs, or advanced media features.
+
+## 13. Progress Tracker (Phase 1)
+
+_Last updated: 2025-11-29_
+
+### M1.1: User Auth & Profile ✅
+
+| Feature                 | Status  | Notes                              |
+| ----------------------- | ------- | ---------------------------------- |
+| Google OAuth (Supabase) | ✅ Done | Login, logout, session persistence |
+| User profile creation   | ✅ Done | Via onboarding flow                |
+| Profile editing         | ✅ Done | `/profile/edit` page               |
+| RLS policies            | ✅ Done | All tables secured                 |
+
+### M1.2: AI Training Plan Generation ✅
+
+| Feature                         | Status  | Notes                               |
+| ------------------------------- | ------- | ----------------------------------- |
+| AI plan generation endpoint     | ✅ Done | `/api/plans/generate`               |
+| Multi-week plan structure       | ✅ Done | Weekly schedule with focus/modality |
+| Plan management UI              | ✅ Done | Active plan + library views         |
+| Activate/delete plans           | ✅ Done | Single active plan at a time        |
+| Edit plan days (AI suggestions) | ✅ Done | `/api/plans/[id]/suggest-day`       |
+| Auto-activate single plan       | ✅ Done | UX improvement                      |
+
+### M1.3: Session Runner & Logging 🔶
+
+| Feature                     | Status     | Notes                                   |
+| --------------------------- | ---------- | --------------------------------------- |
+| AI session generation       | ✅ Done    | `/api/ai/session.generate`              |
+| Session preview page        | ✅ Done    | `/session/preview`                      |
+| Exercise swap (AI)          | ✅ Done    | `/api/sessions/[id]/swap-exercise`      |
+| Session runner UI           | 🔶 Partial | Displays exercises, no step-by-step yet |
+| One-exercise-at-a-time view | ⬜ Todo    | Currently shows all exercises           |
+| Set logging (reps/load/RPE) | ⬜ Todo    | No input controls yet                   |
+| Rest timer                  | ⬜ Todo    | Not implemented                         |
+| Skip/replace during session | ⬜ Todo    | Only in preview                         |
+| Complete session flow       | ⬜ Todo    | No finish/save functionality            |
+
+### M1.4: Basic Analytics ⬜
+
+| Feature                   | Status  | Notes                             |
+| ------------------------- | ------- | --------------------------------- |
+| End-session feedback form | ⬜ Todo | RPE, difficulty, notes, soreness  |
+| Session report            | ⬜ Todo | Post-workout summary              |
+| Weekly report             | ⬜ Todo | 7-day aggregation                 |
+| Progress page             | ⬜ Todo | Placeholder exists at `/progress` |
+
+### M1.5: Beta Launch ⬜
+
+| Feature               | Status  | Notes            |
+| --------------------- | ------- | ---------------- |
+| Production deployment | ✅ Done | Cloudflare Pages |
+| Beta testing          | ⬜ Todo | —                |
+| Bug fixes & polish    | ⬜ Todo | —                |
+
+---
+
+**Legend:** ✅ Done | 🔶 Partial | ⬜ Todo

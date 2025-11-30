@@ -21,47 +21,100 @@
     assets/
       css/
         main.css              # Global design tokens
+        grid.css              # Grid utilities
+        accessibility.css     # A11y overrides
     components/
+      base/                   # Vanilla UI components
+        BaseButton.vue
+        BaseCard.vue
+        BaseDialog.vue
+        BaseSelect.vue
+        BaseTabs.vue
+        BaseTabList.vue
+        BaseTab.vue
+        BaseMessage.vue
+        BasePageMessages.vue
+        BaseBadge.vue
+        BaseDivider.vue
+        BaseProgressSpinner.vue
       display/                # Read-only display components
+        DetailsList.vue
+        FieldRow.vue
       form/                   # Form input components
         CheckboxCard.vue
-        FormChipGroup.vue
+        CheckboxGroup.vue
+        CheckboxButtonGroup.vue
+        ChipGroup.vue
+        RadioGroup.vue
       layout/                 # Layout components
         BottomNav.vue
+      onboarding/             # Onboarding step components
+        OnboardingStep1.vue
+        OnboardingStep2.vue
+        OnboardingStep3.vue
+        OnboardingStep4.vue
       plans/                  # Training plan components
         PlanGenerator.vue
         PlanCard.vue
         PlanWeekView.vue
-      session/                # Session runner components
-      feedback/               # Feedback components
+        PlanWeekViewCards.vue
+      profile/                # Profile components
+        ProfileEditForm.vue
+        ProfileFormGoals.vue
+        ProfileFormHealthSafety.vue
+        ProfileFormTrainingPreferences.vue
     composables/
-      useProfile.ts
+      useToast.ts             # Toast notification composable
     layouts/
       default.vue
     pages/
       index.vue               # Home page
       login.vue
+      confirm.vue             # Auth callback
       onboarding.vue
-      profile.vue
+      progress.vue
       plans/
-        index.vue             # Plan management page
-      sessions/
-      reports/
+        index.vue             # Active plan view
+        library.vue           # Plan library
+      profile/
+        index.vue             # Profile view
+        edit.vue              # Profile edit
+      session/
+        index.vue             # Active session runner
+        preview.vue           # Session preview with exercise swap
     stores/
       plans.ts                # Plans Pinia store
+      session.ts              # Session Pinia store
+      profile.store.ts        # Profile Pinia store
+      onboarding.ts           # Onboarding Pinia store
     app.vue
   db/
     schema/
       index.ts
       profiles.ts
-      training-plans.ts       # Training plans schema (to be created)
+      training-plans.ts
+      sessions.ts
     migrations/
   server/
     api/
-      plans/                  # Plan generation & management endpoints
+      profile.get.ts
+      profile.post.ts
+      plans/                  # Plan endpoints
+        generate.post.ts
+        [id].patch.ts
+        [id]/suggest-day.post.ts
       ai/
         session.generate.post.ts
-        exercise.substitute.post.ts
+      sessions/
+        index.get.ts
+        index.post.ts
+        [id]/
+          swap-exercise.post.ts
       adapt/
         next-session.post.ts
+    shared/
+      schemas/                # Zod schemas
+      prompts/                # AI prompt templates
+    utils/
+      ai.ts                   # AI client utilities
 ```

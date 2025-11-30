@@ -1,5 +1,14 @@
 import { defineStore } from 'pinia'
 import { $fetch } from 'ofetch'
+import type {
+  LoggedSet,
+  StrengthLoggedSet,
+  CardioLoggedSet,
+  HIITLoggedSet,
+  RehabLoggedSet,
+  CrossfitLoggedSet,
+  ExerciseCompletion,
+} from '../../db/schema/sessions'
 
 // Type definitions matching unified flat structure
 export interface SessionExercise {
@@ -46,6 +55,44 @@ export interface Session {
   modality: string
   reasons: string | null
   exercises: SessionExercise[]
+  loggedSets?: LoggedSet[]
+  exerciseCompletions?: ExerciseCompletion[]
+  status: 'generated' | 'in_progress' | 'completed' | 'cancelled'
+  startedAt: string | null
+  completedAt: string | null
+  feedback: SessionFeedback | null
+  createdAt: string
+  updatedAt: string
+}
+
+// Rest timer state
+interface RestTimerState {
+  active: boolean
+  remaining: number // Seconds remaining
+  total: number // Total rest time for this rest period
+  startedAt: string | null // When rest started
+}
+
+// Re-export types for components
+export type {
+  LoggedSet,
+  StrengthLoggedSet,
+  CardioLoggedSet,
+  HIITLoggedSet,
+  RehabLoggedSet,
+  CrossfitLoggedSet,
+  ExerciseCompletion,
+}
+
+export interface Session {
+  id: string
+  userId: string
+  planId: string
+  week: number
+  dayKey: string
+  modality: string
+  reasons: string | null
+  exercises: SessionExercise[]
   status: 'generated' | 'in_progress' | 'completed' | 'cancelled'
   startedAt: string | null
   completedAt: string | null
@@ -55,10 +102,278 @@ export interface Session {
 }
 
 export const useSessionStore = defineStore('session', () => {
-  // State
+  // ============================================
+  // SESSION STATE
+  // ============================================
   const currentSession = ref<Session | null>(null)
   const generating = ref(false)
   const error = ref<string | null>(null)
+
+  // ============================================
+  // RUNNER STATE
+  // ============================================
+  const currentExerciseIndex = ref(0)
+  const currentSetIndex = ref(0)
+  const currentSetStartedAt = ref<string | null>(null)
+  const loggedSets = ref<LoggedSet[]>([])
+  const exerciseCompletions = ref<ExerciseCompletion[]>([])
+  const showSummary = ref(false)
+  const showExerciseRPE = ref(false)
+
+  // Rest timer
+  const restTimer = ref<RestTimerState>({
+    active: false,
+    remaining: 0,
+    total: 0,
+    startedAt: null,
+  })
+  let restTimerInterval: ReturnType<typeof setInterval> | null = null
+
+  // ============================================
+  // COMPUTED
+  // ============================================
+  const currentExercise = computed(() => {
+    if (!currentSession.value) return null
+    return currentSession.value.exercises[currentExerciseIndex.value] || null
+  })
+
+  const totalExercises = computed(() => {
+    return currentSession.value?.exercises.length || 0
+  })
+
+  const totalSetsForCurrentExercise = computed(() => {
+    if (!currentExercise.value) return 1
+    return currentExercise.value.sets || 1
+  })
+
+  const isLastSetOfExercise = computed(() => {
+    return currentSetIndex.value + 1 >= totalSetsForCurrentExercise.value
+  })
+
+  const isLastExercise = computed(() => {
+    return currentExerciseIndex.value + 1 >= totalExercises.value
+  })
+
+  const sessionProgress = computed(() => {
+    if (!currentSession.value) return 0
+    const total = currentSession.value.exercises.reduce((sum, ex) => sum + (ex.sets || 1), 0)
+    const completed = loggedSets.value.filter((s) => !s.skipped).length
+    return total > 0 ? Math.round((completed / total) * 100) : 0
+  })
+
+  // ============================================
+  // RUNNER ACTIONS
+  // ============================================
+
+  function initRunner() {
+    currentExerciseIndex.value = 0
+    currentSetIndex.value = 0
+    currentSetStartedAt.value = new Date().toISOString()
+    loggedSets.value = []
+    exerciseCompletions.value = []
+    showSummary.value = false
+    showExerciseRPE.value = false
+    stopRestTimer()
+  }
+
+  function logStrengthSet(data: { reps: number; loadKg: number }) {
+    const now = new Date().toISOString()
+
+    // Calculate rest taken (time since last set completed)
+    let restTakenSec: number | undefined
+    if (currentSetIndex.value > 0) {
+      const prevSet = loggedSets.value
+        .filter((s) => s.exerciseIndex === currentExerciseIndex.value)
+        .pop()
+      if (prevSet && currentSetStartedAt.value) {
+        restTakenSec = Math.round(
+          (new Date(currentSetStartedAt.value).getTime() -
+            new Date(prevSet.completedAt).getTime()) /
+            1000
+        )
+      }
+    }
+
+    const loggedSet: StrengthLoggedSet = {
+      type: 'strength',
+      exerciseIndex: currentExerciseIndex.value,
+      setNumber: currentSetIndex.value + 1,
+      reps: data.reps,
+      loadKg: data.loadKg,
+      skipped: false,
+      startedAt: currentSetStartedAt.value!,
+      completedAt: now,
+      restTakenSec,
+    }
+
+    loggedSets.value.push(loggedSet)
+    currentSetIndex.value++
+    currentSetStartedAt.value = new Date().toISOString()
+  }
+
+  function logCardioExercise(data: {
+    durationMin: number
+    distanceKm?: number
+    intensity: 'easy' | 'moderate' | 'hard'
+  }) {
+    const now = new Date().toISOString()
+
+    const loggedSet: CardioLoggedSet = {
+      type: 'cardio',
+      exerciseIndex: currentExerciseIndex.value,
+      setNumber: 1,
+      durationMin: data.durationMin,
+      distanceKm: data.distanceKm,
+      intensity: data.intensity,
+      skipped: false,
+      startedAt: currentSetStartedAt.value!,
+      completedAt: now,
+    }
+
+    loggedSets.value.push(loggedSet)
+  }
+
+  // Unified logSet function that handles different types
+  function logSet(
+    data:
+      | { type: 'strength'; reps: number; loadKg: number }
+      | {
+          type: 'cardio'
+          durationMin: number
+          distanceKm?: number
+          intensity: 'easy' | 'moderate' | 'hard'
+        }
+  ) {
+    if (data.type === 'strength') {
+      logStrengthSet({ reps: data.reps, loadKg: data.loadKg })
+    } else if (data.type === 'cardio') {
+      logCardioExercise({
+        durationMin: data.durationMin,
+        distanceKm: data.distanceKm,
+        intensity: data.intensity,
+      })
+    }
+  }
+
+  function completeExercise(rpe?: number, notes?: string) {
+    exerciseCompletions.value.push({
+      exerciseIndex: currentExerciseIndex.value,
+      status: 'completed',
+      rpe,
+      notes,
+    })
+    showExerciseRPE.value = false
+    nextExercise()
+  }
+
+  function skipExercise() {
+    exerciseCompletions.value.push({
+      exerciseIndex: currentExerciseIndex.value,
+      status: 'skipped',
+    })
+    nextExercise()
+  }
+
+  function nextExercise() {
+    stopRestTimer()
+
+    if (isLastExercise.value) {
+      // Session complete - show summary
+      showSummary.value = true
+    } else {
+      currentExerciseIndex.value++
+      currentSetIndex.value = 0
+      currentSetStartedAt.value = new Date().toISOString()
+    }
+  }
+
+  // ============================================
+  // REST TIMER ACTIONS
+  // ============================================
+
+  function startRestTimer(seconds: number) {
+    stopRestTimer() // Clear any existing timer
+
+    restTimer.value = {
+      active: true,
+      remaining: seconds,
+      total: seconds,
+      startedAt: new Date().toISOString(),
+    }
+
+    restTimerInterval = setInterval(() => {
+      if (restTimer.value.remaining > 0) {
+        restTimer.value.remaining--
+      } else {
+        onRestComplete()
+      }
+    }, 1000)
+  }
+
+  function skipRest() {
+    stopRestTimer()
+    currentSetStartedAt.value = new Date().toISOString()
+  }
+
+  function onRestComplete() {
+    stopRestTimer()
+    currentSetStartedAt.value = new Date().toISOString()
+  }
+
+  function stopRestTimer() {
+    if (restTimerInterval) {
+      clearInterval(restTimerInterval)
+      restTimerInterval = null
+    }
+    restTimer.value = {
+      active: false,
+      remaining: 0,
+      total: 0,
+      startedAt: null,
+    }
+  }
+
+  // ============================================
+  // SESSION STATS (for summary)
+  // ============================================
+
+  const sessionStats = computed(() => {
+    if (!currentSession.value) {
+      return {
+        duration: 0,
+        exercisesCompleted: 0,
+        exercisesSkipped: 0,
+        totalSets: 0,
+        totalVolume: 0,
+      }
+    }
+
+    const startTime = currentSession.value.startedAt
+      ? new Date(currentSession.value.startedAt).getTime()
+      : 0
+    const endTime = Date.now()
+    const durationMin = startTime ? Math.round((endTime - startTime) / 1000 / 60) : 0
+
+    const completedExercises = exerciseCompletions.value.filter(
+      (e) => e.status === 'completed'
+    ).length
+    const skippedExercises = exerciseCompletions.value.filter((e) => e.status === 'skipped').length
+
+    const completedSets = loggedSets.value.filter((s) => !s.skipped).length
+
+    // Calculate volume (strength only)
+    const totalVolume = loggedSets.value
+      .filter((s): s is StrengthLoggedSet => s.type === 'strength' && !s.skipped)
+      .reduce((sum, s) => sum + s.reps * s.loadKg, 0)
+
+    return {
+      duration: durationMin,
+      exercisesCompleted: completedExercises,
+      exercisesSkipped: skippedExercises,
+      totalSets: completedSets,
+      totalVolume,
+    }
+  })
 
   // Actions
   async function generateSession(
@@ -169,6 +484,8 @@ export const useSessionStore = defineStore('session', () => {
           status: 'completed',
           completedAt: new Date().toISOString(),
           feedback,
+          loggedSets: loggedSets.value,
+          exerciseCompletions: exerciseCompletions.value,
         },
       })
 
@@ -263,11 +580,28 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   return {
-    // State
+    // Session State
     currentSession,
     generating,
     error,
-    // Actions
+    // Runner State
+    currentExerciseIndex,
+    currentSetNumber: currentSetIndex,
+    loggedSets,
+    exerciseCompletions,
+    restTimeRemaining: computed(() => restTimer.value.remaining),
+    restTimerRunning: computed(() => restTimer.value.active),
+    showSummary,
+    showExerciseRPE,
+    // Computed
+    currentExercise,
+    totalExercises,
+    totalSetsForCurrentExercise,
+    isLastSetOfExercise,
+    isLastExercise,
+    sessionProgress,
+    sessionStats,
+    // Session Actions
     generateSession,
     startSession,
     completeSession,
@@ -276,5 +610,15 @@ export const useSessionStore = defineStore('session', () => {
     fetchSessionByDay,
     swapExercise,
     clearSession,
+    // Runner Actions
+    initRunner,
+    logSet,
+    completeExercise,
+    skipExercise,
+    nextExercise,
+    // Rest Timer Actions
+    startRestTimer,
+    stopRestTimer,
+    skipRest,
   }
 })

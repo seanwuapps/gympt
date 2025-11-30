@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      message: 'Unauthorized',
     })
   }
 
@@ -21,19 +21,19 @@ export default defineEventHandler(async (event) => {
   if (!sessionId) {
     throw createError({
       statusCode: 400,
-      message: 'Session ID is required'
+      message: 'Session ID is required',
     })
   }
 
   // Parse and validate request body
   const body = await readBody(event)
   const validation = UpdateSessionSchema.safeParse(body)
-  
+
   if (!validation.success) {
     throw createError({
       statusCode: 400,
       message: 'Invalid request body',
-      data: validation.error.flatten()
+      data: validation.error.flatten(),
     })
   }
 
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
   if (!connectionString) {
     throw createError({
       statusCode: 500,
-      message: 'Database connection not configured'
+      message: 'Database connection not configured',
     })
   }
 
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
   try {
     // Build update object
     const updateData: any = {
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
 
     if (updates.status) {
@@ -69,27 +69,30 @@ export default defineEventHandler(async (event) => {
     if (updates.feedback) {
       updateData.feedback = updates.feedback
     }
+    if (updates.loggedSets) {
+      updateData.loggedSets = updates.loggedSets
+    }
+    if (updates.exerciseCompletions) {
+      updateData.exerciseCompletions = updates.exerciseCompletions
+    }
 
     // Update session (RLS ensures user can only update their own)
     const result = await db
       .update(sessions)
       .set(updateData)
-      .where(and(
-        eq(sessions.id, sessionId),
-        eq(sessions.userId, user.sub)
-      ))
+      .where(and(eq(sessions.id, sessionId), eq(sessions.userId, user.sub)))
       .returning()
 
     if (result.length === 0) {
       throw createError({
         statusCode: 404,
-        message: 'Session not found or update failed'
+        message: 'Session not found or update failed',
       })
     }
 
     return {
       success: true,
-      session: result[0]
+      session: result[0],
     }
   } finally {
     await client.end()
